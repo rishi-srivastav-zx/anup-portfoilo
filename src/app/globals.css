@@ -1,0 +1,308 @@
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Caveat:wght@400;600;700&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Dr+Sugiyama&family=Gloria+Hallelujah&family=Homemade+Apple&family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600;700;800;900&family=Kalam:wght@400;700&family=Patrick+Hand&family=Permanent+Marker&family=Plus+Jakarta+Sans:wght@400;600;800;900&family=Schoolbell&display=swap');
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+.font-bebas { font-family: 'Bebas Neue', sans-serif; }
+.font-caveat { font-family: 'Caveat', cursive; }
+.font-gloria { font-family: 'Gloria Hallelujah', cursive; }
+.font-signature { font-family: 'Homemade Apple', cursive; }
+.font-dm-mono { font-family: 'DM Mono', monospace; }
+.font-dm-sans { font-family: 'DM Sans', sans-serif; }
+.font-inter { font-family: 'Inter', sans-serif; }
+.font-serif-italic { font-family: 'Instrument Serif', Georgia, serif; }
+.font-schoolbell { font-family: 'Schoolbell', cursive; }
+.font-sugiyama { font-family: 'Dr Sugiyama', cursive; }
+.font-kalam { font-family: 'Kalam', cursive; }
+.font-patrick { font-family: 'Patrick Hand', cursive; }
+.font-marker { font-family: 'Permanent Marker', cursive; }
+
+/* 01 — ORIGIN / THE BEGINNING STYLES */
+.book-viewport {
+  perspective: 1800px;
+  transform-style: preserve-3d;
+}
+
+.book-container {
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.paper-texture {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.08'/%3E%3C/svg%3E");
+  mix-blend-mode: multiply;
+}
+
+.ruled-paper-lines {
+  background-image: linear-gradient(rgba(1, 44, 235, 0.08) 1px, transparent 1px);
+  background-size: 100% 32px;
+}
+
+.notebook-red-margin {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 8%;
+  width: 2px;
+  background-color: rgba(239, 68, 68, 0.35);
+  pointer-events: none;
+  z-index: 10;
+}
+
+.page-crease-left {
+  box-shadow: inset -15px 0 25px -10px rgba(0, 0, 0, 0.25);
+}
+
+.page-crease-right {
+  box-shadow: inset 15px 0 25px -10px rgba(0, 0, 0, 0.25);
+}
+
+.scotch-tape {
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(2px);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.evidence-stamp-blue {
+  border: 2px dashed #012CEB;
+  color: #012CEB;
+  background: rgba(1, 44, 235, 0.04);
+}
+
+.evidence-stamp-yellow {
+  border: 2px dashed #CA8A04;
+  color: #A16207;
+  background: rgba(202, 138, 4, 0.04);
+}
+
+.evidence-stamp-red {
+  border: 2px dashed #DC2626;
+  color: #DC2626;
+  background: rgba(220, 38, 38, 0.04);
+}
+
+.draggable-sticker {
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+}
+
+.draggable-sticker:active {
+  cursor: grabbing;
+}
+
+.map-line-path {
+  will-change: stroke-dashoffset;
+}
+
+
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Lenis recommended CSS */
+html.lenis, html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+.lenis.lenis-smooth iframe {
+  pointer-events: none;
+}
+
+
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --beige: #F4EFE6;
+    --beige-dark: #E5DFC8;
+    --blue: #012CEB;
+    --navy: #051024;
+    --border-w: 2px;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    overflow-x: hidden;
+  }
+
+  body {
+    background-color: #010204;
+    color: var(--beige);
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    overflow-x: hidden;
+  }
+}
+
+/* --- Font Utility Classes --- */
+.font-schoolbell { font-family: 'Schoolbell', cursive, sans-serif; }
+.font-gloria { font-family: 'Gloria Hallelujah', cursive, sans-serif; }
+.font-sugiyama { font-family: 'Dr Sugiyama', cursive, sans-serif; }
+.font-bebas { font-family: 'Bebas Neue', sans-serif; }
+.font-dm-mono { font-family: 'DM Mono', monospace; }
+.font-dm-sans { font-family: 'DM Sans', sans-serif; }
+.font-inter { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
+
+/* --- 3D Book Viewport & Container --- */
+.book-viewport {
+  perspective: 1800px;
+  perspective-origin: center center;
+}
+
+.book-container {
+  transform-style: preserve-3d;
+  box-shadow: 0 45px 120px rgba(0, 0, 0, 0.75), 0 15px 35px rgba(0, 0, 0, 0.55);
+}
+
+/* --- Paper Textures & Creases --- */
+.paper-texture {
+  background-image: url("data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMjAwIDIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZmlsdGVyIGlkPSJuIj48ZmVUdXJidWxlbmNlIHR5cGU9ImZyYWN0YWxOb2lzZSIgYmFzZUZyZXF1ZW5jeT0iMC45IiBudW1PY3RhdmVzPSIzIiBzdGl0Y2hUaWxlcz0ic3RpdGNoIi8+PC9maWx0ZXI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsdGVyPSJ1cmwoI24pIiBvcGFjaXR5PSIwLjA1Ii8+PC9zdmc+");
+}
+
+.ruled-paper-lines {
+  background-size: 100% 24px;
+  background-image: linear-gradient(rgba(1, 44, 235, 0.06) 1px, transparent 1px);
+}
+
+.notebook-red-margin {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 38px;
+  width: 2px;
+  background-color: rgba(239, 68, 68, 0.25);
+  box-shadow: 1px 0 0 rgba(239, 68, 68, 0.12);
+  pointer-events: none;
+  z-index: 10;
+}
+
+@media (min-width: 768px) {
+  .notebook-red-margin {
+    left: 54px;
+  }
+}
+
+.page-crease-left {
+  box-shadow: inset -30px 0 40px rgba(0, 0, 0, 0.15), inset 0 0 20px rgba(0, 0, 0, 0.05);
+}
+
+.page-crease-right {
+  box-shadow: inset 30px 0 40px rgba(0, 0, 0, 0.15), inset 0 0 20px rgba(0, 0, 0, 0.05);
+}
+
+.realistic-paper-stack-right {
+  box-shadow: 
+    3px 0 0 #e8e3d5,
+    6px 0 0 #ded7c5,
+    9px 0 0 #d4ccb4,
+    12px 0 0 #c7bfa5,
+    16px 8px 30px rgba(0, 0, 0, 0.35);
+}
+
+/* --- Scotch Tape Physical Element --- */
+.scotch-tape {
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(1.5px);
+  mix-blend-mode: multiply;
+}
+
+/* --- Evidence Stamps (Physical Ink Stamps) --- */
+.evidence-stamp-blue {
+  border: 2px solid rgba(1, 44, 235, 0.85);
+  color: rgba(1, 44, 235, 0.95);
+  transform: rotate(-2deg);
+  box-shadow: 2px 4px 10px rgba(0, 0, 0, 0.06);
+  background: rgba(239, 246, 255, 0.4);
+}
+
+.evidence-stamp-yellow {
+  border: 2px dashed rgba(161, 98, 7, 0.85);
+  color: rgba(161, 98, 7, 0.95);
+  transform: rotate(2.5deg);
+  box-shadow: 2px 4px 10px rgba(0, 0, 0, 0.05);
+  background: rgba(254, 252, 232, 0.45);
+}
+
+.evidence-stamp-red {
+  border: 2px solid rgba(185, 28, 28, 0.85);
+  color: rgba(185, 28, 28, 0.92);
+  transform: rotate(-3deg);
+  box-shadow: inset 0 0 4px rgba(185, 28, 28, 0.1), 2px 4px 10px rgba(0, 0, 0, 0.06);
+  background: rgba(254, 242, 242, 0.4);
+}
+
+/* --- Draggable Vinyl Stickers --- */
+.draggable-sticker {
+  cursor: grab !important;
+  user-select: none;
+  touch-action: none;
+  will-change: transform, box-shadow;
+  filter: drop-shadow(4px 8px 12px rgba(5, 16, 36, 0.28));
+  transition: transform 0.15s ease-out, filter 0.15s ease-out;
+}
+
+.draggable-sticker:active {
+  cursor: grabbing !important;
+  filter: drop-shadow(8px 16px 20px rgba(5, 16, 36, 0.42));
+}
+
+/* --- Blueprint Map Line SVG Base Classes --- */
+.map-line-path {
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 4500;
+  stroke-dashoffset: 4500;
+  transition: none !important;
+  animation: none !important;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #010204;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #012CEB;
+}
+
