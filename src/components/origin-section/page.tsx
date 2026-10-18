@@ -9,6 +9,7 @@ import React from "react";
 import { Navbar } from "./components/Navbar";
 import { HeroSection } from "./components/HeroSection";
 import { OriginSection } from "./components/OriginSection";
+import MyImagesSection from "@/components/my-images-section";
 import { WorksSection } from "./components/WorksSection";
 import { Footer } from "./components/Footer";
 
@@ -26,7 +27,10 @@ export default function App() {
                 {/* 2. 01 — ORIGIN / THE BEGINNING (Scroll-driven 3D Storytelling Experience) */}
                 <OriginSection />
 
-                {/* 3. 02 — Selected Works / Systems Architecture */}
+                {/* 3. My Images Section (Interactive 3D Sketchbook) */}
+                <MyImagesSection />
+
+                {/* 4. 02 — Selected Works / Systems Architecture */}
                 <WorksSection />
             </main>
 

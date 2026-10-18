@@ -54,7 +54,7 @@ export default function HeroText() {
           position: absolute;
           left: 0;
           right: 0;
-          top: 58%;
+          top: 52%;
           transform: translateY(-50%);
           padding: 0 clamp(16px, 4vw, 80px);
           z-index: 1;
@@ -78,6 +78,8 @@ export default function HeroText() {
         .word-right {
           grid-column: 3;
           justify-self: start;
+          position: relative;
+          top: clamp(-54px, -3.8vw, -18px);
         }
         @media (max-width: 1024px) {
           .hero-title-grid {
@@ -97,6 +99,7 @@ export default function HeroText() {
           .word-left, .word-right {
             grid-column: 1;
             justify-self: center;
+            top: 0;
           }
         }
       `}} />

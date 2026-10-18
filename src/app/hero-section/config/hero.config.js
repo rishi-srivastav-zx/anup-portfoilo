@@ -45,7 +45,6 @@ export const heroConfig = {
     }
   },
   images: {
-    // Replace this with the actual cut-out image path in your public folder
-    portrait: '/images/Gemini_Generated_Image_xl9jcuxl9jcuxl9j-2.png',
+    portrait: '/images/anup_portrait.png',
   }
 };

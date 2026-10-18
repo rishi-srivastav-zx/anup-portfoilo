@@ -1,4 +1,4 @@
-'use client';
+  'use client';
 
 import React from 'react';
 import { HeroProvider } from './provider/HeroProvider';
@@ -15,7 +15,7 @@ export default function HeroSection() {
   return (
     <HeroProvider config={heroConfig}>
       <section 
-        className="w-full h-[100svh] bg-[#E6DDD2] selection:bg-[#14100E] selection:text-[#F4EDE4] font-sans overflow-hidden relative grid"
+        className="w-full h-[100svh] bg-[#E6DDD2] selection:bg-[#14100E] selection:text-[#F4EDE4] font-sans overflow-x-clip overflow-y-visible relative grid z-10"
         style={{ 
           color: heroConfig.colors.text,
           gridTemplateRows: 'auto 1fr',
