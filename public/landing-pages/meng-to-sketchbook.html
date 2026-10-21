@@ -48,7 +48,18 @@
                 --track-caps: 0.24em;
                 --track-nav: 0.06em;
             }
-            * {
+            *,
+            html,
+            body,
+            button,
+            a,
+            input,
+            div,
+            span,
+            svg,
+            .sb-zone,
+            .plate {
+                cursor: none !important;
                 box-sizing: border-box;
             }
             html,
@@ -2259,6 +2270,82 @@
                 },
                 { passive: true },
             );
+
+            // Forward mouse events to parent window to drive custom cursor seamlessly
+            let isIframeMouseDown = false;
+
+            function forwardParentCursor(e, isDown, isLeave) {
+                try {
+                    if (window.parent && window.parent !== window) {
+                        let left = 0;
+                        let top = 0;
+                        if (window.frameElement) {
+                            const rect = window.frameElement.getBoundingClientRect();
+                            left = rect.left;
+                            top = rect.top;
+                        }
+                        if (typeof isDown === 'boolean') {
+                            isIframeMouseDown = isDown;
+                        }
+                        const t = e.target;
+                        let hoverType = null;
+                        let hoverLabel = null;
+
+                        if (t && t.closest) {
+                            if (
+                                t.closest("button") ||
+                                t.closest("a") ||
+                                t.closest(".plate") ||
+                                t.closest(".sb-arrow") ||
+                                t.closest(".tool") ||
+                                t.closest(".icon-btn") ||
+                                t.closest('[data-cursor="hover"]') ||
+                                t.closest('[data-cursor="pointer"]') ||
+                                t.closest('[role="button"]')
+                            ) {
+                                hoverType = "pointer";
+                                hoverLabel = null;
+                            } else if (t.closest(".loupe, .ring, .grip")) {
+                                hoverType = "grab";
+                                hoverLabel = isIframeMouseDown ? "DRAGGING" : "MOVE";
+                            } else if (t.closest(".sb-next")) {
+                                hoverType = "grab";
+                                hoverLabel = isIframeMouseDown ? "FLIPPING" : "FLIP";
+                            } else if (t.closest(".sb-prev")) {
+                                hoverType = "grab";
+                                hoverLabel = isIframeMouseDown ? "FLIPPING" : "FLIP";
+                            } else if (t.closest(".sb-zone, .sb-book, .sb-tilt")) {
+                                hoverType = "grab";
+                                hoverLabel = isIframeMouseDown ? "DRAGGING" : "DRAG";
+                            } else if (
+                                t.tagName &&
+                                (t.tagName.toLowerCase() === "input" ||
+                                    t.tagName.toLowerCase() === "textarea")
+                            ) {
+                                hoverType = "input";
+                                hoverLabel = null;
+                            }
+                        }
+
+                        window.parent.dispatchEvent(
+                            new CustomEvent("custom-cursor-move", {
+                                detail: {
+                                    clientX: e.clientX + left,
+                                    clientY: e.clientY + top,
+                                    hoverType: hoverType,
+                                    hoverLabel: hoverLabel,
+                                    isDown: isDown,
+                                    isLeave: isLeave,
+                                },
+                            })
+                        );
+                    }
+                } catch (_) {}
+            }
+
+            window.addEventListener("mousemove", (e) => forwardParentCursor(e), { passive: true });
+            window.addEventListener("mousedown", (e) => forwardParentCursor(e, true), { passive: true });
+            window.addEventListener("mouseup", (e) => forwardParentCursor(e, false), { passive: true });
         </script>
     </body>
 </html>

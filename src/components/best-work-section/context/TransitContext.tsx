@@ -1,3 +1,5 @@
+"use client";
+
 import React, {
   createContext,
   useCallback,
@@ -7,12 +9,20 @@ import React, {
   useRef,
   useState,
 } from 'react';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import {
   BEST_WORK_CONFIG,
   BestWorkConfig,
   ProjectConfig,
   TransitStationConfig,
 } from '../config/bestWorkConfig';
+
+if (typeof window !== 'undefined') {
+  gsap.registerPlugin(ScrollTrigger);
+  window.gsap = gsap;
+  window.ScrollTrigger = ScrollTrigger;
+}
 
 declare global {
   interface Window {

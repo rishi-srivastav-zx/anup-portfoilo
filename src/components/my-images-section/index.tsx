@@ -26,6 +26,9 @@ export function MyImagesSection() {
                 {/* Seamless ambient transition from Origin Section */}
                 <div className="absolute top-0 left-0 right-0 h-16 pointer-events-none z-20 bg-gradient-to-b from-[#E6DDD2] to-transparent" />
 
+                {/* Seamless ambient transition to Best Work Section */}
+                <div className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none z-20 bg-gradient-to-t from-[#E6DDD2] to-transparent" />
+
                 {/* 3D Curled Sketchbook Scene */}
                 <Scene />
 

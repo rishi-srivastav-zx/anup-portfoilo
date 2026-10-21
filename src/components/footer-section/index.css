@@ -1,0 +1,40 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-brush: 'Kaushan Script', 'Caveat', cursive;
+    --font-signature: 'Caveat', cursive;
+    --font-marker: 'Rock Salt', cursive;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    background-color: #E6DDD2;
+    color: #14100E;
+    overflow-x: hidden;
+  }
+}
+
+.font-brush {
+  font-family: var(--font-brush);
+}
+
+.font-signature {
+  font-family: var(--font-signature);
+}
+
+.font-marker {
+  font-family: var(--font-marker);
+}
+
+.font-mono-slate {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Subtle, restrained cinematic film grain */
+.studio-film-grain {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.045'/%3E%3C/svg%3E");
+}

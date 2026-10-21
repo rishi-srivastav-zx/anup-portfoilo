@@ -82,24 +82,35 @@ export default function HeroText() {
           top: clamp(-54px, -3.8vw, -18px);
         }
         @media (max-width: 1024px) {
+          .hero-name-container {
+            top: 50%;
+            padding: 0 clamp(16px, 3vw, 40px);
+          }
           .hero-title-grid {
-            --name-gap: 38vw;
-            font-size: clamp(48px, 9vw, 120px);
+            --name-gap: clamp(210px, 30vw, 300px);
+            font-size: clamp(34px, 5.6vw, 64px);
+          }
+          .word-right {
+            top: clamp(-24px, -2.5vw, -12px);
           }
         }
         @media (max-width: 640px) {
           .hero-name-container {
             top: 46%;
+            padding: 0 10px;
           }
           .hero-title-grid {
-            grid-template-columns: 1fr;
-            row-gap: 0.1em;
-            font-size: 24vw;
+            --name-gap: clamp(125px, 39vw, 165px);
+            font-size: clamp(19px, 5.6vw, 29px);
           }
-          .word-left, .word-right {
-            grid-column: 1;
-            justify-self: center;
-            top: 0;
+          .word-left {
+            justify-self: end;
+            padding-right: 4px;
+          }
+          .word-right {
+            justify-self: start;
+            padding-left: 4px;
+            top: clamp(-16px, -3.2vw, -10px);
           }
         }
       `}} />

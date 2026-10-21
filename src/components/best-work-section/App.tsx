@@ -1,9 +1,6 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
+"use client";
 
-import { useLayoutEffect } from 'react';
+import { useEffect } from 'react';
 import { REFERENCE_STYLES } from './referenceStyles';
 import { BEST_WORK_CONFIG } from './config/bestWorkConfig';
 import { TransitProvider } from './context/TransitContext';
@@ -19,10 +16,8 @@ function ensureReferenceStyles() {
   }
 }
 
-ensureReferenceStyles();
-
 export default function App() {
-  useLayoutEffect(() => {
+  useEffect(() => {
     ensureReferenceStyles();
   }, []);
 

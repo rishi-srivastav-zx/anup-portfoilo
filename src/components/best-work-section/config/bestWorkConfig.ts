@@ -4,187 +4,455 @@
  */
 
 export interface OriginInstructionItem {
-  badgeBg: string;
-  badgeText: string;
-  titleColor: string;
-  descColor: string;
-  titleFont: string;
-  titleSize: string;
-  descSize: string;
-  title: string;
-  description: string;
-  iconSvgPath: string;
+    badgeBg: string;
+    badgeText: string;
+    titleColor: string;
+    descColor: string;
+    titleFont: string;
+    titleSize: string;
+    descSize: string;
+    title: string;
+    description: string;
+    iconSvgPath: string;
 }
 
 export interface ProjectConfig {
-  id: string;
-  client: string;
-  name: string;
-  stationName: string;
-  tags: string[];
-  stat: string;
-  bg: string;
-  text: string;
-  sysId: string;
-  summary: string;
-  points: string[];
-  metrics: [string, string, string];
-  metricLabels: [string, string, string];
-  keyword: string;
-  customHTML: string;
-  logo?: string;
-  logoClass?: string;
+    id: string;
+    client: string;
+    name: string;
+    stationName: string;
+    tags: string[];
+    stat: string;
+    bg: string;
+    text: string;
+    sysId: string;
+    summary: string;
+    points: string[];
+    metrics: [string, string, string];
+    metricLabels: [string, string, string];
+    keyword: string;
+    customHTML: string;
+    logo?: string;
+    logoClass?: string;
 }
 
 export interface TransitStationConfig {
-  isOrigin?: boolean;
-  id?: string;
-  client?: string;
-  name: string;
-  stationName: string;
-  tags?: string[];
-  stat: string;
-  bg?: string;
-  text?: string;
-  sysId?: string;
-  summary: string;
-  points: string[];
-  metrics: [string, string, string];
-  metricLabels: [string, string, string];
-  keyword: string;
-  customHTML?: string;
+    isOrigin?: boolean;
+    id?: string;
+    client?: string;
+    name: string;
+    stationName: string;
+    tags?: string[];
+    stat: string;
+    bg?: string;
+    text?: string;
+    sysId?: string;
+    summary: string;
+    points: string[];
+    metrics: [string, string, string];
+    metricLabels: [string, string, string];
+    keyword: string;
+    customHTML?: string;
 }
 
 export interface BestWorkConfig {
-  theme: {
-    beige: string;
-    blue: string;
-    navy: string;
-  };
-  sectionHeader: {
-    badge: string;
-    titleFirstWord: string;
-    titleSecondWord: string;
-  };
-  routeBoard: {
-    boardBg: string;
-    dmrcStations: string[];
-    dummyStationsList: string[];
-    originLabel: string;
-  };
-  welcomeDoors: {
-    hindiHeadingLine1: string;
-    hindiHeadingLine2: string;
-    englishSubtitle: string;
-    enterButtonText: string;
-  };
-  originStation: TransitStationConfig & {
-    instructions: OriginInstructionItem[];
-  };
-  train: {
-    graffitiText: string;
-    bodyLabel: string;
-    secondaryAnnouncements: string[];
-    stepOutLine1: string;
-    stepOutLine2: string;
-    returnButtonText: string;
-  };
-  platform: {
-    leftPrimary: string;
-    leftSeparator: string;
-    leftSecondary: string;
-    rightCautionPrefix: string;
-    rightCautionHighlight: string;
-  };
-  projects: ProjectConfig[];
+    theme: {
+        beige: string;
+        blue: string;
+        navy: string;
+    };
+    sectionHeader: {
+        badge: string;
+        titleFirstWord: string;
+        titleSecondWord: string;
+    };
+    routeBoard: {
+        boardBg: string;
+        dmrcStations: string[];
+        dummyStationsList: string[];
+        originLabel: string;
+    };
+    welcomeDoors: {
+        hindiHeadingLine1: string;
+        hindiHeadingLine2: string;
+        englishSubtitle: string;
+        enterButtonText: string;
+    };
+    originStation: TransitStationConfig & {
+        instructions: OriginInstructionItem[];
+    };
+    train: {
+        graffitiText: string;
+        bodyLabel: string;
+        secondaryAnnouncements: string[];
+        stepOutLine1: string;
+        stepOutLine2: string;
+        returnButtonText: string;
+    };
+    platform: {
+        leftPrimary: string;
+        leftSeparator: string;
+        leftSecondary: string;
+        rightCautionPrefix: string;
+        rightCautionHighlight: string;
+    };
+    projects: ProjectConfig[];
 }
 
-        function buildFlow() {
-          const N: Record<string, any> = {
-            nc: { cx: 450, y: 40, w: 220, h: 44, t: 'start', lb: ['NEW CUSTOMER'] },
-            reg: { cx: 450, y: 120, w: 240, h: 44, t: 'main', lb: ['Registration / Sign-up'] },
-            welc: { cx: 450, y: 200, w: 560, h: 70, t: 'email', lb: ['T+0 (Immediate)', 'Welcome Email + Brand Story + Most Loved Products'], nt: 'Carousel of models wearing SINS drips & short tagline. Based on Gender & Age.' },
-            left: { cx: 160, y: 340, w: 240, h: 46, t: 'branch', lb: ['Customer left the site'] },
-            expl: { cx: 620, y: 340, w: 280, h: 46, t: 'main', lb: ['Explored Pages / Products'] },
-            l_24: { cx: 160, y: 440, w: 280, h: 70, t: 'email', lb: ['T+24H', '"Someone in your city just bought X product"'], nt: 'Location-based trigger' },
-            l_end: { cx: 160, y: 560, w: 280, h: 30, t: 'exit2', lb: ['→ Move to Old Customer sequence'] },
-            noadd: { cx: 440, y: 440, w: 160, h: 46, t: 'branch', lb: ["Didn't add"] },
-            cart: { cx: 820, y: 440, w: 180, h: 46, t: 'branch', lb: ['Added to Cart'] },
-            b2h: { cx: 380, y: 560, w: 340, h: 90, t: 'email', lb: ['B + 2H', '"You forgot me, but I am still', 'thinking about you" + Moodboard'], nt: 'Moodboard: Ways to style with clothes they likely own' },
-            b24h: { cx: 380, y: 720, w: 340, h: 70, t: 'email', lb: ['B + 24H', 'Hot selling/Vibe based creative', 'Free delivery for next 24H'], nt: 'Based on product browsed' },
-            bend: { cx: 380, y: 840, w: 160, h: 40, t: 'exit', lb: ['Campaign Exits'] },
-            cout: { cx: 680, y: 560, w: 180, h: 46, t: 'branch', lb: ['Checked Out'] },
-            ncout: { cx: 960, y: 560, w: 220, h: 46, t: 'branch', lb: ["Didn't check out"] },
-            d0: { cx: 680, y: 660, w: 280, h: 70, t: 'email', lb: ['D + 0', 'Elite taste validation + Receipt', '+ Tracking information'] },
-            deliv: { cx: 680, y: 770, w: 140, h: 44, t: 'main', lb: ['Delivery'] },
-            e48: { cx: 680, y: 860, w: 280, h: 70, t: 'email', lb: ['E + 48H', 'Fit Check + Feedback', '+ Instagram Story push'] },
-            e20: { cx: 680, y: 970, w: 280, h: 60, t: 'email', lb: ['E + 20 Days', 'Product recommendation matching item'] },
-            e25: { cx: 680, y: 1070, w: 280, h: 70, t: 'email', lb: ['E + 25 Days', '"10% Off + 50+20 Credits" combo', 'with a 12-hour countdown'] },
-            eend: { cx: 680, y: 1180, w: 280, h: 30, t: 'exit2', lb: ['→ Move to Old Customer sequence'] },
-            c1h: { cx: 980, y: 660, w: 320, h: 70, t: 'email', lb: ['C + 1H', '"I guess your crush texted you,', 'that\'s why you left me on seen"'] },
-            c24: { cx: 980, y: 770, w: 320, h: 70, t: 'email', lb: ['C + 24H', '"10% Off + 50 Credits" combo', 'with a 12-hour countdown'] },
-            c48: { cx: 980, y: 880, w: 320, h: 70, t: 'email', lb: ['C + 48H', '"Your bag is about to be stolen"', 'in next 2 hours.'] },
-            ccout: { cx: 860, y: 1000, w: 160, h: 46, t: 'branch', lb: ['Checked out'] },
-            ccout_n: { cx: 860, y: 1070, w: 260, h: 30, t: 'exit2', lb: ['→ Move to Checked out sequence'] },
-            cnc: { cx: 1100, y: 1000, w: 200, h: 46, t: 'branch', lb: ["Didn't check out"] },
-            cnc_end: { cx: 1100, y: 1080, w: 180, h: 40, t: 'exit', lb: ['Campaign Exits'] }
-          };
+function buildFlow() {
+    const N: Record<string, any> = {
+        nc: { cx: 450, y: 40, w: 220, h: 44, t: "start", lb: ["NEW CUSTOMER"] },
+        reg: {
+            cx: 450,
+            y: 120,
+            w: 240,
+            h: 44,
+            t: "main",
+            lb: ["Registration / Sign-up"],
+        },
+        welc: {
+            cx: 450,
+            y: 200,
+            w: 560,
+            h: 70,
+            t: "email",
+            lb: [
+                "T+0 (Immediate)",
+                "Welcome Email + Brand Story + Most Loved Products",
+            ],
+            nt: "Carousel of models wearing SINS drips & short tagline. Based on Gender & Age.",
+        },
+        left: {
+            cx: 160,
+            y: 340,
+            w: 240,
+            h: 46,
+            t: "branch",
+            lb: ["Customer left the site"],
+        },
+        expl: {
+            cx: 620,
+            y: 340,
+            w: 280,
+            h: 46,
+            t: "main",
+            lb: ["Explored Pages / Products"],
+        },
+        l_24: {
+            cx: 160,
+            y: 440,
+            w: 280,
+            h: 70,
+            t: "email",
+            lb: ["T+24H", '"Someone in your city just bought X product"'],
+            nt: "Location-based trigger",
+        },
+        l_end: {
+            cx: 160,
+            y: 560,
+            w: 280,
+            h: 30,
+            t: "exit2",
+            lb: ["→ Move to Old Customer sequence"],
+        },
+        noadd: {
+            cx: 440,
+            y: 440,
+            w: 160,
+            h: 46,
+            t: "branch",
+            lb: ["Didn't add"],
+        },
+        cart: {
+            cx: 820,
+            y: 440,
+            w: 180,
+            h: 46,
+            t: "branch",
+            lb: ["Added to Cart"],
+        },
+        b2h: {
+            cx: 380,
+            y: 560,
+            w: 340,
+            h: 90,
+            t: "email",
+            lb: [
+                "B + 2H",
+                '"You forgot me, but I am still',
+                'thinking about you" + Moodboard',
+            ],
+            nt: "Moodboard: Ways to style with clothes they likely own",
+        },
+        b24h: {
+            cx: 380,
+            y: 720,
+            w: 340,
+            h: 70,
+            t: "email",
+            lb: [
+                "B + 24H",
+                "Hot selling/Vibe based creative",
+                "Free delivery for next 24H",
+            ],
+            nt: "Based on product browsed",
+        },
+        bend: {
+            cx: 380,
+            y: 840,
+            w: 160,
+            h: 40,
+            t: "exit",
+            lb: ["Campaign Exits"],
+        },
+        cout: {
+            cx: 680,
+            y: 560,
+            w: 180,
+            h: 46,
+            t: "branch",
+            lb: ["Checked Out"],
+        },
+        ncout: {
+            cx: 960,
+            y: 560,
+            w: 220,
+            h: 46,
+            t: "branch",
+            lb: ["Didn't check out"],
+        },
+        d0: {
+            cx: 680,
+            y: 660,
+            w: 280,
+            h: 70,
+            t: "email",
+            lb: [
+                "D + 0",
+                "Elite taste validation + Receipt",
+                "+ Tracking information",
+            ],
+        },
+        deliv: { cx: 680, y: 770, w: 140, h: 44, t: "main", lb: ["Delivery"] },
+        e48: {
+            cx: 680,
+            y: 860,
+            w: 280,
+            h: 70,
+            t: "email",
+            lb: ["E + 48H", "Fit Check + Feedback", "+ Instagram Story push"],
+        },
+        e20: {
+            cx: 680,
+            y: 970,
+            w: 280,
+            h: 60,
+            t: "email",
+            lb: ["E + 20 Days", "Product recommendation matching item"],
+        },
+        e25: {
+            cx: 680,
+            y: 1070,
+            w: 280,
+            h: 70,
+            t: "email",
+            lb: [
+                "E + 25 Days",
+                '"10% Off + 50+20 Credits" combo',
+                "with a 12-hour countdown",
+            ],
+        },
+        eend: {
+            cx: 680,
+            y: 1180,
+            w: 280,
+            h: 30,
+            t: "exit2",
+            lb: ["→ Move to Old Customer sequence"],
+        },
+        c1h: {
+            cx: 980,
+            y: 660,
+            w: 320,
+            h: 70,
+            t: "email",
+            lb: [
+                "C + 1H",
+                '"I guess your crush texted you,',
+                "that's why you left me on seen\"",
+            ],
+        },
+        c24: {
+            cx: 980,
+            y: 770,
+            w: 320,
+            h: 70,
+            t: "email",
+            lb: [
+                "C + 24H",
+                '"10% Off + 50 Credits" combo',
+                "with a 12-hour countdown",
+            ],
+        },
+        c48: {
+            cx: 980,
+            y: 880,
+            w: 320,
+            h: 70,
+            t: "email",
+            lb: [
+                "C + 48H",
+                '"Your bag is about to be stolen"',
+                "in next 2 hours.",
+            ],
+        },
+        ccout: {
+            cx: 860,
+            y: 1000,
+            w: 160,
+            h: 46,
+            t: "branch",
+            lb: ["Checked out"],
+        },
+        ccout_n: {
+            cx: 860,
+            y: 1070,
+            w: 260,
+            h: 30,
+            t: "exit2",
+            lb: ["→ Move to Checked out sequence"],
+        },
+        cnc: {
+            cx: 1100,
+            y: 1000,
+            w: 200,
+            h: 46,
+            t: "branch",
+            lb: ["Didn't check out"],
+        },
+        cnc_end: {
+            cx: 1100,
+            y: 1080,
+            w: 180,
+            h: 40,
+            t: "exit",
+            lb: ["Campaign Exits"],
+        },
+    };
 
-          const E=[
-            ['nc', 'reg'], ['reg', 'welc'], 
-            ['welc', 'left'], ['welc', 'expl'],
-            ['left', 'l_24'], ['l_24', 'l_end'],
-            ['expl', 'noadd'], ['expl', 'cart'],
-            ['noadd', 'b2h'], ['b2h', 'b24h'], ['b24h', 'bend'],
-            ['cart', 'cout'], ['cart', 'ncout'],
-            ['cout', 'd0'], ['d0', 'deliv'], ['deliv', 'e48'], ['e48', 'e20'], ['e20', 'e25'], ['e25', 'eend'],
-            ['ncout', 'c1h'], ['c1h', 'c24'], ['c24', 'c48'],
-            ['c48', 'ccout'], ['c48', 'cnc'],
-            ['ccout', 'ccout_n'], ['cnc', 'cnc_end']
-          ];
+    const E = [
+        ["nc", "reg"],
+        ["reg", "welc"],
+        ["welc", "left"],
+        ["welc", "expl"],
+        ["left", "l_24"],
+        ["l_24", "l_end"],
+        ["expl", "noadd"],
+        ["expl", "cart"],
+        ["noadd", "b2h"],
+        ["b2h", "b24h"],
+        ["b24h", "bend"],
+        ["cart", "cout"],
+        ["cart", "ncout"],
+        ["cout", "d0"],
+        ["d0", "deliv"],
+        ["deliv", "e48"],
+        ["e48", "e20"],
+        ["e20", "e25"],
+        ["e25", "eend"],
+        ["ncout", "c1h"],
+        ["c1h", "c24"],
+        ["c24", "c48"],
+        ["c48", "ccout"],
+        ["c48", "cnc"],
+        ["ccout", "ccout_n"],
+        ["cnc", "cnc_end"],
+    ];
 
-          const TC: Record<string, any> = {
-            start: {f:'var(--text-color)', s:'var(--text-color)', c:'var(--bg-color)', fw:'900', fs:'14'},
-            main:  {f:'transparent', s:'var(--text-color)', c:'var(--text-color)', fw:'900', fs:'13'},
-            email: {f:'var(--bg-color)', s:'var(--text-color)', c:'var(--text-color)', fw:'800', fs:'12'},
-            branch:{f:'var(--text-color)', s:'var(--text-color)', c:'var(--bg-color)', fw:'900', fs:'13'},
-            exit:  {f:'transparent', s:'var(--text-color)', c:'var(--text-color)', fw:'900', fs:'12', d:'8,4'},
-            exit2: {f:'transparent', s:'transparent', c:'var(--text-color)', fw:'900', fs:'12'},
-          };
+    const TC: Record<string, any> = {
+        start: {
+            f: "var(--text-color)",
+            s: "var(--text-color)",
+            c: "var(--bg-color)",
+            fw: "900",
+            fs: "14",
+        },
+        main: {
+            f: "transparent",
+            s: "var(--text-color)",
+            c: "var(--text-color)",
+            fw: "900",
+            fs: "13",
+        },
+        email: {
+            f: "var(--bg-color)",
+            s: "var(--text-color)",
+            c: "var(--text-color)",
+            fw: "800",
+            fs: "12",
+        },
+        branch: {
+            f: "var(--text-color)",
+            s: "var(--text-color)",
+            c: "var(--bg-color)",
+            fw: "900",
+            fs: "13",
+        },
+        exit: {
+            f: "transparent",
+            s: "var(--text-color)",
+            c: "var(--text-color)",
+            fw: "900",
+            fs: "12",
+            d: "8,4",
+        },
+        exit2: {
+            f: "transparent",
+            s: "transparent",
+            c: "var(--text-color)",
+            fw: "900",
+            fs: "12",
+        },
+    };
 
-          let eS='', nS='';
+    let eS = "",
+        nS = "";
 
-          for(const[a,b] of E){
-            const na = N[a], nb = N[b];
-            const x1 = na.cx, y1 = na.y + na.h, x2 = nb.cx, y2 = nb.y;
-            const my = (y1 + y2) / 2;
-            
-            eS += `<path d="M${x1},${y1} L${x1},${my} L${x2},${my} L${x2},${y2}" fill="none" stroke="var(--text-color)" stroke-width="4" stroke-linejoin="round" marker-end="url(#fa)"/>`;
-          }
+    for (const [a, b] of E) {
+        const na = N[a],
+            nb = N[b];
+        const x1 = na.cx,
+            y1 = na.y + na.h,
+            x2 = nb.cx,
+            y2 = nb.y;
+        const my = (y1 + y2) / 2;
 
-          for(const[id,n] of Object.entries(N)){
-            const c = TC[n.t];
-            const lh = 18; 
-            const lines = n.lb;
-            const totalH = (lines.length - 1) * lh;
-            const firstY = n.y + (n.h / 2) - (totalH / 2) + 5;
+        eS += `<path d="M${x1},${y1} L${x1},${my} L${x2},${my} L${x2},${y2}" fill="none" stroke="var(--text-color)" stroke-width="4" stroke-linejoin="round" marker-end="url(#fa)"/>`;
+    }
 
-            const rx = n.cx - (n.w / 2);
-            
-            nS += `<rect x="${rx}" y="${n.y}" width="${n.w}" height="${n.h}" fill="${c.f}" stroke="${c.s}" stroke-width="4"${c.d ? ` stroke-dasharray="${c.d}"` : ''}/>`;
-            
-            nS += `<text text-anchor="middle" font-family="DM Sans, sans-serif" font-size="${c.fs}" font-weight="${c.fw}" fill="${c.c}">`;
-            lines.forEach((l: string, i: number) => {
-                nS += `<tspan x="${n.cx}" y="${firstY + i * lh}">${l}</tspan>`;
-            });
-            nS += `</text>`;
-            
-            if (n.nt) {
-                nS += `<text x="${n.cx}" y="${n.y + n.h + 18}" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="10" font-weight="700" fill="var(--text-color)" opacity="0.6">${n.nt}</text>`;
-            }
-          }
+    for (const [id, n] of Object.entries(N)) {
+        const c = TC[n.t];
+        const lh = 18;
+        const lines = n.lb;
+        const totalH = (lines.length - 1) * lh;
+        const firstY = n.y + n.h / 2 - totalH / 2 + 5;
 
-          return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1250 1250" width="100%" height="auto" style="display:block; min-width:850px;">
+        const rx = n.cx - n.w / 2;
+
+        nS += `<rect x="${rx}" y="${n.y}" width="${n.w}" height="${n.h}" fill="${c.f}" stroke="${c.s}" stroke-width="4"${c.d ? ` stroke-dasharray="${c.d}"` : ""}/>`;
+
+        nS += `<text text-anchor="middle" font-family="DM Sans, sans-serif" font-size="${c.fs}" font-weight="${c.fw}" fill="${c.c}">`;
+        lines.forEach((l: string, i: number) => {
+            nS += `<tspan x="${n.cx}" y="${firstY + i * lh}">${l}</tspan>`;
+        });
+        nS += `</text>`;
+
+        if (n.nt) {
+            nS += `<text x="${n.cx}" y="${n.y + n.h + 18}" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="10" font-weight="700" fill="var(--text-color)" opacity="0.6">${n.nt}</text>`;
+        }
+    }
+
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1250 1250" width="100%" height="auto" style="display:block; min-width:850px;">
             <defs>
               <marker id="fa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
                 <path d="M0,0 L10,5 L0,10 Z" fill="var(--text-color)"/>
@@ -192,14 +460,20 @@ export interface BestWorkConfig {
             </defs>
             ${eS}${nS}
           </svg>`;
-        }
+}
 
-        const cachedFlowSVG = buildFlow();
+const cachedFlowSVG = buildFlow();
 
-        const inventoryData: any[] = [
-            { 
-                id: 'Krishna Shukla', client: 'Krishna Shukla', tags: ['Identity Content', 'Comedy Business'], stat: '₹4.4L Revenue', bg: '#F4EFE6', text: '#051024', sysId: '01',
-                customHTML: `
+const inventoryData: any[] = [
+    {
+        id: "Krishna Shukla",
+        client: "Krishna Shukla",
+        tags: ["Identity Content", "Comedy Business"],
+        stat: "₹4.4L Revenue",
+        bg: "#F4EFE6",
+        text: "#051024",
+        sysId: "01",
+        customHTML: `
                 <div class="brutal-wrap" style="--bg-color: #F4EFE6; --text-color: #051024;">
                     <div class="reveal-blur">
                         <span class="brutal-overline">Freelance · Brand & Business Manager</span>
@@ -337,11 +611,19 @@ export interface BestWorkConfig {
                             <div class="brutal-stat-label">Jaipur, Kanpur, Lucknow, Gurugram</div>
                         </div>
                     </div>
-                </div>`
-            },
-            { 
-                id: 'RNTL.', client: 'RNTL.', tags: ['Trust Engineering', 'Paid Social'], stat: '4.6X Lift', bg: '#8A9ED8', text: '#051024', sysId: '02', logo: 'rntllogo.svg', logoClass: 'mix-blend-multiply',
-                customHTML: `
+                </div>`,
+    },
+    {
+        id: "RNTL.",
+        client: "RNTL.",
+        tags: ["Trust Engineering", "Paid Social"],
+        stat: "4.6X Lift",
+        bg: "#8A9ED8",
+        text: "#051024",
+        sysId: "02",
+        logo: "rntllogo.svg",
+        logoClass: "mix-blend-multiply",
+        customHTML: `
                 <div class="brutal-wrap" style="--bg-color: #8A9ED8; --text-color: #051024;">
                     <div class="reveal-blur">
                         <span class="brutal-overline">Founding Marketer · Core Team</span>
@@ -605,11 +887,19 @@ export interface BestWorkConfig {
                             </div>
                         </div>
                     </div>
-                </div>`
-            },
-            { 
-                id: 'Sins Crew', client: 'Sinskari', tags: ['Email Funnel', 'D2C Strategy'], stat: '25+ Carts Recovered', bg: '#012CEB', text: '#F4EFE6', sysId: '03', logo: 'sinskarilogo.svg', logoClass: 'invert brightness-0',
-                customHTML: `
+                </div>`,
+    },
+    {
+        id: "Sins Crew",
+        client: "Sinskari",
+        tags: ["Email Funnel", "D2C Strategy"],
+        stat: "25+ Carts Recovered",
+        bg: "#012CEB",
+        text: "#F4EFE6",
+        sysId: "03",
+        logo: "sinskarilogo.svg",
+        logoClass: "invert brightness-0",
+        customHTML: `
                 <div class="brutal-wrap" style="--bg-color: #012CEB; --text-color: #F4EFE6;">
                     <div class="reveal-blur">
                         <span class="brutal-overline">Strategy Intern · 4 Weeks</span>
@@ -659,11 +949,19 @@ export interface BestWorkConfig {
                             <div class="brutal-stat-label">Funnel Optimization</div>
                         </div>
                     </div>
-                </div>`
-            },
-            { 
-                id: 'Histrionica', client: 'Dramsoc SRCC', tags: ['Brand Growth', 'Sponsorships'], stat: '₹55L+ Secured', bg: '#111111', text: '#F4EFE6', sysId: '04', logo: 'dramlogo.svg', logoClass: '',
-                customHTML: `
+                </div>`,
+    },
+    {
+        id: "Histrionica",
+        client: "Dramsoc SRCC",
+        tags: ["Brand Growth", "Sponsorships"],
+        stat: "₹55L+ Secured",
+        bg: "#111111",
+        text: "#F4EFE6",
+        sysId: "04",
+        logo: "dramlogo.svg",
+        logoClass: "",
+        customHTML: `
                 <div class="brutal-wrap" style="--bg-color: #111111; --text-color: #F4EFE6;">
                     <div class="reveal-blur">
                         <span class="brutal-overline">Vice President · The Dramatics Society, SRCC</span>
@@ -954,11 +1252,19 @@ export interface BestWorkConfig {
                             </div>
                         </div>
                     </div>
-                </div>`
-            },
-            { 
-                id: 'Signal', client: 'Jio Hotstar', tags: ['GTM Strategy', 'Campus Marketing'], stat: '7L+ Impressions', bg: '#D8E0E8', text: '#012CEB', sysId: '05', logo: 'hotstarlogo.svg', logoClass: 'mix-blend-multiply',
-                customHTML: `
+                </div>`,
+    },
+    {
+        id: "Signal",
+        client: "Jio Hotstar",
+        tags: ["GTM Strategy", "Campus Marketing"],
+        stat: "7L+ Impressions",
+        bg: "#D8E0E8",
+        text: "#012CEB",
+        sysId: "05",
+        logo: "hotstarlogo.svg",
+        logoClass: "mix-blend-multiply",
+        customHTML: `
                 <div class="brutal-wrap" style="--bg-color: #D8E0E8; --text-color: #012CEB;">
                     <div class="reveal-blur">
                         <span class="brutal-overline">Marketing & GTM Strategy Lead</span>
@@ -1065,123 +1371,185 @@ export interface BestWorkConfig {
                             <div class="brutal-stat-label">Attendees Converted</div>
                         </div>
                     </div>
-                </div>`
-            }
-        ];
-        
-        // --- 4. CAREER TRANSIT SYSTEM LOGIC ---
-        // Dynamically add summaries and properties to the inventoryData array to avoid touching existing customHTML
-        if (inventoryData[0]) { inventoryData[0].summary = "Engineered creator growth systems capturing massive reach & brand revenue."; inventoryData[0].points = ["Created relatable POV content to acquire cold audiences", "Turned passive viewers into active distributors with 3x Loop Rate", "Operationalized & scaled a 40+ show touring business"]; inventoryData[0].name = "Krishna Shukla"; inventoryData[0].metrics = ["186M+", "₹4.4L", "32X"]; inventoryData[0].metricLabels = ["REACH", "REVENUE", "ROI"]; inventoryData[0].keyword = "Growth"; }
-        if (inventoryData[1]) { inventoryData[1].summary = "Validated acquisition channels for Gen Z sustainable fashion rentals."; inventoryData[1].points = ["Used borrowed equity to remove consumer trust deficit", "Positioned brand as a legitimate player from Day 1", "Made credible industry voices endorse renting as a lifestyle"]; inventoryData[1].name = "Rntl."; inventoryData[1].metrics = ["ACQ", "500+", "4X"]; inventoryData[1].metricLabels = ["FOCUS", "BETA USERS", "GROWTH"]; inventoryData[1].keyword = "Acquisition"; }
-        if (inventoryData[2]) { inventoryData[2].summary = "Architected automated email flows to dramatically lift retention."; inventoryData[2].points = ["Built automated email funnel architecture from scratch", "Plugged revenue bleeding from daily abandoned carts", "Recovered 25+ carts & boosted conversion by 10%"]; inventoryData[2].name = "Sinkari"; inventoryData[2].metrics = ["10%", "90%", "30D"]; inventoryData[2].metricLabels = ["REV LIFT", "RETENTION", "WINDOW"]; inventoryData[2].keyword = "Retention"; }
-        if (inventoryData[3]) { inventoryData[3].summary = "Secured brand sponsorships and scaled digital presence for flagship fest."; inventoryData[3].points = ["Closed ₹55L+ in brand sponsorships with 30+ brands", "Grew Instagram to 10K+ followers as DU's #1 club", "Generated 33M+ total campaign reach for flagship events"]; inventoryData[3].name = "Dramsoc"; inventoryData[3].metrics = ["₹55L+", "40K", "72H"]; inventoryData[3].metricLabels = ["SPONSORSHIP", "FOOTFALL", "DURATION"]; inventoryData[3].keyword = "Scale"; }
-        if (inventoryData[4]) { inventoryData[4].summary = "Orchestrated hyper-localized campus launch generating massive organic reach."; inventoryData[4].points = ["Turned a streaming show launch into an organic campus moment", "Scaled 25-40 micro-influencers to reach 30,000+ students", "Converted event footfall into 8,000+ organic peer-to-peer shares"]; inventoryData[4].name = "Jio Hotstar"; inventoryData[4].metrics = ["7L+", "15%", "40K+"]; inventoryData[4].metricLabels = ["IMPRESSIONS", "CONVERSION", "SIGNUPS"]; inventoryData[4].keyword = "Launch"; }
+                </div>`,
+    },
+];
 
+// --- 4. CAREER TRANSIT SYSTEM LOGIC ---
+// Dynamically add summaries and properties to the inventoryData array to avoid touching existing customHTML
+if (inventoryData[0]) {
+    inventoryData[0].summary =
+        "Engineered creator growth systems capturing massive reach & brand revenue.";
+    inventoryData[0].points = [
+        "Created relatable POV content to acquire cold audiences",
+        "Turned passive viewers into active distributors with 3x Loop Rate",
+        "Operationalized & scaled a 40+ show touring business",
+    ];
+    inventoryData[0].name = "Krishna Shukla";
+    inventoryData[0].metrics = ["186M+", "₹4.4L", "32X"];
+    inventoryData[0].metricLabels = ["REACH", "REVENUE", "ROI"];
+    inventoryData[0].keyword = "Growth";
+}
+if (inventoryData[1]) {
+    inventoryData[1].summary =
+        "Validated acquisition channels for Gen Z sustainable fashion rentals.";
+    inventoryData[1].points = [
+        "Used borrowed equity to remove consumer trust deficit",
+        "Positioned brand as a legitimate player from Day 1",
+        "Made credible industry voices endorse renting as a lifestyle",
+    ];
+    inventoryData[1].name = "Rntl.";
+    inventoryData[1].metrics = ["ACQ", "500+", "4X"];
+    inventoryData[1].metricLabels = ["FOCUS", "BETA USERS", "GROWTH"];
+    inventoryData[1].keyword = "Acquisition";
+}
+if (inventoryData[2]) {
+    inventoryData[2].summary =
+        "Architected automated email flows to dramatically lift retention.";
+    inventoryData[2].points = [
+        "Built automated email funnel architecture from scratch",
+        "Plugged revenue bleeding from daily abandoned carts",
+        "Recovered 25+ carts & boosted conversion by 10%",
+    ];
+    inventoryData[2].name = "Sinkari";
+    inventoryData[2].metrics = ["10%", "90%", "30D"];
+    inventoryData[2].metricLabels = ["REV LIFT", "RETENTION", "WINDOW"];
+    inventoryData[2].keyword = "Retention";
+}
+if (inventoryData[3]) {
+    inventoryData[3].summary =
+        "Secured brand sponsorships and scaled digital presence for flagship fest.";
+    inventoryData[3].points = [
+        "Closed ₹55L+ in brand sponsorships with 30+ brands",
+        "Grew Instagram to 10K+ followers as DU's #1 club",
+        "Generated 33M+ total campaign reach for flagship events",
+    ];
+    inventoryData[3].name = "Dramsoc";
+    inventoryData[3].metrics = ["₹55L+", "40K", "72H"];
+    inventoryData[3].metricLabels = ["SPONSORSHIP", "FOOTFALL", "DURATION"];
+    inventoryData[3].keyword = "Scale";
+}
+if (inventoryData[4]) {
+    inventoryData[4].summary =
+        "Orchestrated hyper-localized campus launch generating massive organic reach.";
+    inventoryData[4].points = [
+        "Turned a streaming show launch into an organic campus moment",
+        "Scaled 25-40 micro-influencers to reach 30,000+ students",
+        "Converted event footfall into 8,000+ organic peer-to-peer shares",
+    ];
+    inventoryData[4].name = "Jio Hotstar";
+    inventoryData[4].metrics = ["7L+", "15%", "40K+"];
+    inventoryData[4].metricLabels = ["IMPRESSIONS", "CONVERSION", "SIGNUPS"];
+    inventoryData[4].keyword = "Launch";
+}
 
 const dmrcStations = [
-  "NORTH CAMPUS",
-  "GTB NAGAR",
-  "VISHWAVIDYALAYA",
-  "KASHMERE GATE",
-  "RAJIV CHOWK",
-  "RNTL TERMINAL",
+    "NORTH CAMPUS",
+    "GTB NAGAR",
+    "VISHWAVIDYALAYA",
+    "KASHMERE GATE",
+    "RAJIV CHOWK",
+    "RNTL TERMINAL",
 ];
 
 const dummyStationsList = [
-  "VISHWAVIDYALAYA",
-  "GTB NAGAR",
-  "KASHMERE GATE",
-  "RAJIV CHOWK",
-  "MANDI HOUSE",
+    "VISHWAVIDYALAYA",
+    "GTB NAGAR",
+    "KASHMERE GATE",
+    "RAJIV CHOWK",
+    "MANDI HOUSE",
 ];
 
-const enrichedProjects: ProjectConfig[] = inventoryData.map((d: any, i: number) => ({
-  ...d,
-  stationName: dmrcStations[i + 1] || `STATION ${i + 2}`,
-}));
+const enrichedProjects: ProjectConfig[] = inventoryData.map(
+    (d: any, i: number) => ({
+        ...d,
+        stationName: dmrcStations[i + 1] || `STATION ${i + 2}`,
+    }),
+);
 
 export const BEST_WORK_CONFIG: BestWorkConfig = {
-  theme: {
-    beige: "#ECE8E1",
-    blue: "#0F35FF",
-    navy: "#0B0B0B",
-  },
-  sectionHeader: {
-    badge: "Section 04",
-    titleFirstWord: "Best",
-    titleSecondWord: "Work",
-  },
-  routeBoard: {
-    boardBg: "#d9d9d9",
-    dmrcStations,
-    dummyStationsList,
-    originLabel: "ORIGIN",
-  },
-  welcomeDoors: {
-    hindiHeadingLine1: "दिल्ली मेट्रो में",
-    hindiHeadingLine2: "आपका स्वागत है",
-    englishSubtitle: "Welcome to Delhi Metro",
-    enterButtonText: "ENTER METRO",
-  },
-  originStation: {
-    isOrigin: true,
-    name: "NORTH CAMPUS",
-    stationName: dmrcStations[0],
-    stat: "Origin",
-    summary: "INSTRUCTION MANUAL",
-    points: [
-      `<svg class="w-3 h-3 inline-block mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg> SWIPE L/R`,
-      `<svg class="w-3 h-3 inline-block mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg> STEP OUT`,
-      `<svg class="w-3 h-3 inline-block mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> MIND GAP`,
-    ],
-    metricLabels: ["SYSTEM", "MODE", "STATUS"],
-    metrics: ["ACTIVE", "MANUAL", "READY"],
-    keyword: "Terminal",
-    instructions: [
-      {
-        badgeBg: "#D4A017",
-        badgeText: "#0B0B0B",
-        titleColor: "#D4A017",
-        descColor: "#A0A0A0",
-        titleFont: "font-['DM_Mono']",
-        titleSize: "text-[9px] md:text-[10px]",
-        descSize: "text-[9px] md:text-[10px]",
-        title: "Navigate",
-        description: "Arrow keys to browse projects.",
-        iconSvgPath: "M5 12h14M12 5l7 7-7 7",
-      },
-      {
-        badgeBg: "#0F35FF",
-        badgeText: "#FFFFFF",
-        titleColor: "#FFFFFF",
-        descColor: "rgba(255,255,255,0.55)",
-        titleFont: "font-['Inter']",
-        titleSize: "text-[10px] md:text-[11px]",
-        descSize: "text-[10px] md:text-[11px]",
-        title: "Step Out",
-        description: "Yellow button → deep-dive the project.",
-        iconSvgPath: "M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7",
-      },
-    ],
-  },
-  train: {
-    graffitiText: "driven by a self proclaimed artist",
-    bodyLabel: "BLUE LINE // DELHI METRO",
-    secondaryAnnouncements: [
-      "kripya darwazo se duri banaye rakhein",
-      "apni zaruri vastuon ka dhyan rakhein",
-      "darwaze bayin aur khulenge",
-    ],
-    stepOutLine1: "STEP OUT FOR",
-    stepOutLine2: "DISSECTION",
-    returnButtonText: "Return to Platform",
-  },
-  platform: {
-    leftPrimary: "built in new delhi",
-    leftSeparator: "///",
-    leftSecondary: "powered by caffeine",
-    rightCautionPrefix: "caution:",
-    rightCautionHighlight: "can run even after 11pm due to late night designing hobby",
-  },
-  projects: enrichedProjects,
+    theme: {
+        beige: "#E6DDD2",
+        blue: "#14100E",
+        navy: "#14100E",
+    },
+    sectionHeader: {
+        badge: "03 — BEST WORK",
+        titleFirstWord: "Best",
+        titleSecondWord: "Work",
+    },
+    routeBoard: {
+        boardBg: "#F4EFE6",
+        dmrcStations,
+        dummyStationsList,
+        originLabel: "ORIGIN",
+    },
+    welcomeDoors: {
+        hindiHeadingLine1: "दिल्ली मेट्रो में",
+        hindiHeadingLine2: "आपका स्वागत है",
+        englishSubtitle: "Welcome to Delhi Metro",
+        enterButtonText: "ENTER METRO",
+    },
+    originStation: {
+        isOrigin: true,
+        name: "NORTH CAMPUS",
+        stationName: dmrcStations[0],
+        stat: "Origin",
+        summary: "INSTRUCTION MANUAL",
+        points: [
+            `<svg class="w-3 h-3 inline-block mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg> SWIPE L/R`,
+            `<svg class="w-3 h-3 inline-block mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg> STEP OUT`,
+            `<svg class="w-3 h-3 inline-block mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> MIND GAP`,
+        ],
+        metricLabels: ["SYSTEM", "MODE", "STATUS"],
+        metrics: ["ACTIVE", "MANUAL", "READY"],
+        keyword: "Terminal",
+        instructions: [
+            {
+                badgeBg: "#D4A017",
+                badgeText: "#0B0B0B",
+                titleColor: "#D4A017",
+                descColor: "#A0A0A0",
+                titleFont: "font-['DM_Mono']",
+                titleSize: "text-[9px] md:text-[10px]",
+                descSize: "text-[9px] md:text-[10px]",
+                title: "Navigate",
+                description: "Arrow keys to browse projects.",
+                iconSvgPath: "M5 12h14M12 5l7 7-7 7",
+            },
+            {
+                badgeBg: "#012CEB",
+                badgeText: "#FFFFFF",
+                titleColor: "#FFFFFF",
+                descColor: "rgba(255,255,255,0.7)",
+                titleFont: "font-['Inter']",
+                titleSize: "text-[10px] md:text-[11px]",
+                descSize: "text-[10px] md:text-[11px]",
+                title: "Step Out",
+                description: "Yellow button → deep-dive the project.",
+                iconSvgPath: "M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7",
+            },
+        ],
+    },
+    train: {
+        graffitiText: "framing by light, more critical by moonlight",
+        bodyLabel: "BLUE LINE // ANUP RAWAT TRANSIT",
+        secondaryAnnouncements: [
+            "kripya darwazo se duri banaye rakhein",
+            "apni zaruri vastuon ka dhyan rakhein",
+            "darwaze bayin aur khulenge",
+        ],
+        stepOutLine1: "STEP OUT FOR",
+        stepOutLine2: "DISSECTION",
+        returnButtonText: "Return to Platform",
+    },
+    platform: {
+        leftPrimary: "anup rawat studio",
+        leftSeparator: "///",
+        leftSecondary: "cinematographer • ftii '24",
+        rightCautionPrefix: "caution:",
+        rightCautionHighlight:
+            "framing stories through light & shadows",
+    },
+    projects: enrichedProjects,
 };

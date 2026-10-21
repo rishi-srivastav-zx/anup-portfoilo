@@ -28,12 +28,109 @@ export function Scene() {
         return () => window.removeEventListener("message", handleWheelMsg);
     }, []);
 
-    // Memoize handleApplyScene to prevent re-rendering loops and DOM thrashing during scroll
+    // Sync active page into iframe once loaded and attach custom cursor bridge
     const handleApplyScene = useCallback(
         (frame: HTMLIFrameElement) => {
             registerFrame(frame);
+
             try {
+                const doc = frame.contentDocument;
                 const win = frame.contentWindow as any;
+
+                if (doc) {
+                    // 1. Hide the browser's default OS cursor inside the iframe
+                    if (!doc.getElementById("custom-cursor-style")) {
+                        const style = doc.createElement("style");
+                        style.id = "custom-cursor-style";
+                        style.textContent = `
+                            *, html, body, button, a, input, div, span, svg, .sb-zone, .plate {
+                                cursor: none !important;
+                            }
+                        `;
+                        doc.head?.appendChild(style);
+                    }
+
+                    // 2. Attach mouse forwarding to keep the parent CustomCursor active and reactive
+                    if (win && !win.__cursorBridgeInstalled) {
+                        win.__cursorBridgeInstalled = true;
+
+                        let isMouseDownState = false;
+
+                        const forwardMove = (e: MouseEvent) => {
+                            const rect = frame.getBoundingClientRect();
+                            const target = e.target as HTMLElement | null;
+                            let hoverType: "pointer" | "grab" | "input" | null = null;
+                            let hoverLabel: string | null = null;
+
+                            if (
+                                target?.closest?.(
+                                    'button, a, .plate, .sb-arrow, .tool, .icon-btn, [role="button"], [data-cursor="hover"], [data-cursor="pointer"]',
+                                )
+                            ) {
+                                hoverType = 'pointer';
+                                hoverLabel = null;
+                            } else if (target?.closest?.('.loupe, .ring, .grip')) {
+                                hoverType = 'grab';
+                                hoverLabel = isMouseDownState ? 'DRAGGING' : 'MOVE';
+                            } else if (target?.closest?.('.sb-next')) {
+                                hoverType = 'grab';
+                                hoverLabel = isMouseDownState ? 'FLIPPING' : 'FLIP';
+                            } else if (target?.closest?.('.sb-prev')) {
+                                hoverType = 'grab';
+                                hoverLabel = isMouseDownState ? 'FLIPPING' : 'FLIP';
+                            } else if (target?.closest?.('.sb-zone, .sb-book, .sb-tilt')) {
+                                hoverType = 'grab';
+                                hoverLabel = isMouseDownState ? 'DRAGGING' : 'DRAG';
+                            } else if (
+                                target?.tagName?.toLowerCase() === "input" ||
+                                target?.tagName?.toLowerCase() === "textarea"
+                            ) {
+                                hoverType = "input";
+                                hoverLabel = null;
+                            }
+
+                            window.dispatchEvent(
+                                new CustomEvent("custom-cursor-move", {
+                                    detail: {
+                                        clientX: e.clientX + rect.left,
+                                        clientY: e.clientY + rect.top,
+                                        hoverType,
+                                        hoverLabel,
+                                    },
+                                }),
+                            );
+                        };
+
+                        const forwardDown = () => {
+                            isMouseDownState = true;
+                            window.dispatchEvent(
+                                new CustomEvent("custom-cursor-move", {
+                                    detail: { isDown: true },
+                                }),
+                            );
+                        };
+
+                        const forwardUp = () => {
+                            isMouseDownState = false;
+                            window.dispatchEvent(
+                                new CustomEvent("custom-cursor-move", {
+                                    detail: { isDown: false },
+                                }),
+                            );
+                        };
+
+                        win.addEventListener("mousemove", forwardMove, {
+                            passive: true,
+                        });
+                        win.addEventListener("mousedown", forwardDown, {
+                            passive: true,
+                        });
+                        win.addEventListener("mouseup", forwardUp, {
+                            passive: true,
+                        });
+                    }
+                }
+
                 if (win && typeof win.goTo === "function") {
                     win.goTo(currentPageIndex);
                 }
