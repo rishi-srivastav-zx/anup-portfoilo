@@ -9,6 +9,7 @@ import HeroText from "./components/HeroText";
 import Portrait from "./components/Portrait";
 import DetailsLeft from "./components/DetailsLeft";
 import DetailsRight from "./components/DetailsRight";
+import CareerTicker from "./components/CareerTicker";
 import ScrollHint from "@/components/ScrollHint/ScrollHint";
 
 export default function HeroSection() {
@@ -27,20 +28,21 @@ export default function HeroSection() {
 
                 <div
                     style={{ gridArea: "nav" }}
-                    className="relative z-50 h-[68px] sm:h-[76px] w-full"
+                    className="relative z-50 h-[56px] sm:h-[76px] w-full"
                 >
                     <Navbar />
                 </div>
 
                 <div
                     style={{ gridArea: "hero" }}
-                    className="relative w-full h-full flex flex-col justify-end pb-6 sm:pb-12 px-6 md:px-12 pointer-events-none"
+                    className="relative w-full h-full flex flex-col justify-end pb-4 sm:pb-12 px-2 sm:px-6 md:px-12 pointer-events-none"
                 >
                     <HeroText />
                     <Portrait />
 
                     <DetailsLeft />
                     <DetailsRight />
+                    <CareerTicker />
                     <ScrollHint />
                 </div>
             </section>

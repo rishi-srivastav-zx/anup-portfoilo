@@ -94,28 +94,14 @@ export default function HeroText() {
             top: clamp(-24px, -2.5vw, -12px);
           }
         }
-        @media (max-width: 640px) {
+        @media (max-width: 639px) {
           .hero-name-container {
-            top: 46%;
-            padding: 0 10px;
-          }
-          .hero-title-grid {
-            --name-gap: clamp(125px, 39vw, 165px);
-            font-size: clamp(19px, 5.6vw, 29px);
-          }
-          .word-left {
-            justify-self: end;
-            padding-right: 4px;
-          }
-          .word-right {
-            justify-self: start;
-            padding-left: 4px;
-            top: clamp(-16px, -3.2vw, -10px);
+            display: none !important;
           }
         }
       `}} />
       
-      <div className="hero-name-container pointer-events-auto flex justify-center">
+      <div className="hero-name-container pointer-events-auto hidden sm:flex justify-center">
         <motion.div
           animate={{ x: textX, y: textY }}
           transition={{ type: "spring", stiffness: 40, damping: 20 }}

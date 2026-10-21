@@ -53,7 +53,7 @@ export default function Background() {
                     x: { type: "spring", stiffness: 50, damping: 20 },
                     y: { type: "spring", stiffness: 50, damping: 20 },
                 }}
-                className="absolute top-[46%] sm:top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full w-[clamp(215px,58vw,300px)] h-[clamp(215px,58vw,300px)] sm:w-[clamp(210px,45vw,650px)] sm:h-[clamp(210px,45vw,650px)]"
+                className="absolute top-[52%] sm:top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full w-[clamp(260px,84vw,370px)] h-[clamp(260px,84vw,370px)] sm:w-[clamp(210px,45vw,650px)] sm:h-[clamp(210px,45vw,650px)]"
                 style={{
                     backgroundColor: colors.circle,
                 }}

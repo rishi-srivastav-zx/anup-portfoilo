@@ -103,10 +103,10 @@ export default function Navbar() {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
-            className={`fixed top-0 left-0 right-0 z-50 w-full flex justify-between items-center px-4 sm:px-6 md:px-12 transition-all duration-300 font-sans ${
+            className={`fixed top-0 left-0 right-0 z-50 w-full flex justify-between items-center px-3 sm:px-6 md:px-12 transition-all duration-300 font-sans ${
                 isScrolled
-                    ? "py-3 sm:py-3.5 bg-[#E6DDD2]/85 backdrop-blur-md shadow-[0_4px_24px_rgba(20,16,14,0.06)] border-b border-[#14100E]/10"
-                    : "py-4 sm:py-5 bg-transparent border-b border-transparent"
+                    ? "py-2.5 sm:py-3.5 bg-[#E6DDD2]/85 backdrop-blur-md shadow-[0_4px_24px_rgba(20,16,14,0.06)] border-b border-[#14100E]/10"
+                    : "py-3 sm:py-5 bg-transparent border-b border-transparent"
             }`}
             style={{ color: colors.text }}
         >

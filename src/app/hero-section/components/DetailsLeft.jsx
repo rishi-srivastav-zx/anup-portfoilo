@@ -62,8 +62,8 @@ export default function DetailsLeft() {
                 </p>
             </motion.div>
 
-            {/* Bottom Left Items */}
-            <div className="flex flex-col space-y-1 sm:space-y-4 md:space-y-6 max-w-[10.5rem] sm:max-w-[16rem] md:max-w-[22rem] mt-auto pb-1 sm:pb-4 bg-[#E6DDD2]/90 sm:bg-transparent backdrop-blur-[4px] sm:backdrop-blur-none p-1.5 sm:p-0 rounded-md border border-[#14100E]/10 sm:border-0 shadow-sm sm:shadow-none">
+            {/* Bottom Left Items (Desktop / Tablet only — replaced by continuous ticker on mobile) */}
+            <div className="hidden sm:flex flex-col space-y-1 sm:space-y-4 md:space-y-6 max-w-[10.5rem] sm:max-w-[16rem] md:max-w-[22rem] mt-auto pb-1 sm:pb-4 bg-[#E6DDD2]/90 sm:bg-transparent backdrop-blur-[4px] sm:backdrop-blur-none p-1.5 sm:p-0 rounded-md border border-[#14100E]/10 sm:border-0 shadow-sm sm:shadow-none">
                 {careerSteps.map((step, idx) => (
                     <motion.div
                         key={idx}

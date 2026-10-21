@@ -143,19 +143,19 @@ export default function BottomNav() {
                 damping: 20,
                 delay: 0.6,
             }}
-            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] w-full max-w-[calc(100%-32px)] sm:w-auto"
+            className="fixed bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 z-[100] w-full max-w-[calc(100%-16px)] sm:w-auto flex justify-center"
             style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
         >
             <motion.nav
                 aria-label="Primary Navigation"
-                className="flex items-center p-1.5 sm:p-2 bg-[#F4EDE4] overflow-x-auto overflow-y-hidden rounded-full shadow-[0_12px_32px_rgba(0,0,0,0.35)]"
+                className="flex items-center p-1 sm:p-2 bg-[#F4EDE4] overflow-x-auto overflow-y-hidden rounded-full shadow-[0_12px_32px_rgba(0,0,0,0.35)]"
                 style={{
                     border: "2px solid #14100E",
-                    boxShadow: "8px 8px 0 #14100E",
+                    boxShadow: "6px 6px 0 #14100E",
                     msOverflowStyle: "none",
                     scrollbarWidth: "none",
                 }}
-                whileHover={{ boxShadow: "10px 10px 0 #14100E" }}
+                whileHover={{ boxShadow: "8px 8px 0 #14100E" }}
                 whileTap={{
                     boxShadow: "3px 3px 0 #14100E",
                     x: 2,
@@ -177,7 +177,7 @@ export default function BottomNav() {
                             key={link.label}
                             href={link.href}
                             onClick={(e) => handleNavClick(e, link.href)}
-                            className="relative px-3.5 sm:px-4 py-2 mx-0.5 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-[#14100E] focus-visible:ring-offset-2 focus-visible:ring-offset-[#F4EDE4] flex-shrink-0 group cursor-pointer"
+                            className="relative px-2.5 xs:px-3 sm:px-4 py-1.5 sm:py-2 mx-0.5 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-[#14100E] focus-visible:ring-offset-2 focus-visible:ring-offset-[#F4EDE4] flex-shrink-0 group cursor-pointer"
                             aria-current={isActive ? "page" : undefined}
                         >
                             {/* Active background pill */}
@@ -197,7 +197,7 @@ export default function BottomNav() {
                             <motion.span
                                 className="relative z-10 font-sans uppercase tracking-[0.08em] select-none"
                                 style={{
-                                    fontSize: "clamp(11px, 2vw, 13px)",
+                                    fontSize: "clamp(10px, 2.2vw, 13px)",
                                     fontWeight: 600,
                                     color: isActive ? "#F4EDE4" : "#14100E",
                                 }}
