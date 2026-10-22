@@ -261,6 +261,16 @@
                     display: none;
                 }
             }
+            @media (max-width: 768px) {
+                .hero {
+                    align-content: start;
+                    padding-top: clamp(14px, 2.5svh, 24px);
+                    padding-bottom: 20px;
+                }
+                .chapter-bridge {
+                    margin: 0 0 clamp(8px, 1.5vh, 14px);
+                }
+            }
 
             .chapter-bridge {
                 display: flex;
