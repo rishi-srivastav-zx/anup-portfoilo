@@ -63,9 +63,9 @@ interface SketchbookContextType {
 
 const SketchbookContext = createContext<SketchbookContextType | null>(null);
 
-const STORAGE_KEY_PAGES = "sketchbook_pages_v1";
-const STORAGE_KEY_TYPOGRAPHY = "sketchbook_typography_v1";
-const STORAGE_KEY_METADATA = "sketchbook_metadata_v1";
+const STORAGE_KEY_PAGES = "sketchbook_pages_v5";
+const STORAGE_KEY_TYPOGRAPHY = "sketchbook_typography_v5";
+const STORAGE_KEY_METADATA = "sketchbook_metadata_v5";
 
 export function SketchbookProvider({
     children,
@@ -78,7 +78,13 @@ export function SketchbookProvider({
             const saved = localStorage.getItem(STORAGE_KEY_PAGES);
             if (saved) {
                 const parsed = JSON.parse(saved);
-                if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+                if (
+                    Array.isArray(parsed) &&
+                    parsed.length > 0 &&
+                    !parsed.some((p: any) => typeof p.file === "string" && p.file.startsWith("spread-"))
+                ) {
+                    return parsed;
+                }
             }
         } catch {
             // ignore
@@ -129,14 +135,21 @@ export function SketchbookProvider({
     useEffect(() => {
         const fetchTemplate = async () => {
             try {
-                let res = await fetch(
-                    "/my-image-section/meng-to-sketchbook.html",
+                const res = await fetch(
+                    `/landing-pages/meng-to-sketchbook.html?t=${Date.now()}`,
+                    { cache: "no-store" },
                 );
-                if (!res.ok) {
-                    res = await fetch("/landing-pages/meng-to-sketchbook.html");
-                }
                 if (!res.ok) throw new Error("Failed to load sketchbook HTML");
-                const text = await res.text();
+                let text = await res.text();
+                // Ensure arrow buttons and polyline chevrons are completely stripped from template
+                text = text.replace(
+                    /<polyline[^>]*points=["'](?:11,3 3,22 11,41|3,3 11,22 3,41)["'][^>]*>/gi,
+                    "",
+                );
+                text = text.replace(
+                    /<button[^>]*class=["'][^"']*sb-arrow[^"']*["'][^>]*>[\s\S]*?<\/button>/gi,
+                    '<button class="sb-arrow" style="display:none!important;visibility:hidden!important;width:0!important;height:0!important;"></button>',
+                );
                 setBaseHtml(text);
             } catch (err) {
                 console.warn(
@@ -230,6 +243,16 @@ export function SketchbookProvider({
         if (regex.test(html)) {
             html = html.replace(regex, pagesCode);
         }
+
+        // Clean out any arrow SVGs or chevrons from generatedSrcDoc
+        html = html.replace(
+            /<polyline[^>]*points=["'](?:11,3 3,22 11,41|3,3 11,22 3,41)["'][^>]*>/gi,
+            "",
+        );
+        html = html.replace(
+            /<button[^>]*class=["'][^"']*sb-arrow[^"']*["'][^>]*>[\s\S]*?<\/button>/gi,
+            '<button class="sb-arrow" style="display:none!important;visibility:hidden!important;width:0!important;height:0!important;"></button>',
+        );
 
         return html;
     }, [isCustomizedPages, baseHtml, pages]);

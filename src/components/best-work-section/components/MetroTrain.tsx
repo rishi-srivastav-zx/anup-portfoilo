@@ -9,7 +9,7 @@ export const MetroTrain: React.FC = () => {
         <div
             id="transit-train"
             ref={transitTrainRef}
-            className="relative flex flex-row-reverse items-end mb-[2px] transform translate-x-[5vw] will-change-transform transition-transform duration-[1.5s] h-[133px] pr-[5vw] md:pr-[10vw]"
+            className="relative flex flex-row-reverse items-end mb-[2px] will-change-transform h-[80px] sm:h-[105px] md:h-[133px] pr-[5vw] md:pr-[10vw]"
             style={{ filter: "drop-shadow(0 12px 32px rgba(11,11,11,0.25))" }}
         >
             <div className="flex flex-row-reverse items-end w-full h-full">

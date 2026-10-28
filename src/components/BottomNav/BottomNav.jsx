@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
+import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 
 const navLinks = [
@@ -8,19 +9,41 @@ const navLinks = [
     { label: "About", href: "#about" },
     { label: "Visuals", href: "#visuals" },
     { label: "Work", href: "#work" },
+    { label: "Blog", href: "/blog" },
+    { label: "Login", href: "/login-page" },
     { label: "Contact", href: "#contact" },
 ];
 
 export default function BottomNav() {
-    const [activeItem, setActiveItem] = useState(navLinks[0].href);
+    const pathname = usePathname();
+    const [activeItem, setActiveItem] = useState(
+        pathname?.startsWith("/blog") ? "/blog" : navLinks[0].href,
+    );
     const [isMounted, setIsMounted] = useState(false);
     const isProgrammaticScrollRef = useRef(false);
     const scrollTimeoutRef = useRef(null);
+
+    // Sync activeItem when pathname changes
+    useEffect(() => {
+        if (pathname?.startsWith("/blog")) {
+            setActiveItem("/blog");
+        }
+    }, [pathname]);
+
+    const activeItemRef = useRef(activeItem);
+    activeItemRef.current = activeItem;
 
     // Determine active section based on current viewport scroll position
     const updateActiveSection = useCallback(() => {
         if (typeof window === "undefined" || isProgrammaticScrollRef.current)
             return;
+
+        if (pathname?.startsWith("/blog")) {
+            if (activeItemRef.current !== "/blog") {
+                setActiveItem("/blog");
+            }
+            return;
+        }
 
         const scrollY = window.scrollY;
         const windowHeight = window.innerHeight;
@@ -28,13 +51,17 @@ export default function BottomNav() {
 
         // 1. Near very top of the page
         if (scrollY < 120) {
-            setActiveItem("#home");
+            if (activeItemRef.current !== "#home") {
+                setActiveItem("#home");
+            }
             return;
         }
 
         // 2. Near bottom of page (footer / contact section)
         if (scrollY + windowHeight >= docHeight - 120) {
-            setActiveItem("#contact");
+            if (activeItemRef.current !== "#contact") {
+                setActiveItem("#contact");
+            }
             return;
         }
 
@@ -64,10 +91,10 @@ export default function BottomNav() {
             }
         }
 
-        if (matchingHref) {
+        if (matchingHref && matchingHref !== activeItemRef.current) {
             setActiveItem(matchingHref);
         }
-    }, []);
+    }, [pathname]);
 
     useEffect(() => {
         setIsMounted(true);
@@ -82,19 +109,23 @@ export default function BottomNav() {
             }
         }
 
-        // Update active section on scroll
+        // Update active section on scroll with rAF throttling
+        let rafId = null;
         const handleScroll = () => {
-            updateActiveSection();
+            if (rafId) return;
+            rafId = requestAnimationFrame(() => {
+                updateActiveSection();
+                rafId = null;
+            });
         };
 
         window.addEventListener("scroll", handleScroll, { passive: true });
-        window.addEventListener("resize", updateActiveSection, {
-            passive: true,
-        });
+        window.addEventListener("resize", handleScroll, { passive: true });
 
         return () => {
+            if (rafId) cancelAnimationFrame(rafId);
             window.removeEventListener("scroll", handleScroll);
-            window.removeEventListener("resize", updateActiveSection);
+            window.removeEventListener("resize", handleScroll);
             if (scrollTimeoutRef.current)
                 clearTimeout(scrollTimeoutRef.current);
         };
@@ -104,18 +135,53 @@ export default function BottomNav() {
         e.preventDefault();
         setActiveItem(href);
 
+        if (href.startsWith("/")) {
+            // Direct route navigation (e.g. /blog)
+            if (pathname !== href) {
+                window.location.href = href;
+            }
+            return;
+        }
+
+        // Hash navigation (e.g. #home, #about)
+        if (pathname !== "/") {
+            // If on /blog or another page, navigate back to home page with target hash
+            window.location.href = `/${href}`;
+            return;
+        }
+
         // Temporarily pause scroll spy updates during smooth scroll transition
         isProgrammaticScrollRef.current = true;
         if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
 
         const targetId = href.replace("#", "");
 
-        if (targetId === "home") {
-            window.scrollTo({ top: 0, behavior: "smooth" });
+        if (typeof window !== "undefined" && window.lenis) {
+            const lenis = window.lenis;
+            if (targetId === "home") {
+                lenis.scrollTo(0, {
+                    duration: 1.4,
+                    easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+                });
+            } else {
+                const el = document.getElementById(targetId);
+                if (el) {
+                    lenis.scrollTo(el, {
+                        duration: 1.4,
+                        offset: 0,
+                        easing: (t) =>
+                            Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+                    });
+                }
+            }
         } else {
-            const el = document.getElementById(targetId);
-            if (el) {
-                el.scrollIntoView({ behavior: "smooth" });
+            if (targetId === "home") {
+                window.scrollTo({ top: 0, behavior: "smooth" });
+            } else {
+                const el = document.getElementById(targetId);
+                if (el) {
+                    el.scrollIntoView({ behavior: "smooth" });
+                }
             }
         }
 
@@ -128,10 +194,15 @@ export default function BottomNav() {
         scrollTimeoutRef.current = setTimeout(() => {
             isProgrammaticScrollRef.current = false;
             updateActiveSection();
-        }, 900);
+        }, 1400);
     };
 
-    if (!isMounted) return null;
+    if (
+        !isMounted ||
+        pathname?.startsWith("/login-page") ||
+        pathname?.startsWith("/dashboard")
+    )
+        return null;
 
     return (
         <motion.div

@@ -6,17 +6,16 @@ export const NavigationArrows: React.FC = () => {
 
     return (
         <>
-            <div className="absolute right-4 md:right-8 top-[45%] -translate-y-1/2 z-[90] pointer-events-auto">
+            <div className="absolute right-1 sm:right-2 md:right-8 top-[48%] sm:top-[47%] md:top-[45%] -translate-y-1/2 z-[90] pointer-events-auto">
                 <button
                     id="transit-next-btn"
                     onClick={nextStation}
                     data-cursor="pointer"
                     aria-label="Next Station"
-                    className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#14100E] w-20 h-20 md:w-24 md:h-24 border-[3px] border-[#14100E] bg-[#E6DDD2] text-[#14100E] flex items-center justify-center cursor-pointer hover:bg-[#14100E] hover:text-[#ECE8E1] hover:border-[#14100E] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all duration-150 group shadow-[5px_5px_0_#14100E]"
+                    className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#14100E] w-8 h-8 sm:w-10 sm:h-10 md:w-20 lg:w-24 md:h-20 lg:h-24 border-[2px] sm:border-[2.5px] md:border-[3px] border-[#14100E] bg-[#E6DDD2] text-[#14100E] flex items-center justify-center cursor-pointer hover:bg-[#14100E] hover:text-[#ECE8E1] hover:border-[#14100E] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all duration-150 group shadow-[2px_2px_0_#14100E] sm:shadow-[2.5px_2.5px_0_#14100E] md:shadow-[5px_5px_0_#14100E]"
                 >
                     <svg
-                        width="34"
-                        height="34"
+                        className="w-3.5 h-3.5 sm:w-5 sm:h-5 md:w-[28px] lg:w-[34px] md:h-[28px] lg:h-[34px]"
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
@@ -28,17 +27,16 @@ export const NavigationArrows: React.FC = () => {
                     </svg>
                 </button>
             </div>
-            <div className="absolute left-4 md:left-8 top-[45%] -translate-y-1/2 z-[90] pointer-events-auto">
+            <div className="absolute left-1 sm:left-2 md:left-8 top-[48%] sm:top-[47%] md:top-[45%] -translate-y-1/2 z-[90] pointer-events-auto">
                 <button
                     id="transit-prev-btn"
                     onClick={prevStation}
                     data-cursor="pointer"
                     aria-label="Previous Station"
-                    className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#14100E] w-20 h-20 md:w-24 md:h-24 border-[3px] border-[#14100E] bg-[#E6DDD2] text-[#14100E] flex items-center justify-center cursor-pointer hover:bg-[#14100E] hover:text-[#ECE8E1] hover:border-[#14100E] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all duration-150 group shadow-[5px_5px_0_#14100E]"
+                    className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#14100E] w-8 h-8 sm:w-10 sm:h-10 md:w-20 lg:w-24 md:h-20 lg:h-24 border-[2px] sm:border-[2.5px] md:border-[3px] border-[#14100E] bg-[#E6DDD2] text-[#14100E] flex items-center justify-center cursor-pointer hover:bg-[#14100E] hover:text-[#ECE8E1] hover:border-[#14100E] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all duration-150 group shadow-[2px_2px_0_#14100E] sm:shadow-[2.5px_2.5px_0_#14100E] md:shadow-[5px_5px_0_#14100E]"
                 >
                     <svg
-                        width="34"
-                        height="34"
+                        className="w-3.5 h-3.5 sm:w-5 sm:h-5 md:w-[28px] lg:w-[34px] md:h-[28px] lg:h-[34px]"
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"

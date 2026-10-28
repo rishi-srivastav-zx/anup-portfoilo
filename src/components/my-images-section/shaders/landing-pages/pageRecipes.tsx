@@ -462,6 +462,27 @@ export const MENG_TO_SKETCHBOOK_TYPOGRAPHY: PageTypographyRecipe = {
   --font: ${type.body};
 }
 body { font-family: ${type.body}; font-weight: ${type.bodyWeight}; }
+.sb-arrow, button.sb-arrow, #sbLeft, #sbRight {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  opacity: 0 !important;
+  width: 0 !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+.wash {
+  background-image: url(/landing-pages/meng-to-sketchbook/bg-wash.jpg) !important;
+  background-position: center center !important;
+  background-size: cover !important;
+  background-repeat: no-repeat !important;
+  opacity: 0.95 !important;
+}
+.wash:after {
+  background: radial-gradient(ellipse at center, rgba(230, 221, 210, 0.2) 0%, rgba(230, 221, 210, 0) 70%) !important;
+}
 .top .name, .plate .t { font-family: ${type.heading}; font-weight: ${type.headingWeight}; }
 .top .name {
   font-size: clamp(${px((type.headingSize * 24) / 30)}, calc(${n(type.headingSize / 30)} * 2.4vw), ${px(type.headingSize)});

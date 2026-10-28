@@ -56,44 +56,47 @@ export function applyBackgroundPresentation(
     backgroundCanvasSelector?: string,
     backgroundVisualSelector?: string,
 ) {
-    const document = frame?.contentDocument;
-    if (!document) return;
+    if (!frame) return;
 
-    document.getElementById(BACKGROUND_PRESENTATION_STYLE_ID)?.remove();
-    document
-        .querySelectorAll("[data-threeui-background-layer]")
-        .forEach((element) => {
-            element.removeAttribute("data-threeui-background-layer");
-            element.removeAttribute("data-threeui-background-fill");
-        });
+    try {
+        const document = frame.contentDocument;
+        if (!document || !document.documentElement) return;
 
-    if (!backgroundCanvasSelector) {
-        document.documentElement.removeAttribute("data-threeui-presentation");
-        return;
-    }
-
-    const canvas = document.querySelector<HTMLElement>(
-        backgroundCanvasSelector,
-    );
-    if (!canvas) return;
-
-    canvas.setAttribute("data-threeui-background-layer", "");
-    canvas.setAttribute("data-threeui-background-fill", "");
-    if (backgroundVisualSelector) {
+        document.getElementById(BACKGROUND_PRESENTATION_STYLE_ID)?.remove();
         document
-            .querySelectorAll<HTMLElement>(backgroundVisualSelector)
+            .querySelectorAll("[data-threeui-background-layer]")
             .forEach((element) => {
-                element.setAttribute("data-threeui-background-layer", "");
+                element?.removeAttribute("data-threeui-background-layer");
+                element?.removeAttribute("data-threeui-background-fill");
             });
-    }
 
-    document.documentElement.setAttribute(
-        "data-threeui-presentation",
-        "background",
-    );
-    const presentationStyle = document.createElement("style");
-    presentationStyle.id = BACKGROUND_PRESENTATION_STYLE_ID;
-    presentationStyle.textContent = `
+        if (!backgroundCanvasSelector) {
+            document.documentElement?.removeAttribute("data-threeui-presentation");
+            return;
+        }
+
+        const canvas = document.querySelector<HTMLElement>(
+            backgroundCanvasSelector,
+        );
+        if (!canvas) return;
+
+        canvas.setAttribute("data-threeui-background-layer", "");
+        canvas.setAttribute("data-threeui-background-fill", "");
+        if (backgroundVisualSelector) {
+            document
+                .querySelectorAll<HTMLElement>(backgroundVisualSelector)
+                .forEach((element) => {
+                    element?.setAttribute("data-threeui-background-layer", "");
+                });
+        }
+
+        document.documentElement?.setAttribute(
+            "data-threeui-presentation",
+            "background",
+        );
+        const presentationStyle = document.createElement("style");
+        presentationStyle.id = BACKGROUND_PRESENTATION_STYLE_ID;
+        presentationStyle.textContent = `
     html[data-threeui-presentation="background"],
     html[data-threeui-presentation="background"] body {
       width: 100% !important;
@@ -120,13 +123,20 @@ export function applyBackgroundPresentation(
       transform: none !important;
     }
   `;
-    document.head.appendChild(presentationStyle);
+        if (document.head) {
+            document.head.appendChild(presentationStyle);
+        } else if (document.documentElement) {
+            document.documentElement.appendChild(presentationStyle);
+        }
 
-    // The original renderer may have measured a split hero or section-sized
-    // canvas. Re-run its authored resize path after the layer becomes full-frame.
-    frame.contentWindow?.requestAnimationFrame(() => {
-        frame.contentWindow?.dispatchEvent(new Event("resize"));
-    });
+        // The original renderer may have measured a split hero or section-sized
+        // canvas. Re-run its authored resize path after the layer becomes full-frame.
+        frame.contentWindow?.requestAnimationFrame(() => {
+            frame.contentWindow?.dispatchEvent(new Event("resize"));
+        });
+    } catch {
+        // Safe guard against cross-origin iframe security or transient unmounting errors
+    }
 }
 
 export function LandingPageFrame({
@@ -197,7 +207,7 @@ export function LandingPageFrame({
                     width: "100%",
                     height: "100%",
                     border: 0,
-                    background: "#E6DDD2",
+                    background: "transparent",
                     // A background presentation begins life as the complete source page.
                     // Keep that page visually sealed until onLoad has installed the
                     // scene-only CSS, otherwise its authored navigation/copy can flash for

@@ -17,11 +17,11 @@ export const PlatformSurface: React.FC = () => {
             </div>
 
             {/* Yellow Safety Line */}
-            <div className="w-full h-[5px] md:h-[8px] bg-[#D4A017] mt-8 relative z-10 shadow-[0_2px_4px_rgba(212,160,23,0.3)]" />
+            <div className="w-full h-[5px] md:h-[8px] mt-5 sm:mt-7 md:mt-8 bg-[#D4A017] relative z-10 shadow-[0_2px_4px_rgba(212,160,23,0.3)]" />
 
             {/* Tactile Paving */}
             <div
-                className="w-full h-[8px] mt-1 relative z-10"
+                className="w-full h-[6px] md:h-[8px] mt-0.5 sm:mt-1 relative z-10"
                 style={{
                     backgroundImage:
                         "radial-gradient(#14100E 30%, transparent 30%)",
@@ -32,24 +32,24 @@ export const PlatformSurface: React.FC = () => {
             />
 
             {/* Platform Easter Eggs */}
-            <div className="flex justify-between items-center px-8 md:px-16 mt-3 mb-2 relative z-10">
+            <div className="flex justify-between items-center px-3 sm:px-8 md:px-16 mt-1.5 sm:mt-2 md:mt-3 mb-1 md:mb-2 relative z-10">
                 <div
                     aria-hidden="true"
-                    className="font-['Schoolbell'] text-[12px] md:text-[14px] text-[#14100E] opacity-80"
+                    className="font-['Schoolbell'] text-[10px] sm:text-[12px] md:text-[14px] text-[#14100E] opacity-80 truncate mr-2"
                 >
                     {platform.leftPrimary}{" "}
-                    <span className="hidden md:inline opacity-40 mx-2">
+                    <span className="hidden sm:inline opacity-40 mx-2">
                         {platform.leftSeparator}
                     </span>{" "}
-                    <span className="hidden md:inline">
+                    <span className="hidden sm:inline">
                         {platform.leftSecondary}
                     </span>
                 </div>
                 <div
                     aria-hidden="true"
-                    className="font-['Schoolbell'] text-[12px] md:text-[14px] text-[#14100E] opacity-80"
+                    className="font-['Schoolbell'] text-[10px] sm:text-[12px] md:text-[14px] text-[#14100E] opacity-80 shrink-0"
                 >
-                    {platform.rightCautionPrefix}{" "}
+                    <span className="hidden sm:inline">{platform.rightCautionPrefix} </span>
                     <span className="text-[#14100E] font-bold">
                         {platform.rightCautionHighlight}
                     </span>

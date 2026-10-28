@@ -52,20 +52,24 @@ export default function Portrait() {
             {/* 1. Mobile Dedicated Portrait Wrapper with Anchored Names (sm:hidden) */}
             <div className="sm:hidden absolute inset-x-0 top-[52%] -translate-y-[46%] z-20 flex justify-center pointer-events-none">
                 <motion.div
-                    initial={{ y: shouldReduceMotion ? 0 : 50, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1, x: portraitX, y: portraitY }}
-                    whileHover={shouldReduceMotion ? {} : { scale: 1.02 }}
-                    onHoverStart={() => setHoveringPortrait(true)}
-                    onHoverEnd={() => setHoveringPortrait(false)}
-                    transition={{
-                        y: { duration: 1.2, ease: [0.16, 1, 0.3, 1], delay: 0.2 },
-                        opacity: { duration: 1.2, delay: 0.2 },
-                        scale: { duration: 0.5, ease: [0.16, 1, 0.3, 1] },
-                        x: { type: "spring", stiffness: 50, damping: 25 },
-                    }}
-                    className="relative pointer-events-auto w-[clamp(300px,95vw,390px)] aspect-[836/712] select-none"
-                    style={{ cursor: "none" }}
+                    animate={{ x: portraitX, y: portraitY }}
+                    transition={{ type: "spring", stiffness: 50, damping: 25 }}
+                    className="pointer-events-auto"
                 >
+                    <motion.div
+                        initial={{ y: shouldReduceMotion ? 0 : 50, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        whileHover={shouldReduceMotion ? {} : { scale: 1.02 }}
+                        onHoverStart={() => setHoveringPortrait(true)}
+                        onHoverEnd={() => setHoveringPortrait(false)}
+                        transition={{
+                            y: { duration: 1.2, ease: [0.16, 1, 0.3, 1], delay: 0.2 },
+                            opacity: { duration: 1.2, delay: 0.2 },
+                            scale: { duration: 0.5, ease: [0.16, 1, 0.3, 1] },
+                        }}
+                        className="relative w-[clamp(300px,95vw,390px)] aspect-[836/712] select-none"
+                        style={{ cursor: "none" }}
+                    >
                     {/* Name: ANUP — positioned upward above the hair/forehead */}
                     <motion.div
                         variants={containerVariants}
@@ -149,25 +153,30 @@ export default function Portrait() {
                         </motion.span>
                     </motion.div>
                 </motion.div>
+                </motion.div>
             </div>
 
             {/* 2. Desktop / Tablet Portrait (hidden sm:flex) */}
             <div className="hidden sm:flex absolute inset-x-0 top-[52%] -translate-y-[46%] z-20 justify-center pointer-events-none">
                 <motion.div
-                    initial={{ y: shouldReduceMotion ? 0 : 60, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1, x: portraitX, y: portraitY }}
-                    whileHover={shouldReduceMotion ? {} : { scale: 1.02 }}
-                    onHoverStart={() => setHoveringPortrait(true)}
-                    onHoverEnd={() => setHoveringPortrait(false)}
-                    transition={{
-                        y: { duration: 1.2, ease: [0.16, 1, 0.3, 1], delay: 0.2 },
-                        opacity: { duration: 1.2, delay: 0.2 },
-                        scale: { duration: 0.5, ease: [0.16, 1, 0.3, 1] },
-                        x: { type: "spring", stiffness: 50, damping: 25 },
-                    }}
-                    className="relative pointer-events-auto w-[clamp(440px,55vw,680px)] aspect-[836/712] select-none"
-                    style={{ cursor: "none" }}
+                    animate={{ x: portraitX, y: portraitY }}
+                    transition={{ type: "spring", stiffness: 50, damping: 25 }}
+                    className="pointer-events-auto"
                 >
+                    <motion.div
+                        initial={{ y: shouldReduceMotion ? 0 : 60, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        whileHover={shouldReduceMotion ? {} : { scale: 1.02 }}
+                        onHoverStart={() => setHoveringPortrait(true)}
+                        onHoverEnd={() => setHoveringPortrait(false)}
+                        transition={{
+                            y: { duration: 1.2, ease: [0.16, 1, 0.3, 1], delay: 0.2 },
+                            opacity: { duration: 1.2, delay: 0.2 },
+                            scale: { duration: 0.5, ease: [0.16, 1, 0.3, 1] },
+                        }}
+                        className="relative w-[clamp(440px,55vw,680px)] aspect-[836/712] select-none"
+                        style={{ cursor: "none" }}
+                    >
                     <div
                         className="relative w-full h-full"
                         style={{
@@ -199,6 +208,7 @@ export default function Portrait() {
                                 "linear-gradient(to bottom, rgba(230, 221, 210, 0) 0%, rgba(230, 221, 210, 0.45) 40%, rgba(230, 221, 210, 0.9) 78%, #E6DDD2 100%)",
                         }}
                     />
+                </motion.div>
                 </motion.div>
             </div>
         </>

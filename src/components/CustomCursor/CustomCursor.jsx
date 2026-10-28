@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { motion, useMotionValue, useSpring, useTransform, useVelocity, useReducedMotion } from 'framer-motion';
 
 // Pointer hand SVG (👆 for buttons, arrows, links, clickable tools)
@@ -53,6 +54,9 @@ function ClosedHandIcon({ className = "w-4 h-4" }) {
 }
 
 export default function CustomCursor() {
+  const pathname = usePathname();
+  const isDashboard = pathname?.startsWith('/dashboard');
+
   const [mounted, setMounted] = useState(false);
   const [hoverType, setHoverType] = useState(null); // 'pointer', 'grab', 'link', 'view', 'input'
   const [hoverLabel, setHoverLabel] = useState(null);
@@ -84,17 +88,38 @@ export default function CustomCursor() {
   );
 
   const isVisibleRef = React.useRef(false);
+  const hoverTypeRef = React.useRef(hoverType);
+  const hoverLabelRef = React.useRef(hoverLabel);
+  const lastTargetRef = React.useRef(null);
 
   useEffect(() => {
     setMounted(true);
     
     // Check if device supports hover
     if (window.matchMedia('(hover: none) and (pointer: coarse)').matches) {
+      document.body.style.cursor = 'auto';
+      return;
+    }
+
+    // Never use custom cursor in dashboard
+    if (isDashboard) {
+      document.body.style.cursor = 'auto';
       return;
     }
     
     // Hide default cursor on body
     document.body.style.cursor = 'none';
+
+    const updateHoverState = (nextType, nextLabel) => {
+      if (hoverTypeRef.current !== nextType) {
+        hoverTypeRef.current = nextType;
+        setHoverType(nextType);
+      }
+      if (hoverLabelRef.current !== nextLabel) {
+        hoverLabelRef.current = nextLabel;
+        setHoverLabel(nextLabel);
+      }
+    };
 
     const moveCursor = (e) => {
       mouseX.set(e.clientX);
@@ -107,12 +132,19 @@ export default function CustomCursor() {
       const target = e.target;
       if (!target || !target.closest) return;
 
+      // Skip expensive DOM traversal if target element hasn't changed
+      if (target === lastTargetRef.current) return;
+      lastTargetRef.current = target;
+
+      let nextType = null;
+      let nextLabel = null;
+
       if (target.closest('[data-cursor="view"]')) {
-        setHoverType('view');
-        setHoverLabel('Showreel');
+        nextType = 'view';
+        nextLabel = 'Showreel';
       } else if (target.closest('[data-cursor="grab"]')) {
-        setHoverType('grab');
-        setHoverLabel('DRAG');
+        nextType = 'grab';
+        nextLabel = 'DRAG';
       } else if (
         target.closest('a') || 
         target.closest('button') || 
@@ -120,20 +152,17 @@ export default function CustomCursor() {
         target.closest('[data-cursor="pointer"]') ||
         target.closest('[role="button"]')
       ) {
-        setHoverType('pointer');
-        setHoverLabel(null);
+        nextType = 'pointer';
       } else if (
         target.tagName && (
           target.tagName.toLowerCase() === 'input' || 
           target.tagName.toLowerCase() === 'textarea'
         )
       ) {
-        setHoverType('input');
-        setHoverLabel(null);
-      } else {
-        setHoverType(null);
-        setHoverLabel(null);
+        nextType = 'input';
       }
+
+      updateHoverState(nextType, nextLabel);
     };
 
     const handleCustomCursor = (e) => {
@@ -151,11 +180,11 @@ export default function CustomCursor() {
           setIsVisible(true);
         }
       }
-      if (customHover !== undefined) {
-        setHoverType(customHover);
-      }
-      if (customLabel !== undefined) {
-        setHoverLabel(customLabel);
+      if (customHover !== undefined || customLabel !== undefined) {
+        updateHoverState(
+          customHover !== undefined ? customHover : hoverTypeRef.current,
+          customLabel !== undefined ? customLabel : hoverLabelRef.current
+        );
       }
       if (typeof isDown === 'boolean') {
         setIsMouseDown(isDown);
@@ -192,15 +221,16 @@ export default function CustomCursor() {
       document.removeEventListener('mouseleave', handleMouseLeave);
       document.removeEventListener('mouseenter', handleMouseEnter);
     };
-  }, [mouseX, mouseY, hoverType]);
+  }, [mouseX, mouseY, isDashboard]);
 
-  if (!mounted || shouldReduceMotion) return null;
+  if (!mounted || shouldReduceMotion || isDashboard) return null;
   if (typeof window !== 'undefined' && window.matchMedia('(hover: none) and (pointer: coarse)').matches) return null;
 
   // Variants for the outer cursor element
   const ringVariants = {
     default: {
       width: 36,
+      minWidth: 36,
       height: 36,
       backgroundColor: 'rgba(20, 16, 14, 0)',
       border: '1.5px solid #14100E',
@@ -210,6 +240,7 @@ export default function CustomCursor() {
     },
     pointer: {
       width: 44,
+      minWidth: 44,
       height: 44,
       backgroundColor: '#14100E',
       border: '1.5px solid rgba(244, 237, 228, 0.35)',
@@ -219,6 +250,7 @@ export default function CustomCursor() {
     },
     link: {
       width: 44,
+      minWidth: 44,
       height: 44,
       backgroundColor: '#14100E',
       border: '1.5px solid rgba(244, 237, 228, 0.35)',
@@ -238,6 +270,7 @@ export default function CustomCursor() {
     },
     view: {
       width: 84,
+      minWidth: 84,
       height: 84,
       backgroundColor: '#14100E',
       border: '0px solid #14100E',
@@ -247,6 +280,7 @@ export default function CustomCursor() {
     },
     input: {
       width: 2,
+      minWidth: 2,
       height: 24,
       backgroundColor: '#14100E',
       border: '0px solid #14100E',

@@ -91,7 +91,7 @@ export const Clapperboard3D: React.FC<Clapperboard3DProps> = ({
       isHeadless ? 1 : Math.min(window.devicePixelRatio, 2)
     );
     renderer.shadowMap.enabled = !isHeadless;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.shadowMap.type = THREE.PCFShadowMap;
 
     const width = container.clientWidth || 560;
     const height = container.clientHeight || 520;
@@ -443,13 +443,18 @@ export const Clapperboard3D: React.FC<Clapperboard3DProps> = ({
     // =========================================================================
     // 5. ANIMATION LOOP (Damped Rotation, Subtle Float, Hinge Kinematics)
     // =========================================================================
-    const clock = new THREE.Clock();
+    const startTime = performance.now();
+    let lastTime = performance.now();
     let animFrameId = 0;
+    let isVisible = false;
 
     const animate = () => {
+      if (!isVisible) return;
       animFrameId = requestAnimationFrame(animate);
-      const dt = Math.min(clock.getDelta(), 0.05);
-      const elapsed = clock.getElapsedTime();
+      const now = performance.now();
+      const dt = Math.min((now - lastTime) / 1000, 0.05);
+      lastTime = now;
+      const elapsed = (now - startTime) / 1000;
 
       if (!prefersReducedMotion) {
         // 1. Subtle floating motion
@@ -565,9 +570,21 @@ export const Clapperboard3D: React.FC<Clapperboard3DProps> = ({
       renderer.render(scene, camera);
     };
 
-    animFrameId = requestAnimationFrame(animate);
+    const visibilityObserver = new IntersectionObserver(
+      ([entry]) => {
+        const wasVisible = isVisible;
+        isVisible = entry.isIntersecting;
+        if (!wasVisible && isVisible) {
+          lastTime = performance.now();
+          animFrameId = requestAnimationFrame(animate);
+        }
+      },
+      { rootMargin: '300px 0px' }
+    );
+    visibilityObserver.observe(container);
 
     return () => {
+      visibilityObserver.disconnect();
       cancelAnimationFrame(animFrameId);
       window.removeEventListener('pointermove', handlePointerMove);
       container.removeEventListener('pointerleave', handlePointerLeave);

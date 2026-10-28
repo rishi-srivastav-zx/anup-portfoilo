@@ -38,7 +38,7 @@ export const RouteMapBoard: React.FC = () => {
                 >
                     {/* Station Node */}
                     <div
-                        className="route-dot w-4 h-4 md:w-5 md:h-5 rounded-full border-[3px] md:border-[5px] border-[#14100E] bg-white transition-all duration-500 relative z-10"
+                        className="route-dot w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 rounded-full border-[2.5px] sm:border-[3px] md:border-[5px] border-[#14100E] bg-white transition-all duration-500 relative z-10"
                         style={{
                             backgroundColor: isCompletedOrActive
                                 ? "#14100E"
@@ -50,7 +50,7 @@ export const RouteMapBoard: React.FC = () => {
                     {/* Dark Tilted Label */}
                     <div
                         aria-hidden="true"
-                        className="absolute bottom-full mb-[-4px] md:mb-0 bg-[#14100E] px-2 py-[3px] transform rotate-[-58deg] origin-bottom-left left-[50%] ml-[11px] md:ml-[15px] transition-all duration-500 opacity-60 node-label text-center font-['DM_Mono'] text-[#ECE8E1] text-[11px] md:text-[13px] uppercase font-bold"
+                        className="absolute bottom-full mb-[-2px] md:mb-0 bg-[#14100E] px-1 sm:px-1.5 md:px-2 py-[1.5px] sm:py-[2px] md:py-[3px] transform rotate-[-58deg] origin-bottom-left left-[50%] ml-[6px] sm:ml-[10px] md:ml-[15px] transition-all duration-500 opacity-60 node-label text-center font-['DM_Mono'] text-[#ECE8E1] text-[7.5px] sm:text-[9px] md:text-[13px] uppercase font-bold"
                         style={{
                             lineHeight: 1.04,
                             letterSpacing: "-0.02em",
@@ -77,7 +77,7 @@ export const RouteMapBoard: React.FC = () => {
             >
                 {/* Node */}
                 <div
-                    className="route-dot w-4 h-4 md:w-5 md:h-5 rounded-full border-[3px] md:border-[5px] border-[#14100E] bg-white transition-all duration-500 relative z-10"
+                    className="route-dot w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 md:w-5 md:h-5 rounded-full border-[2px] sm:border-[3px] md:border-[5px] border-[#14100E] bg-white transition-all duration-500 relative z-10"
                     style={{
                         backgroundColor: isCompletedOrActive
                             ? "#14100E"
@@ -89,7 +89,7 @@ export const RouteMapBoard: React.FC = () => {
                 {/* Text Below */}
                 <div
                     aria-hidden="true"
-                    className="absolute top-full mt-[-4px] md:mt-0 font-['DM_Mono'] font-bold text-[#14100E] text-[11px] md:text-[13px] opacity-80 node-label text-center transform rotate-[-58deg] origin-top-right right-[50%] mr-[11px] md:mr-[15px] uppercase"
+                    className="absolute top-full mt-[-2px] md:mt-0 font-['DM_Mono'] font-bold text-[#14100E] text-[7px] sm:text-[8.5px] md:text-[13px] opacity-80 node-label text-center transform rotate-[-58deg] origin-top-right right-[50%] mr-[6px] sm:mr-[10px] md:mr-[15px] uppercase"
                     style={{ lineHeight: 1.04, letterSpacing: "-0.02em" }}
                     dangerouslySetInnerHTML={{ __html: name }}
                 />
@@ -100,14 +100,14 @@ export const RouteMapBoard: React.FC = () => {
     return (
         <div
             id="fixed-route-board"
-            className="absolute top-[82px] right-[99px] md:top-[98px] md:right-[115px] z-[100] w-[90%] md:w-[60%] lg:w-[45%] xl:w-[50%] h-[110px] md:h-[165px] border-[4px] md:border-[5px] border-[#14100E] shadow-[8px_8px_0_rgba(20,16,14,0.3)] pointer-events-none flex flex-col items-center justify-center overflow-visible"
+            className="absolute top-[155px] sm:top-[195px] left-3 right-3 sm:left-6 sm:right-6 md:top-7 md:left-auto md:right-8 lg:right-12 z-20 w-[calc(100%-1.5rem)] sm:w-[calc(100%-3rem)] md:w-[48%] lg:w-[44%] xl:w-[40%] h-[82px] sm:h-[105px] md:h-[135px] border-[3px] md:border-[4px] border-[#14100E] shadow-[5px_5px_0_rgba(20,16,14,0.3)] md:shadow-[6px_6px_0_rgba(20,16,14,0.3)] pointer-events-none flex flex-col items-center justify-center overflow-visible"
             style={{ backgroundColor: routeBoard.boardBg || "#F4EFE6" }}
         >
             {/* Subtle Background Texture */}
             <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCI+PHBhdGggZD0iTTAgMGg0MHY0MEgweiIgZmlsbD0ibm9uZSIvPjxwYXRoIGQ9Ik0wIDBoNDB2MUgwek0wIDBoMXY0MEgwek0zOSAwaDF2NDBoLTF6IiBmaWxsPSJyZ2JhKDIwLCAxNiwgMTQsIDAuMDUpIi8+PC9zdmc+')] opacity-60 z-0" />
 
             {/* The Route Line */}
-            <div className="relative w-[85%] mx-auto h-[40px] flex items-center justify-center z-10">
+            <div className="relative w-[90%] md:w-[85%] mx-auto h-[35px] md:h-[40px] flex items-center justify-center z-10">
                 {/* Background Line */}
                 <div className="absolute left-0 right-0 h-[3px] md:h-[4px] bg-[#D8D4CC] rounded-full" />
                 {/* Active Fill Line */}

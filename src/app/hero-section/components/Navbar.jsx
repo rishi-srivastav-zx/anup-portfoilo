@@ -27,24 +27,32 @@ export default function Navbar() {
     const [isQuoteVisible, setIsQuoteVisible] = useState(true);
     const [isQuoteHovered, setIsQuoteHovered] = useState(false);
 
-    // Track live scroll percentage
+    // Track live scroll percentage with rAF throttling and deduplication
     useEffect(() => {
+        let rafId = null;
+
         const handleScroll = () => {
-            const scrollY = window.scrollY;
-            const docHeight = document.documentElement.scrollHeight;
-            const winHeight = window.innerHeight;
-            const totalScrollable = docHeight - winHeight;
+            if (rafId) return;
+            rafId = requestAnimationFrame(() => {
+                const scrollY = window.scrollY;
+                const docHeight = document.documentElement.scrollHeight;
+                const winHeight = window.innerHeight;
+                const totalScrollable = docHeight - winHeight;
 
-            setIsScrolled(scrollY > 25);
+                const nextScrolled = scrollY > 25;
+                setIsScrolled((prev) => (prev !== nextScrolled ? nextScrolled : prev));
 
-            if (totalScrollable <= 0) {
-                setScrollPercent(0);
-                return;
-            }
+                if (totalScrollable <= 0) {
+                    setScrollPercent((prev) => (prev !== 0 ? 0 : prev));
+                    rafId = null;
+                    return;
+                }
 
-            const rawProgress = (scrollY / totalScrollable) * 100;
-            const clamped = Math.min(100, Math.max(0, Math.round(rawProgress)));
-            setScrollPercent(clamped);
+                const rawProgress = (scrollY / totalScrollable) * 100;
+                const clamped = Math.min(100, Math.max(0, Math.round(rawProgress)));
+                setScrollPercent((prev) => (prev !== clamped ? clamped : prev));
+                rafId = null;
+            });
         };
 
         handleScroll();
@@ -52,6 +60,7 @@ export default function Navbar() {
         window.addEventListener("resize", handleScroll, { passive: true });
 
         return () => {
+            if (rafId) cancelAnimationFrame(rafId);
             window.removeEventListener("scroll", handleScroll);
             window.removeEventListener("resize", handleScroll);
         };

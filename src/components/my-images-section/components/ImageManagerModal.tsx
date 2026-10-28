@@ -262,7 +262,7 @@ export function ImageManagerModal() {
                                         onChange={(e) =>
                                             setImageUrl(e.target.value)
                                         }
-                                        placeholder="e.g. https://example.com/art.png or meng-to-sketchbook/marina-bay-sands.png"
+                                        placeholder="e.g. https://example.com/art.png or DSC06133.webp"
                                         className="w-full px-3 py-2 text-xs font-serif bg-[#f9f8f4] border border-[#2b2721]/20 rounded-lg focus:outline-hidden focus:border-[#2b2721] text-[#2b2721]"
                                     />
                                 </div>

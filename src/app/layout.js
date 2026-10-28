@@ -19,6 +19,7 @@ export const metadata = {
 import CustomCursor from "@/components/CustomCursor/CustomCursor";
 import BottomNav from "@/components/BottomNav/BottomNav";
 import SmoothScroll from "@/components/SmoothScroll";
+import { AuthProvider } from "@/context/AuthContext";
 
 export default function RootLayout({ children }) {
     return (
@@ -39,9 +40,11 @@ export default function RootLayout({ children }) {
                 />
             </head>
             <body className="min-h-full flex flex-col">
-                <SmoothScroll>{children}</SmoothScroll>
-                <CustomCursor />
-                <BottomNav />
+                <AuthProvider>
+                    <SmoothScroll>{children}</SmoothScroll>
+                    <CustomCursor />
+                    <BottomNav />
+                </AuthProvider>
             </body>
         </html>
     );

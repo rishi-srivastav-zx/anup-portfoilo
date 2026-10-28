@@ -171,15 +171,20 @@ export const OriginSection: React.FC = () => {
         baseOpacity = 1,
     ) => {
         if (!el) return;
-        const blur = (1 - focus) * maxBlur;
-        const opacity = (0.36 + focus * 0.64) * baseOpacity;
+        const rawBlur = (1 - focus) * maxBlur;
+        // Quantize blur to 0.2px increments for optimal GPU texture caching
+        const blur = Math.round(rawBlur * 5) / 5;
+        const opacity = (Math.round(((0.36 + focus * 0.64) * baseOpacity) * 50) / 50).toFixed(2);
+        const filterStr = blur < 0.25 ? "none" : `blur(${blur.toFixed(1)}px)`;
 
-        if (blur < 0.25) {
-            el.style.filter = "none";
-            el.style.opacity = `${baseOpacity}`;
-        } else {
-            el.style.filter = `blur(${blur.toFixed(1)}px)`;
-            el.style.opacity = `${opacity.toFixed(2)}`;
+        const elAny = el as unknown as { _fFilter?: string; _fOpacity?: string };
+        if (elAny._fFilter !== filterStr) {
+            el.style.filter = filterStr;
+            elAny._fFilter = filterStr;
+        }
+        if (elAny._fOpacity !== opacity) {
+            el.style.opacity = opacity;
+            elAny._fOpacity = opacity;
         }
     };
 
@@ -189,8 +194,8 @@ export const OriginSection: React.FC = () => {
                 typeof window !== "undefined" && window.innerWidth > 768;
             // Scale raw progress so that the entire animation finishes comfortably before unpinning
             const p = isDesktop
-                ? Math.min(1, Math.max(0, rawP / 0.93))
-                : Math.min(1, Math.max(0, rawP / 0.97));
+                ? Math.min(1, Math.max(0, rawP / 0.96))
+                : Math.min(1, Math.max(0, rawP / 0.98));
 
             // Void grain texture
             if (voidGrainRef.current) {
@@ -202,30 +207,30 @@ export const OriginSection: React.FC = () => {
             // =========================================================================
             const pathLen = unifiedPathLengthRef.current;
 
-            // Progress of line drawing: starts drawing around p=0.08, completes around p=0.88
+            // Progress of line drawing: starts drawing around p=0.08, completes around p=0.80
             let lineFraction = 0;
             if (p <= 0.08) {
                 lineFraction = 0;
-            } else if (p >= 0.88) {
+            } else if (p >= 0.80) {
                 lineFraction = 1;
             } else {
-                lineFraction = (p - 0.08) / (0.88 - 0.08);
+                lineFraction = (p - 0.08) / (0.80 - 0.08);
             }
 
             const dashOffset = (1 - lineFraction) * pathLen;
 
             // Phase E: Ending transition
-            // Line transitions smoothly from blueprint blue (#012CEB) to refined warm ivory (#FFFDF8) (p: 0.82 -> 0.90)
+            // Line transitions smoothly from blueprint blue (#012CEB) to refined warm ivory (#FFFDF8) (p: 0.76 -> 0.82)
             let currentLineColor = "#012CEB";
             const lineAlpha = 1;
 
-            if (p > 0.82 && p <= 0.9) {
-                const whiteRatio = (p - 0.82) / (0.9 - 0.82);
+            if (p > 0.76 && p <= 0.82) {
+                const whiteRatio = (p - 0.76) / (0.82 - 0.76);
                 const r = Math.round(1 + (255 - 1) * whiteRatio);
                 const g = Math.round(44 + (253 - 44) * whiteRatio);
                 const b = Math.round(235 + (248 - 235) * whiteRatio);
                 currentLineColor = `rgb(${r}, ${g}, ${b})`;
-            } else if (p > 0.9) {
+            } else if (p > 0.82) {
                 currentLineColor = "#FFFDF8";
             }
 
@@ -326,13 +331,11 @@ export const OriginSection: React.FC = () => {
                 }
             }
 
-            // Epilogue Quote settled naturally below signature
+            // Epilogue Quote settled naturally on left side of blurred diary
             if (epilogueRef.current) {
-                const eqProg = mapRange(p, 0.93, 0.98);
+                const eqProg = mapRange(p, 0.94, 0.985);
                 epilogueRef.current.style.opacity = `${eqProg.toFixed(3)}`;
-                epilogueRef.current.style.transform = isDesktop
-                    ? `translate(-50%, ${(1 - eqProg) * 8}px)`
-                    : `translateY(${(1 - eqProg) * 8}px)`;
+                epilogueRef.current.style.transform = `translateY(${(1 - eqProg) * 10}px)`;
             }
 
             // =========================================================================
@@ -403,10 +406,10 @@ export const OriginSection: React.FC = () => {
                     camRotZ = -0.5 + u * 0.5;
                     spotX = 22 + u * 14; // Spot moves to ~36%
                     spotY = 28 + u * 36; // Spot moves to ~64%
-                } else if (p < 0.7) {
+                } else if (p < 0.68) {
                     // Step 4: BLUE LINE CROSSES SPINE -> CAMERA PANS TO RIGHT PAGE
                     // Target: Top-left of Right Page ("CINEMATOGRAPHY WITH A PURPOSE" & camera sketches)
-                    const u = smootherstep((p - 0.54) / (0.7 - 0.54));
+                    const u = smootherstep((p - 0.54) / (0.68 - 0.54));
                     const s0 = 1.44;
                     const s1 = 1.46;
                     camScale = s0 + u * (s1 - s0);
@@ -417,10 +420,10 @@ export const OriginSection: React.FC = () => {
                     camRotZ = u * 0.5;
                     spotX = 36 + u * 26; // Spot moves to ~62%
                     spotY = 64 - u * 42; // Spot moves to ~22%
-                } else if (p < 0.88) {
+                } else if (p < 0.80) {
                     // Step 5: FOLLOW LINE DOWN RIGHT PAGE TO PLACES SHOT & CREATIVE NOTE
                     // Target: "// PLACES I'VE SHOT AT", skyline, "crazy what happens...", "PS//"
-                    const u = smootherstep((p - 0.7) / (0.88 - 0.7));
+                    const u = smootherstep((p - 0.68) / (0.80 - 0.68));
                     const s0 = 1.46;
                     const s1 = 1.4;
                     camScale = s0 + u * (s1 - s0);
@@ -435,7 +438,7 @@ export const OriginSection: React.FC = () => {
                     // Step 6 & 7: CINEMATIC EXIT & PULL-OUT TO DREAMY MEMORY OVERVIEW
                     // Smoothly pulls back from the bottom right to a calm, balanced overview
                     // framing the blurred diary silhouette behind the signature
-                    const u = smootherstep((p - 0.88) / (0.96 - 0.88));
+                    const u = smootherstep((p - 0.80) / (0.86 - 0.80));
                     const s0 = 1.4;
                     const s1 = 0.95;
                     camScale = s0 + u * (s1 - s0);
@@ -503,10 +506,10 @@ export const OriginSection: React.FC = () => {
                     camRotZ = -0.3 + u * 0.3;
                     spotX = 24 + u * 16;
                     spotY = 30 + u * 34;
-                } else if (p < 0.7) {
+                } else if (p < 0.68) {
                     // Step 4: BLUE LINE CROSSES SPINE -> SMOOTH CAMERA GLIDE ACROSS TO RIGHT PAGE
                     // Spine glides through the viewport smoothly, landing on Right Page top-left
-                    const u = smootherstep((p - 0.54) / (0.7 - 0.54));
+                    const u = smootherstep((p - 0.54) / (0.68 - 0.54));
                     const s0 = 1.04 * mf;
                     const s1 = 1.08 * mf;
                     camScale = s0 + u * (s1 - s0);
@@ -517,9 +520,9 @@ export const OriginSection: React.FC = () => {
                     camRotZ = u * 0.4;
                     spotX = 40 + u * 24;
                     spotY = 64 - u * 42;
-                } else if (p < 0.88) {
+                } else if (p < 0.80) {
                     // Step 5: Follow line down Right Page to "// PLACES I'VE SHOT AT" and notes
-                    const u = smootherstep((p - 0.7) / (0.88 - 0.7));
+                    const u = smootherstep((p - 0.68) / (0.80 - 0.68));
                     const s0 = 1.08 * mf;
                     const s1 = 1.02 * mf;
                     camScale = s0 + u * (s1 - s0);
@@ -532,7 +535,7 @@ export const OriginSection: React.FC = () => {
                     spotY = 22 + u * 34;
                 } else {
                     // Step 6 & 7: Cinematic Exit & Pull-Out to Center Signature
-                    const u = smootherstep((p - 0.88) / (0.96 - 0.88));
+                    const u = smootherstep((p - 0.80) / (0.86 - 0.80));
                     const s0 = 1.02 * mf;
                     const s1 = 0.58 * mf; // Pulls back to frame the signature with generous margins
                     camScale = s0 + u * (s1 - s0);
@@ -561,7 +564,7 @@ export const OriginSection: React.FC = () => {
                 );
                 const baseSpot = p < 0.18 ? 0.95 : 0.85;
                 const exitSpotFade =
-                    p > 0.88 ? 1 - smootherstep((p - 0.88) / 0.08) : 1;
+                    p > 0.80 ? 1 - smootherstep((p - 0.80) / 0.07) : 1;
                 spotlightRef.current.style.opacity = `${(baseSpot * exitSpotFade).toFixed(2)}`;
             }
 
@@ -575,9 +578,9 @@ export const OriginSection: React.FC = () => {
             const fHeadline = calcZoneFocus(p, 0.12, 0.18, 0.34, 0.4);
             const fCuriosity = calcZoneFocus(p, 0.28, 0.34, 0.52, 0.58);
             const fOperatorPolaroid = calcZoneFocus(p, 0.3, 0.36, 0.52, 0.58);
-            const fCinematography = calcZoneFocus(p, 0.5, 0.56, 0.68, 0.74);
-            const fPlaces = calcZoneFocus(p, 0.66, 0.7, 0.82, 0.88);
-            const fSignature = calcZoneFocus(p, 0.8, 0.84, 0.92, 0.96);
+            const fCinematography = calcZoneFocus(p, 0.5, 0.56, 0.66, 0.72);
+            const fPlaces = calcZoneFocus(p, 0.66, 0.7, 0.78, 0.82);
+            const fSignature = calcZoneFocus(p, 0.8, 0.84, 0.94, 0.98);
 
             // Page-Level Depth of Field (Left Page vs Right Page defocus)
             let leftPageFocus = 1;
@@ -640,57 +643,58 @@ export const OriginSection: React.FC = () => {
             // Notebook Content Blur (STRICTLY CONTAINED INSIDE DIARY):
             // The inner diary content (pages, textures, sketches, cutout, spine) smoothly becomes heavily blurred
             // starting at 8-10px and increasing up to 18-22px, while the outer page and UI remain 100% sharp!
+            // Notebook Content Blur (STRICTLY CONTAINED INSIDE DIARY):
+            // The inner diary content (pages, textures, sketches, cutout, spine) smoothly becomes heavily blurred
+            // starting at 8-10px and increasing up to 18-22px, while the outer page and UI remain 100% sharp!
             if (diaryContentRef.current) {
-                if (p <= 0.88) {
-                    diaryContentRef.current.style.filter = "none";
-                    diaryContentRef.current.style.opacity = "1";
+                const elDiary = diaryContentRef.current as unknown as { _lastFilter?: string; _lastOpacity?: string };
+                if (p <= 0.80) {
+                    if (elDiary._lastFilter !== "none") {
+                        diaryContentRef.current.style.filter = "none";
+                        diaryContentRef.current.style.opacity = "1";
+                        elDiary._lastFilter = "none";
+                        elDiary._lastOpacity = "1";
+                    }
                 } else {
-                    const blurProg = smootherstep((p - 0.88) / (0.96 - 0.88));
+                    const blurProg = smootherstep((p - 0.80) / (0.87 - 0.80));
                     const maxExitBlur = isDesktop ? 22 : 16;
-                    const curBlur = 8 + blurProg * (maxExitBlur - 8);
-                    const curOpacity = 1 - blurProg * 0.08; // Preserves creamy paper appearance beneath blur
-                    diaryContentRef.current.style.filter = `blur(${curBlur.toFixed(1)}px) saturate(${(1 - blurProg * 0.15).toFixed(2)}) brightness(${(1 + blurProg * 0.04).toFixed(2)})`;
-                    diaryContentRef.current.style.opacity = `${curOpacity.toFixed(2)}`;
+                    const curBlur = Math.round((8 + blurProg * (maxExitBlur - 8)) * 4) / 4;
+                    const curOpacity = (Math.round((1 - blurProg * 0.08) * 50) / 50).toFixed(2);
+                    const filterStr = `blur(${curBlur.toFixed(1)}px) saturate(${(1 - blurProg * 0.15).toFixed(2)}) brightness(${(1 + blurProg * 0.04).toFixed(2)})`;
+                    
+                    if (elDiary._lastFilter !== filterStr) {
+                        diaryContentRef.current.style.filter = filterStr;
+                        elDiary._lastFilter = filterStr;
+                    }
+                    if (elDiary._lastOpacity !== curOpacity) {
+                        diaryContentRef.current.style.opacity = curOpacity;
+                        elDiary._lastOpacity = curOpacity;
+                    }
                 }
-            }
-
-            // Notebook container itself is NOT blurred (keeps transforms clean and outer page sharp)
-            if (notebookRef.current) {
-                notebookRef.current.style.filter = "none";
-                notebookRef.current.style.opacity = "1";
             }
 
             // =========================================================================
             // 5. PHASE E: CINEMATIC BLUE DIARY EXIT & ANIMATED SIGNATURE REVEAL
             // =========================================================================
 
-            // A. Keep surrounding section background steady & sharp (never blur outside)
-            if (containerRef.current) {
-                containerRef.current.style.backgroundColor = "#E6DDD2";
-            }
-
             // B. Blue Atmosphere Wash Overlay (Inside diary only)
             if (blueAtmosphereRef.current) {
-                if (p <= 0.88) {
+                if (p <= 0.80) {
                     blueAtmosphereRef.current.style.opacity = "0";
                 } else {
-                    const washProg = smootherstep((p - 0.88) / (0.95 - 0.88));
+                    const washProg = smootherstep((p - 0.80) / (0.86 - 0.80));
                     blueAtmosphereRef.current.style.opacity = `${(washProg * 0.85).toFixed(3)}`;
                 }
             }
 
-            if (darkThemeRef.current) {
-                darkThemeRef.current.style.opacity = "0";
-            }
-
             // C. Grand Signature Overlay Container Opacity
             if (grandSignatureOverlayRef.current) {
-                const overOp = mapRange(p, 0.89, 0.93);
+                const overOp = mapRange(p, 0.81, 0.85);
                 grandSignatureOverlayRef.current.style.opacity = `${overOp.toFixed(3)}`;
             }
 
-            // D. Animated White Curved Guide Line (p: 0.90 -> 0.932)
-            const pCurve = mapRange(p, 0.9, 0.932);
+            // D. Animated White Curved Guide Line (p: 0.835 -> 0.875)
+            const pCurve = mapRange(p, 0.835, 0.875);
             if (whiteGuideLineRef.current && lenGuideCurveRef.current) {
                 const len = lenGuideCurveRef.current;
                 whiteGuideLineRef.current.style.strokeDashoffset = `${((1 - pCurve) * len).toFixed(2)}px`;
@@ -722,8 +726,8 @@ export const OriginSection: React.FC = () => {
             }
 
             // E. Bespoke Cinematic "Anup Rawat" Signature Handwriting Animation
-            // 1. "Anup" cursive stroke: p: 0.930 -> 0.954
-            const pAnup = mapRange(p, 0.93, 0.954);
+            // 1. "Anup" cursive stroke: p: 0.875 -> 0.920 (Deliberate, slow, elegant handwriting pace)
+            const pAnup = mapRange(p, 0.875, 0.920);
             if (sigMainAnupRef.current && lenSigAnupRef.current) {
                 const dash = (1 - pAnup) * lenSigAnupRef.current;
                 sigMainAnupRef.current.style.strokeDashoffset = `${dash.toFixed(2)}px`;
@@ -732,8 +736,8 @@ export const OriginSection: React.FC = () => {
                 }
             }
 
-            // 2. "Rawat" cursive stroke: p: 0.954 -> 0.974
-            const pRawat = mapRange(p, 0.954, 0.974);
+            // 2. "Rawat" cursive stroke: p: 0.925 -> 0.965 (Silky, flowing handwriting pace)
+            const pRawat = mapRange(p, 0.925, 0.965);
             if (sigMainRawatRef.current && lenSigRawatRef.current) {
                 const dash = (1 - pRawat) * lenSigRawatRef.current;
                 sigMainRawatRef.current.style.strokeDashoffset = `${dash.toFixed(2)}px`;
@@ -742,8 +746,8 @@ export const OriginSection: React.FC = () => {
                 }
             }
 
-            // 3. Sweeping Underline Flourish: p: 0.972 -> 0.988
-            const pUnderline = mapRange(p, 0.972, 0.988);
+            // 3. Sweeping Underline Flourish: p: 0.962 -> 0.982
+            const pUnderline = mapRange(p, 0.962, 0.982);
             if (sigUnderlineRef.current && lenSigUnderlineRef.current) {
                 const dash = (1 - pUnderline) * lenSigUnderlineRef.current;
                 sigUnderlineRef.current.style.strokeDashoffset = `${dash.toFixed(2)}px`;
@@ -752,8 +756,8 @@ export const OriginSection: React.FC = () => {
                 }
             }
 
-            // 4. 't' Crossbar flick: p: 0.987 -> 0.995
-            const pCross = mapRange(p, 0.987, 0.995);
+            // 4. 't' Crossbar flick: p: 0.980 -> 0.992
+            const pCross = mapRange(p, 0.980, 0.992);
             if (sigMainCrossRef.current && lenSigCrossRefRef.current) {
                 const dash = (1 - pCross) * lenSigCrossRefRef.current;
                 sigMainCrossRef.current.style.strokeDashoffset = `${dash.toFixed(2)}px`;
@@ -764,13 +768,13 @@ export const OriginSection: React.FC = () => {
 
             // 5. Luminous Artist Pen Tip (Active Drawing Flare tracking the live pen point)
             if (sigPenTipRef.current) {
-                if (p >= 0.93 && p < 0.996) {
+                if (p >= 0.875 && p < 0.994) {
                     let px = 135;
                     let py = 238;
                     let penOp = 1;
 
                     if (
-                        p < 0.954 &&
+                        p < 0.920 &&
                         sigMainAnupRef.current &&
                         lenSigAnupRef.current
                     ) {
@@ -780,16 +784,16 @@ export const OriginSection: React.FC = () => {
                             );
                             px = pt.x;
                             py = pt.y;
-                            penOp = Math.min(1, (p - 0.93) / 0.004);
+                            penOp = Math.min(1, (p - 0.875) / 0.005);
                         } catch (_) {}
-                    } else if (p < 0.956) {
-                        // Air glide from 'p' exit flick to 'R' start
-                        const tAir = (p - 0.954) / 0.002;
+                    } else if (p < 0.925) {
+                        // Air glide from 'p' exit flick (488, 206) to 'R' start (522, 105)
+                        const tAir = (p - 0.920) / (0.925 - 0.920);
                         px = 488 + tAir * (522 - 488);
                         py = 206 + tAir * (105 - 206);
                         penOp = 0.85;
                     } else if (
-                        p < 0.974 &&
+                        p < 0.965 &&
                         sigMainRawatRef.current &&
                         lenSigRawatRef.current
                     ) {
@@ -802,7 +806,7 @@ export const OriginSection: React.FC = () => {
                             penOp = 1;
                         } catch (_) {}
                     } else if (
-                        p < 0.988 &&
+                        p < 0.982 &&
                         sigUnderlineRef.current &&
                         lenSigUnderlineRef.current
                     ) {
@@ -815,7 +819,7 @@ export const OriginSection: React.FC = () => {
                             penOp = 1;
                         } catch (_) {}
                     } else if (
-                        p < 0.996 &&
+                        p < 0.994 &&
                         sigMainCrossRef.current &&
                         lenSigCrossRefRef.current
                     ) {
@@ -825,7 +829,7 @@ export const OriginSection: React.FC = () => {
                             );
                             px = pt.x;
                             py = pt.y;
-                            penOp = 1 - Math.max(0, (p - 0.992) / 0.004);
+                            penOp = 1 - Math.max(0, (p - 0.988) / 0.006);
                         } catch (_) {}
                     }
 
@@ -841,18 +845,18 @@ export const OriginSection: React.FC = () => {
 
             // 6. Subtle Glow Intensity Bloom during final flourish settling into stable elegance
             if (sigGlowGroupRef.current) {
-                if (p < 0.93) {
+                if (p < 0.875) {
                     sigGlowGroupRef.current.style.opacity = "0";
-                } else if (p < 0.974) {
-                    sigGlowGroupRef.current.style.opacity = "0.55";
-                } else if (p < 0.988) {
-                    // Flourish bloom
-                    const bloomProg = (p - 0.974) / 0.014;
-                    sigGlowGroupRef.current.style.opacity = `${(0.55 + bloomProg * 0.18).toFixed(2)}`;
+                } else if (p < 0.965) {
+                    sigGlowGroupRef.current.style.opacity = "0.58";
+                } else if (p < 0.982) {
+                    // Flourish bloom during sweeping underline
+                    const bloomProg = (p - 0.965) / 0.017;
+                    sigGlowGroupRef.current.style.opacity = `${(0.58 + bloomProg * 0.22).toFixed(2)}`;
                 } else {
                     // Settling into calm, luminous permanence
-                    const settleProg = Math.min(1, (p - 0.988) / 0.012);
-                    sigGlowGroupRef.current.style.opacity = `${(0.73 - settleProg * 0.15).toFixed(2)}`;
+                    const settleProg = Math.min(1, (p - 0.982) / 0.015);
+                    sigGlowGroupRef.current.style.opacity = `${(0.80 - settleProg * 0.16).toFixed(2)}`;
                 }
             }
         },
@@ -860,17 +864,17 @@ export const OriginSection: React.FC = () => {
     );
 
     useEffect(() => {
-        let animId: number;
         lastTimeRef.current = performance.now();
 
-        const tick = (now: number) => {
+        const tick = () => {
+            const now = performance.now();
             const dt = Math.min((now - lastTimeRef.current) / 1000, 0.033);
             lastTimeRef.current = now;
 
             const diff = targetProgressRef.current - progressRef.current;
 
-            if (Math.abs(diff) > 0.00001) {
-                const decayRate = targetProgressRef.current > 0.9 ? 18.0 : 12.0;
+            if (Math.abs(diff) > 0.0001) {
+                const decayRate = targetProgressRef.current > 0.85 ? 18.0 : 16.0;
                 const factor = 1 - Math.exp(-decayRate * dt);
                 progressRef.current += diff * factor;
                 updateVisuals(progressRef.current);
@@ -878,12 +882,12 @@ export const OriginSection: React.FC = () => {
                 progressRef.current = targetProgressRef.current;
                 updateVisuals(progressRef.current);
             }
-
-            animId = requestAnimationFrame(tick);
         };
 
-        animId = requestAnimationFrame(tick);
-        return () => cancelAnimationFrame(animId);
+        gsap.ticker.add(tick);
+        return () => {
+            gsap.ticker.remove(tick);
+        };
     }, [updateVisuals]);
 
     // SVG Path length initialization
@@ -979,10 +983,10 @@ export const OriginSection: React.FC = () => {
             start: "top top",
             end: () =>
                 isMobile
-                    ? `+=${Math.max(window.innerHeight * 2.2, 1600)}`
-                    : `+=${Math.max(window.innerHeight * 3.6, 2700)}`,
+                    ? `+=${Math.max(window.innerHeight * 5.5, 4200)}`
+                    : `+=${Math.max(window.innerHeight * 8.5, 7200)}`,
             pinSpacing: true,
-            anticipatePin: 1,
+            anticipatePin: 0,
             invalidateOnRefresh: true,
             onUpdate: (self) => {
                 targetProgressRef.current = self.progress;
@@ -1933,53 +1937,61 @@ export const OriginSection: React.FC = () => {
                                     opacity="0"
                                     className="pointer-events-none"
                                 >
+                                    {/* Outer ethereal cyan bloom */}
                                     <circle
-                                        r="8.5"
-                                        fill="#60A5FA"
-                                        opacity="0.45"
+                                        r="13"
+                                        fill="#38BDF8"
+                                        opacity="0.32"
                                         filter="url(#sig-pen-flare)"
                                     />
+                                    {/* Mid luminous cobalt glow */}
                                     <circle
-                                        r="4.2"
-                                        fill="#E2EFFF"
-                                        opacity="0.85"
+                                        r="7.5"
+                                        fill="#60A5FA"
+                                        opacity="0.75"
                                         filter="url(#white-curve-glow)"
                                     />
-                                    <circle r="2.2" fill="#FFFFFF" />
+                                    {/* Diamond white pen nib point */}
+                                    <circle
+                                        r="3.4"
+                                        fill="#FFFFFF"
+                                        opacity="0.95"
+                                    />
+                                    <circle r="1.6" fill="#FFFFFF" />
                                 </g>
                             </svg>
                         </div>
-                    </div>
-                </div>
-                </div>
 
-                {/* Epilogue Quote settled gracefully on the warm desk beneath the notebook spread */}
-                <div
-                    id="epilogue-quote"
-                    ref={epilogueRef}
-                    className="relative md:absolute md:bottom-4 md:left-1/2 mt-3 md:mt-0 text-center pointer-events-none z-[165] w-full max-w-[500px] px-4 opacity-0 transition-opacity duration-500"
-                >
-                    <p className="font-schoolbell text-xs md:text-sm text-[#14100E]/85 leading-relaxed mb-0.5 px-4 drop-shadow-sm">
-                        “If I ever write a book on how I see creativity, it will
-                        have infinite pages. And I'll still be figuring it out.”
-                    </p>
-                    <div className="flex flex-col items-center justify-center gap-1">
-                        <span className="text-[9px] font-dm-mono text-[#012CEB] tracking-[0.25em] uppercase font-bold">
-                            CHAPTER 01 // ORIGIN COMPLETE
-                        </span>
-                        <div className="flex items-center gap-1.5 opacity-55 text-[8px] font-dm-mono tracking-[0.2em] uppercase text-[#14100E]/70 mt-0.5">
-                            <span>Scroll for Chapter 02</span>
-                            <svg
-                                className="w-2.5 h-2.5 animate-bounce"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2.5"
-                            >
-                                <path d="M7 10l5 5 5-5" />
-                            </svg>
+                        {/* Epilogue Quote settled on the left side of the blurred diary */}
+                        <div
+                            id="epilogue-quote"
+                            ref={epilogueRef}
+                            className="absolute bottom-5 left-5 sm:bottom-7 sm:left-8 md:bottom-8 md:left-10 lg:bottom-10 lg:left-12 max-w-[280px] sm:max-w-[340px] md:max-w-[420px] text-left pointer-events-none z-[160] opacity-0"
+                        >
+                            <p className="font-schoolbell text-[11px] sm:text-xs md:text-sm lg:text-[15px] text-[#14100E]/90 leading-snug sm:leading-relaxed mb-1.5 md:mb-2 drop-shadow-[0_1px_2px_rgba(255,255,255,0.7)]">
+                                “If I ever write a book on how I see creativity, it will
+                                have infinite pages. And I'll still be figuring it out.”
+                            </p>
+                            <div className="flex flex-col items-start gap-1">
+                                <span className="text-[8.5px] sm:text-[9px] md:text-[10px] font-dm-mono text-[#012CEB] tracking-[0.25em] uppercase font-bold drop-shadow-[0_1px_2px_rgba(255,255,255,0.6)]">
+                                    CHAPTER 01 // ORIGIN COMPLETE
+                                </span>
+                                <div className="flex items-center gap-1.5 opacity-65 text-[7.5px] sm:text-[8px] md:text-[9px] font-dm-mono tracking-[0.2em] uppercase text-[#14100E]/80 mt-0.5">
+                                    <span>Scroll for Chapter 02</span>
+                                    <svg
+                                        className="w-2.5 h-2.5 animate-bounce text-[#012CEB]"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="2.5"
+                                    >
+                                        <path d="M7 10l5 5 5-5" />
+                                    </svg>
+                                </div>
+                            </div>
                         </div>
                     </div>
+                </div>
                 </div>
 
                 {/* Seamless gradient floor connecting into Chapter 02 */}

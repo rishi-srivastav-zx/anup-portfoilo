@@ -138,8 +138,11 @@ html.lenis, html.lenis body {
   overflow: hidden;
 }
 
-.lenis.lenis-smooth iframe {
-  pointer-events: none;
+/* When actively scrolling with Lenis, prevent iframes from capturing pointer/wheel events */
+html.lenis-scrolling iframe,
+body.lenis-scrolling iframe,
+.lenis-scrolling iframe {
+  pointer-events: none !important;
 }
 
 
@@ -155,7 +158,6 @@ html.lenis, html.lenis body {
   }
 
   html {
-    scroll-behavior: smooth;
     overflow-x: hidden;
   }
 

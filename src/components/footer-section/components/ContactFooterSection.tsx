@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { Clapperboard3D } from './Clapperboard3D';
 import {
   CinematographyTakeStill,
@@ -423,8 +424,8 @@ export const ContactFooterSection: React.FC = () => {
                   )}
                 </div>
 
-                {/* Submit Button: Send Message ↗ */}
-                <div className="pt-1">
+                {/* Submit Button & Login Link */}
+                <div className="pt-1 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <button
                     type="submit"
                     className="group relative inline-flex items-center justify-center gap-2.5 w-full sm:w-auto min-w-[200px] px-8 py-3.5 rounded-xl bg-[#14100E] hover:bg-[#012CEB] active:bg-[#0022b8] text-[#F4EDE4] font-semibold text-sm sm:text-base tracking-wide transition-all duration-200 shadow-[0_8px_24px_rgba(20,16,14,0.18)] hover:shadow-[0_10px_28px_rgba(1,44,235,0.3)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#012CEB] whitespace-nowrap shrink-0 cursor-pointer"
@@ -437,6 +438,17 @@ export const ContactFooterSection: React.FC = () => {
                       ↗
                     </span>
                   </button>
+
+                  <Link
+                    href="/login-page"
+                    className="inline-flex items-center gap-1.5 text-xs font-medium text-[#6B625A] hover:text-[#012CEB] transition-colors group"
+                  >
+                    <span>Client Portal</span>
+                    <span className="underline underline-offset-2 font-semibold text-[#14100E] group-hover:text-[#012CEB]">
+                      Login Page
+                    </span>
+                    <span className="transition-transform group-hover:translate-x-0.5">→</span>
+                  </Link>
                 </div>
               </form>
             </div>
@@ -444,21 +456,29 @@ export const ContactFooterSection: React.FC = () => {
         </div>
       </section>
 
-      {/* BOTTOM FOOTER — ELEGANT THEMED STRIP (Zero Navigation Links) */}
+      {/* BOTTOM FOOTER — ELEGANT THEMED STRIP */}
       <footer
         aria-label="Site footer"
         className="w-full bg-[#DDD3C5] text-[#14100E] border-t border-[#14100E]/15 px-6 sm:px-10 lg:px-16 xl:px-24 py-10 sm:py-12"
       >
         <div className="max-w-[1440px] mx-auto flex flex-col sm:flex-row items-start sm:items-end justify-between gap-8">
-          {/* Left Side: Editorial Sign-Off & Copyright */}
+          {/* Left Side: Editorial Sign-Off, Copyright & Login Redirect */}
           <div className="space-y-4">
             <div className="text-lg sm:text-xl font-medium tracking-tight text-[#14100E] leading-snug">
               <p>Thanks for stopping by.</p>
               <p className="text-[#6B625A]">Keep creating.</p>
             </div>
-            <p className="text-xs sm:text-sm text-[#6B625A] font-normal">
-              © 2026 Anup Rawat. All rights reserved.
-            </p>
+            <div className="flex flex-wrap items-center gap-3 text-xs sm:text-sm text-[#6B625A] font-normal">
+              <span>© 2026 Anup Rawat. All rights reserved.</span>
+              <span className="opacity-40">•</span>
+              <Link
+                href="/login-page"
+                className="inline-flex items-center gap-1.5 text-[#14100E] font-medium hover:text-[#012CEB] transition-colors underline underline-offset-4 decoration-[#14100E]/30 hover:decoration-[#012CEB]"
+              >
+                <span>Client Portal / Login</span>
+                <span className="text-xs">↗</span>
+              </Link>
+            </div>
           </div>
 
           {/* Right Side: Handwritten Signature-Style Brand (Anup Rawat / (Baaz)) */}

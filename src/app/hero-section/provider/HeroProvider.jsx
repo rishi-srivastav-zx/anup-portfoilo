@@ -14,25 +14,51 @@ export const HeroProvider = ({ children, config }) => {
   });
 
   useEffect(() => {
-    const handleMouseMove = (e) => {
+    let rafId = null;
+    let latestE = null;
+    let lastX = 0;
+    let lastY = 0;
+
+    const onTick = () => {
+      if (!latestE) return;
       // Normalize mouse position between -1 and 1 for parallax
-      const x = (e.clientX / window.innerWidth) * 2 - 1;
-      const y = (e.clientY / window.innerHeight) * 2 - 1;
-      setMousePosition(prev => ({ 
-        ...prev, 
-        x, 
-        y, 
-        clientX: e.clientX, 
-        clientY: e.clientY 
-      }));
+      const x = (latestE.clientX / window.innerWidth) * 2 - 1;
+      const y = (latestE.clientY / window.innerHeight) * 2 - 1;
+      
+      // Deadband check: only trigger React update if motion is perceptible (> 0.008)
+      if (Math.abs(x - lastX) > 0.008 || Math.abs(y - lastY) > 0.008) {
+        lastX = x;
+        lastY = y;
+        setMousePosition(prev => ({ 
+          ...prev, 
+          x, 
+          y, 
+          clientX: latestE.clientX, 
+          clientY: latestE.clientY 
+        }));
+      }
+      rafId = null;
     };
 
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
+    const handleMouseMove = (e) => {
+      latestE = e;
+      if (!rafId) {
+        rafId = requestAnimationFrame(onTick);
+      }
+    };
+
+    window.addEventListener('mousemove', handleMouseMove, { passive: true });
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      if (rafId) cancelAnimationFrame(rafId);
+    };
   }, []);
 
   const setHoveringPortrait = (isHovering) => {
-    setMousePosition(prev => ({ ...prev, isHoveringPortrait: isHovering }));
+    setMousePosition(prev => {
+      if (prev.isHoveringPortrait === isHovering) return prev;
+      return { ...prev, isHoveringPortrait: isHovering };
+    });
   };
 
   return (

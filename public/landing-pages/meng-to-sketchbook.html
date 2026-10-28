@@ -97,20 +97,18 @@
                 inset: 0;
                 z-index: -2;
                 pointer-events: none;
-                background: url(meng-to-sketchbook/bg-wash.jpg) center top /
+                background: url(meng-to-sketchbook/bg-wash.jpg) center center /
                     cover no-repeat;
-                opacity: 0.85;
+                opacity: 0.95;
             }
             .wash:after {
                 content: "";
                 position: absolute;
                 inset: 0;
-                background: linear-gradient(
-                    180deg,
-                    var(--paper) 0%,
-                    rgba(230, 221, 210, 0.35) 15%,
-                    rgba(230, 221, 210, 0.72) 58%,
-                    var(--paper) 88%
+                background: radial-gradient(
+                    ellipse at center,
+                    rgba(230, 221, 210, 0.2) 0%,
+                    rgba(230, 221, 210, 0) 70%
                 );
             }
 
@@ -381,21 +379,18 @@
                 touch-action: pan-y;
             }
             .sb-arrow {
-                flex: none;
-                display: inline-flex;
-                align-items: center;
-                justify-content: center;
-                padding: 6px 2px;
-                border: 0;
-                background: transparent;
-                color: var(--ink-faint);
-                cursor: pointer;
-                transition: color 0.2s;
-                -webkit-tap-highlight-color: transparent;
-                z-index: 8;
+                display: none !important;
+                visibility: hidden !important;
+                pointer-events: none !important;
+                opacity: 0 !important;
+                width: 0 !important;
+                height: 0 !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                overflow: hidden !important;
             }
             .sb-arrow:hover {
-                color: var(--ink);
+                display: none !important;
             }
 
             /* The box is the book's own untransformed frame: the loupe lives here, on
@@ -476,55 +471,112 @@
             .sb-full {
                 position: absolute;
                 inset: 0;
+                overflow: hidden;
+                border-radius: 6px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.22), 0 2px 6px rgba(0, 0, 0, 0.12);
+                background: #f5efe6;
             }
             .sb-full img {
                 width: 100%;
-                height: auto;
+                height: 100%;
+                object-fit: cover;
                 display: block;
+            }
+            /* Realistic book gutter / spine fold shadow down the center */
+            .sb-full::after {
+                content: "";
+                position: absolute;
+                inset: 0;
+                pointer-events: none;
+                background: linear-gradient(
+                    90deg,
+                    rgba(0, 0, 0, 0.04) 0%,
+                    rgba(0, 0, 0, 0) 4%,
+                    rgba(0, 0, 0, 0) 46%,
+                    rgba(25, 18, 10, 0.16) 49.5%,
+                    rgba(15, 10, 5, 0.28) 50%,
+                    rgba(25, 18, 10, 0.16) 50.5%,
+                    rgba(0, 0, 0, 0) 54%,
+                    rgba(0, 0, 0, 0) 96%,
+                    rgba(0, 0, 0, 0.04) 100%
+                );
+                box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08);
             }
             .sb-half {
                 position: absolute;
                 top: 0;
                 bottom: 0;
                 width: 50%;
-                overflow-x: clip;
-                overflow-y: visible;
+                overflow: hidden;
             }
             .sb-half.left {
                 left: 0;
+                border-radius: 6px 0 0 6px;
             }
             .sb-half.right {
                 left: 50%;
+                border-radius: 0 6px 6px 0;
             }
             .sb-half-img {
-                width: 200%;
+                position: absolute;
+                top: 0;
+                width: var(--bw, 100%);
+                height: 100%;
+                object-fit: cover;
                 max-width: none;
-                height: auto;
                 display: block;
             }
+            .sb-half.left .sb-half-img,
+            .sb-half-img.left {
+                left: 0;
+            }
+            .sb-half.right .sb-half-img,
             .sb-half-img.right {
-                margin-left: -100%;
+                left: calc(-0.5 * var(--bw, 100%));
+                margin-left: 0;
+            }
+            .sb-half.left::after {
+                content: "";
+                position: absolute;
+                top: 0;
+                bottom: 0;
+                right: 0;
+                width: 25px;
+                pointer-events: none;
+                background: linear-gradient(90deg, transparent, rgba(15, 10, 5, 0.22));
+                z-index: 5;
+            }
+            .sb-half.right::after {
+                content: "";
+                position: absolute;
+                top: 0;
+                bottom: 0;
+                left: 0;
+                width: 25px;
+                pointer-events: none;
+                background: linear-gradient(90deg, rgba(15, 10, 5, 0.22), transparent);
+                z-index: 5;
             }
             /* the shadow the lifting leaf throws onto the page beneath it */
             .gutter-shade {
                 position: absolute;
-                top: var(--pg, 21.8%);
-                bottom: var(--pg, 21.8%);
-                width: 46%;
+                top: 0;
+                bottom: 0;
+                width: 50%;
                 pointer-events: none;
                 opacity: calc(var(--shade, 0) * 0.62);
                 -webkit-mask-image: linear-gradient(
                     180deg,
                     transparent 0,
-                    #000 5.2%,
-                    #000 94.8%,
+                    #000 2%,
+                    #000 98%,
                     transparent 100%
                 );
                 mask-image: linear-gradient(
                     180deg,
                     transparent 0,
-                    #000 5.2%,
-                    #000 94.8%,
+                    #000 2%,
+                    #000 98%,
                     transparent 100%
                 );
             }
@@ -601,7 +653,7 @@
                 backface-visibility: hidden;
                 -webkit-backface-visibility: hidden;
                 background-repeat: no-repeat;
-                background-size: var(--bw, 0px) auto;
+                background-size: var(--bw, 0px) 100%;
             }
             .face.back {
                 transform: rotateY(180deg);
@@ -658,8 +710,8 @@
                 position: absolute;
                 left: 0;
                 right: 0;
-                top: var(--pg, 21.8%);
-                bottom: var(--pg, 21.8%);
+                top: 0;
+                bottom: 0;
                 pointer-events: none;
             }
             .curl.next .face.front .sh,
@@ -682,8 +734,8 @@
                 position: absolute;
                 left: 0;
                 right: 0;
-                top: var(--pg, 21.8%);
-                bottom: var(--pg, 21.8%);
+                top: 0;
+                bottom: 0;
                 pointer-events: none;
                 background: #fffaf0;
                 opacity: calc(
@@ -951,6 +1003,142 @@
                 width: 50%;
             }
 
+            /* ---- Right-side Turn Indicator & Page Cue ---- */
+            .sb-turn-cue {
+                position: absolute;
+                right: 18px;
+                top: 50%;
+                transform: translateY(-50%);
+                z-index: 68;
+                pointer-events: auto;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                transition: opacity 0.28s ease, transform 0.22s ease;
+                user-select: none;
+            }
+            .sb-turn-cue.hidden {
+                opacity: 0;
+                pointer-events: none;
+            }
+            .cue-pill {
+                display: inline-flex;
+                align-items: center;
+                gap: 7px;
+                padding: 7px 14px;
+                border-radius: 999px;
+                background: rgba(255, 252, 246, 0.94);
+                border: 1px solid rgba(43, 39, 33, 0.16);
+                box-shadow: 
+                    0 4px 18px rgba(43, 39, 33, 0.18),
+                    0 1px 3px rgba(0, 0, 0, 0.08);
+                backdrop-filter: blur(12px);
+                -webkit-backdrop-filter: blur(12px);
+                color: var(--ink);
+                font-family: var(--font);
+                font-size: 11.5px;
+                letter-spacing: 0.08em;
+                animation: cueBreathe 2.4s ease-in-out infinite;
+                transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+            }
+            .cue-pill:hover {
+                background: #ffffff;
+                box-shadow: 
+                    0 6px 22px rgba(43, 39, 33, 0.28),
+                    0 2px 8px rgba(0, 0, 0, 0.14);
+                transform: translateX(4px);
+            }
+            .cue-dot {
+                width: 6px;
+                height: 6px;
+                border-radius: 50%;
+                background: #012ceb;
+                box-shadow: 0 0 8px rgba(1, 44, 235, 0.8);
+                animation: cueDotPulse 1.8s ease-in-out infinite;
+            }
+            .cue-text {
+                font-weight: 600;
+                font-size: 10.5px;
+                letter-spacing: 0.14em;
+                text-transform: uppercase;
+                color: var(--ink);
+            }
+            .cue-page-num {
+                font-size: 10px;
+                opacity: 0.65;
+                letter-spacing: 0.08em;
+                padding-left: 5px;
+                border-left: 1px solid rgba(43, 39, 33, 0.18);
+                font-variant-numeric: tabular-nums;
+            }
+            .cue-arrow {
+                width: 13px;
+                height: 13px;
+                color: #012ceb;
+                display: block;
+                transition: transform 0.2s ease;
+            }
+            .cue-pill:hover .cue-arrow {
+                transform: translateX(3px);
+            }
+            /* Dog-ear page curl corner at bottom right */
+            .sb-corner-cue {
+                position: absolute;
+                right: 0;
+                bottom: 0;
+                width: 38px;
+                height: 38px;
+                z-index: 68;
+                pointer-events: auto;
+                cursor: pointer;
+                overflow: hidden;
+                border-radius: 0 0 6px 0;
+            }
+            .sb-corner-cue::before {
+                content: "";
+                position: absolute;
+                right: 0;
+                bottom: 0;
+                width: 0;
+                height: 0;
+                border-style: solid;
+                border-width: 0 0 30px 30px;
+                border-color: transparent transparent rgba(255, 255, 255, 0.92) transparent;
+                filter: drop-shadow(-2px -2px 4px rgba(0, 0, 0, 0.25));
+                transition: border-width 0.22s ease, filter 0.22s ease;
+            }
+            .sb-corner-cue:hover::before {
+                border-width: 0 0 40px 40px;
+                filter: drop-shadow(-3px -3px 6px rgba(0, 0, 0, 0.32));
+            }
+            @keyframes cueBreathe {
+                0%, 100% {
+                    transform: translateX(0);
+                }
+                50% {
+                    transform: translateX(4px);
+                }
+            }
+            @keyframes cueDotPulse {
+                0%, 100% {
+                    opacity: 0.45;
+                    transform: scale(0.9);
+                }
+                50% {
+                    opacity: 1;
+                    transform: scale(1.25);
+                }
+            }
+            @media (max-width: 640px) {
+                .cue-pill {
+                    padding: 5px 10px;
+                    font-size: 10px;
+                }
+                .sb-turn-cue {
+                    right: 8px;
+                }
+            }
+
             .sb-captions {
                 display: grid;
                 justify-items: center;
@@ -1014,17 +1202,15 @@
                     margin-inline: calc(50% - 50vw);
                 }
                 .sb-arrow {
-                    position: absolute;
-                    top: 50%;
-                    transform: translateY(-50%);
-                    z-index: 70;
-                    padding: 12px 6px;
+                    display: none !important;
+                    visibility: hidden !important;
+                    pointer-events: none !important;
                 }
                 .sb-arrow.left {
-                    left: 2px;
+                    display: none !important;
                 }
                 .sb-arrow.right {
-                    right: 2px;
+                    display: none !important;
                 }
                 .sb-3d {
                     max-width: none;
@@ -1213,23 +1399,10 @@
                             class="sb-arrow left"
                             id="sbLeft"
                             aria-label="previous page"
-                        >
-                            <svg
-                                viewBox="0 0 14 44"
-                                width="14"
-                                height="44"
-                                fill="none"
-                                aria-hidden="true"
-                            >
-                                <polyline
-                                    points="11,3 3,22 11,41"
-                                    stroke="currentColor"
-                                    stroke-width="1.1"
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                />
-                            </svg>
-                        </button>
+                            style="display: none !important; visibility: hidden !important; pointer-events: none !important; width: 0 !important; height: 0 !important; overflow: hidden !important;"
+                            tabindex="-1"
+                            aria-hidden="true"
+                        ></button>
                         <div class="sb-3d" id="sb3d">
                             <div class="sb-tilt" id="sbTilt">
                                 <div
@@ -1245,6 +1418,17 @@
                                     aria-hidden="true"
                                 ></div>
                                 <div class="sb-book" id="sbBook"></div>
+                                <div class="sb-turn-cue" id="sbTurnCue" role="button" data-cursor="pointer" aria-label="Turn to next plate">
+                                    <span class="cue-pill">
+                                        <span class="cue-dot"></span>
+                                        <span class="cue-text">Click to flip</span>
+                                        <span class="cue-page-num" id="cuePageNum">1 / 15</span>
+                                        <svg class="cue-arrow" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M5 10h10M11 6l4 4-4 4"/>
+                                        </svg>
+                                    </span>
+                                </div>
+                                <div class="sb-corner-cue" id="sbCornerCue" role="button" data-cursor="pointer" title="Turn page"></div>
                             </div>
                             <div
                                 class="zoomwrap"
@@ -1268,23 +1452,10 @@
                             class="sb-arrow right"
                             id="sbRight"
                             aria-label="next page"
-                        >
-                            <svg
-                                viewBox="0 0 14 44"
-                                width="14"
-                                height="44"
-                                fill="none"
-                                aria-hidden="true"
-                            >
-                                <polyline
-                                    points="3,3 11,22 3,41"
-                                    stroke="currentColor"
-                                    stroke-width="1.1"
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                />
-                            </svg>
-                        </button>
+                            style="display: none !important; visibility: hidden !important; pointer-events: none !important; width: 0 !important; height: 0 !important; overflow: hidden !important;"
+                            tabindex="-1"
+                            aria-hidden="true"
+                        ></button>
                     </div>
                     <div class="sb-captions" id="sbCaptions"></div>
                     <div
@@ -1361,49 +1532,79 @@
             const DIR = "meng-to-sketchbook/";
             const PAGES = [
                 {
-                    file: "marina-bay-sands.png",
-                    title: "Marina Bay Sands",
-                    place: "Bayfront",
+                    file: "1956C3DE-266A-4B87-95D6-B5705F71403D_1_201_a.webp",
+                    title: "Synchronized Asanas",
+                    place: "Ganges Riverbank",
                 },
                 {
-                    file: "gardens-by-the-bay.png",
-                    title: "Gardens by the Bay",
-                    place: "Supertree Grove",
+                    file: "32E40AED-445C-4C30-BE11-CF56C53DB3B3.webp",
+                    title: "Creative Dialogue",
+                    place: "Retreat Pavillion",
                 },
                 {
-                    file: "merlion.png",
-                    title: "The Merlion",
-                    place: "Merlion Park",
+                    file: "90FAD19F-0B33-4498-9988-80A4EC7F916E.webp",
+                    title: "Circle of Stories",
+                    place: "Open Veranda",
                 },
                 {
-                    file: "buddha-tooth.png",
-                    title: "Buddha Tooth Relic Temple",
-                    place: "Chinatown",
+                    file: "929C8E5F-4089-4A7E-8A55-B4DD4BF9E3CE_1_201_a.webp",
+                    title: "Valley Harmony",
+                    place: "Himalayan Foothills",
                 },
                 {
-                    file: "joo-chiat.png",
-                    title: "Joo Chiat Shophouses",
-                    place: "Katong",
+                    file: "BC6B84CC-A454-4FFD-BED9-50603DC17A27.webp",
+                    title: "Evening Reflections",
+                    place: "Gathering Lounge",
                 },
                 {
-                    file: "lau-pa-sat.png",
-                    title: "Lau Pa Sat",
-                    place: "Raffles Quay",
+                    file: "BF6EEE2F-E74B-4CCA-8066-59CB3E28EA00.webp",
+                    title: "Shared Perspectives",
+                    place: "Studio Workshop",
                 },
                 {
-                    file: "marina-bay-skyline.png",
-                    title: "Marina Bay Skyline",
-                    place: "The Bay",
+                    file: "C4299386-1599-4DD7-B54C-787F7F4C05EE.webp",
+                    title: "Golden Hour Gathering",
+                    place: "Garden Hall",
                 },
                 {
-                    file: "singapore-river.png",
-                    title: "Singapore River",
-                    place: "Boat Quay",
+                    file: "DSC06133.webp",
+                    title: "Mindful Serenity",
+                    place: "Yoga Sanctuary",
                 },
                 {
-                    file: "botanic-gardens.png",
-                    title: "Botanic Gardens",
-                    place: "Tanglin",
+                    file: "DSC06149.webp",
+                    title: "Morning Sunburst",
+                    place: "Veranda Studio",
+                },
+                {
+                    file: "F60F25E7-9F10-4D0A-9C18-9B8D9582ECFA.webp",
+                    title: "Collaborative Mindset",
+                    place: "Courtyard Session",
+                },
+                {
+                    file: "P1000926.webp",
+                    title: "Earth & Sunlight",
+                    place: "Forest Trail",
+                },
+                {
+                    file: "P1000931.webp",
+                    title: "Canopy Walk",
+                    place: "Woodland Path",
+                },
+                {
+                    file: "P1000941.webp",
+                    title: "Quiet Presence",
+                    place: "Green Canopy",
+                },
+                {
+                    file: "P1001077.webp",
+                    title: "River Stones & Flow",
+                    place: "Mountain Stream",
+                },
+                {
+                    file: "P1001082.webp",
+                    title: "Breeze & Shallows",
+                    place: "Riverside Bank",
                 },
             ];
             PAGES.forEach((p) => (p.url = DIR + p.file));
@@ -1422,7 +1623,7 @@
 
             /* ------------------------------------------------ the turning leaf */
             const N = 18; /* strips — enough for a smooth curve          */
-            const SPAN = 0.449; /* gutter → outer page edge, as a fraction     */
+            const SPAN = 0.5; /* gutter → outer page edge, as a fraction     */
             const BETA = 0.6; /* peak curl of the arc, radians              */
             let idx = 0,
                 turn = null; /* turn = {dir, from, to, t}                   */
@@ -1557,12 +1758,20 @@
                 layout();
                 caption();
                 marks();
+                const cueEl = document.getElementById("sbTurnCue");
+                const cornerEl = document.getElementById("sbCornerCue");
+                if (cueEl) cueEl.classList.toggle("hidden", !!turn);
+                if (cornerEl) cornerEl.style.opacity = turn ? "0" : "1";
                 if (typeof syncZoomLayer === "function") syncZoomLayer();
                 if (typeof placeLoupe === "function") placeLoupe();
             }
             function caption() {
                 capBox.textContent = "";
                 capOut = capIn = null;
+                const cueNumEl = document.getElementById("cuePageNum");
+                if (cueNumEl) {
+                    cueNumEl.textContent = (idx + 1) + " / " + M;
+                }
                 if (turn) {
                     capOut = el("p", "sb-caption live");
                     capOut.textContent = PAGES[turn.from].title;
@@ -1629,7 +1838,8 @@
                     if (s.kind === "tween") {
                         s.e += dt;
                         const k = Math.min(1, s.e / s.dur);
-                        turn.t = s.from + (s.target - s.from) * k;
+                        const ease = k < 0.5 ? 2 * k * k : -1 + (4 - 2 * k) * k;
+                        turn.t = s.from + (s.target - s.from) * ease;
                         applyTurn(turn.t);
                         if (k >= 1) {
                             spring = null;
@@ -1759,9 +1969,13 @@
 
             stage.addEventListener("pointerdown", (e) => {
                 if (e.button !== 0) return;
-                e.preventDefault(); /* no text selection, no image drag */
+                if (e.pointerType !== "touch") {
+                    e.preventDefault(); /* no text selection, no image drag */
+                }
                 const onBook = e.target.closest(".sb-zone");
-                stage.setPointerCapture(e.pointerId);
+                if (e.pointerType !== "touch" || onBook) {
+                    try { stage.setPointerCapture(e.pointerId); } catch (_) {}
+                }
                 hideHint();
                 if (!onBook || introOn) return;
                 const r = bookRect();
@@ -1771,6 +1985,7 @@
                 drag = {
                     dir: dir,
                     x0: e.clientX,
+                    y0: e.clientY,
                     w: r.width,
                     moved: 0,
                     vel: 0,
@@ -1779,6 +1994,14 @@
             });
             stage.addEventListener("pointermove", (e) => {
                 if (!drag) return;
+                if (e.pointerType === "touch") {
+                    const totalDy = Math.abs(e.clientY - drag.y0);
+                    const totalDx = Math.abs(e.clientX - drag.x0);
+                    if (totalDy > 8 && totalDy > totalDx) {
+                        endDrag(e);
+                        return;
+                    }
+                }
                 const dx = e.clientX - drag.x0;
                 drag.moved = Math.max(drag.moved, Math.abs(dx));
                 const raw = (drag.dir === "next" ? -dx : dx) / (drag.w * 0.62);
@@ -1837,30 +2060,26 @@
                     paint();
                     return;
                 }
-                animateTo(
+                tweenTo(
                     1,
+                    0.38,
                     () => {
                         idx = turn.to;
                         turn = null;
                         paint();
-                    },
-                    170,
-                    26,
+                    }
                 );
-                kick();
             }
             function cancel() {
                 if (!turn) return;
-                animateTo(
+                tweenTo(
                     0,
+                    0.25,
                     () => {
                         turn = null;
                         paint();
-                    },
-                    150,
-                    24,
+                    }
                 );
-                kick();
             }
             function step(dir) {
                 if (introOn) endIntro();
@@ -1889,6 +2108,10 @@
             }
             document.getElementById("sbLeft").onclick = () => step("prev");
             document.getElementById("sbRight").onclick = () => step("next");
+            const cueBtn = document.getElementById("sbTurnCue");
+            const cornerBtn = document.getElementById("sbCornerCue");
+            if (cueBtn) cueBtn.onclick = (e) => { e.stopPropagation(); step("next"); };
+            if (cornerBtn) cornerBtn.onclick = (e) => { e.stopPropagation(); step("next"); };
             addEventListener("keydown", (e) => {
                 if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
                 if (e.metaKey || e.ctrlKey || e.altKey) return;

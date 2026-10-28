@@ -34,6 +34,8 @@ export interface ProjectConfig {
     customHTML: string;
     logo?: string;
     logoClass?: string;
+    videoWebm?: string;
+    videoMov?: string;
 }
 
 export interface TransitStationConfig {
@@ -53,6 +55,8 @@ export interface TransitStationConfig {
     metricLabels: [string, string, string];
     keyword: string;
     customHTML?: string;
+    videoWebm?: string;
+    videoMov?: string;
 }
 
 export interface BestWorkConfig {
@@ -1379,91 +1383,101 @@ const inventoryData: any[] = [
 // Dynamically add summaries and properties to the inventoryData array to avoid touching existing customHTML
 if (inventoryData[0]) {
     inventoryData[0].summary =
-        "Engineered creator growth systems capturing massive reach & brand revenue.";
+        "DIRECTOR OF PHOTOGRAPHY • NARRATIVE & VISUAL IDENTITY";
     inventoryData[0].points = [
-        "Created relatable POV content to acquire cold audiences",
-        "Turned passive viewers into active distributors with 3x Loop Rate",
-        "Operationalized & scaled a 40+ show touring business",
+        "Shot on ARRI Alexa Mini LF paired with Atlas Anamorphic primes",
+        "Atmospheric natural light & chiaroscuro night compositions",
+        "Single-take Steadicam choreography with seamless camera moves",
     ];
     inventoryData[0].name = "Krishna Shukla";
-    inventoryData[0].metrics = ["186M+", "₹4.4L", "32X"];
-    inventoryData[0].metricLabels = ["REACH", "REVENUE", "ROI"];
-    inventoryData[0].keyword = "Growth";
+    inventoryData[0].metrics = ["ARRI LF", "ANAMORPHIC", "2.39:1"];
+    inventoryData[0].metricLabels = ["CAMERA", "LENS", "FORMAT"];
+    inventoryData[0].keyword = "Cinematography";
+    inventoryData[0].videoWebm = "/videos/april 20.webm";
+    inventoryData[0].videoMov = "/videos/april 20.mov";
 }
 if (inventoryData[1]) {
     inventoryData[1].summary =
-        "Validated acquisition channels for Gen Z sustainable fashion rentals.";
+        "DIRECTOR OF PHOTOGRAPHY • HIGH-FASHION & COMMERCIAL FILM";
     inventoryData[1].points = [
-        "Used borrowed equity to remove consumer trust deficit",
-        "Positioned brand as a legitimate player from Day 1",
-        "Made credible industry voices endorse renting as a lifestyle",
+        "Hard directional key lighting sculpting fabric textures and movement",
+        "High-speed 120fps capture revealing micro-fluidity of movement",
+        "Custom Kodachrome film stock emulation & rich contrast curve",
     ];
     inventoryData[1].name = "Rntl.";
-    inventoryData[1].metrics = ["ACQ", "500+", "4X"];
-    inventoryData[1].metricLabels = ["FOCUS", "BETA USERS", "GROWTH"];
-    inventoryData[1].keyword = "Acquisition";
+    inventoryData[1].metrics = ["8K RAW", "120 FPS", "CHIAROSCURO"];
+    inventoryData[1].metricLabels = ["SENSOR", "FPS", "LIGHTING"];
+    inventoryData[1].keyword = "Aesthetics";
+    inventoryData[1].videoWebm = "/videos/may 1.webm";
+    inventoryData[1].videoMov = "/videos/may 1.mov";
 }
 if (inventoryData[2]) {
     inventoryData[2].summary =
-        "Architected automated email flows to dramatically lift retention.";
+        "DIRECTOR OF PHOTOGRAPHY • VISUAL POEM & MUSIC VIDEO";
     inventoryData[2].points = [
-        "Built automated email funnel architecture from scratch",
-        "Plugged revenue bleeding from daily abandoned carts",
-        "Recovered 25+ carts & boosted conversion by 10%",
+        "Vintage Cooke Speed Panchro lenses producing organic flare and bokeh",
+        "Continuous natural golden-hour illumination with unbleached muslin fill",
+        "Intimate handheld camera movement maintaining dynamic proximity",
     ];
     inventoryData[2].name = "Sinkari";
-    inventoryData[2].metrics = ["10%", "90%", "30D"];
-    inventoryData[2].metricLabels = ["REV LIFT", "RETENTION", "WINDOW"];
-    inventoryData[2].keyword = "Retention";
+    inventoryData[2].metrics = ["COOKE VINTAGE", "4:3 BOX", "180°"];
+    inventoryData[2].metricLabels = ["OPTICS", "ASPECT", "SHUTTER"];
+    inventoryData[2].keyword = "Atmosphere";
+    inventoryData[2].videoWebm = "/videos/outrive .webm";
+    inventoryData[2].videoMov = "/videos/outrive .mov";
 }
 if (inventoryData[3]) {
     inventoryData[3].summary =
-        "Secured brand sponsorships and scaled digital presence for flagship fest.";
+        "HEAD OF CINEMATOGRAPHY • THEATRICAL & PERFORMANCE PRODUCTION";
     inventoryData[3].points = [
-        "Closed ₹55L+ in brand sponsorships with 30+ brands",
-        "Grew Instagram to 10K+ followers as DU's #1 club",
-        "Generated 33M+ total campaign reach for flagship events",
+        "Wide dynamic range capture managing aggressive theatrical spotlight falloff",
+        "Sympathetic focal lengths preserving actors' raw emotional depth",
+        "Deep black floor reflections enhancing spatial stage dimension",
     ];
     inventoryData[3].name = "Dramsoc";
-    inventoryData[3].metrics = ["₹55L+", "40K", "72H"];
-    inventoryData[3].metricLabels = ["SPONSORSHIP", "FOOTFALL", "DURATION"];
-    inventoryData[3].keyword = "Scale";
+    inventoryData[3].metrics = ["DUAL 4000", "15+ STOPS", "S-GAMUT3"];
+    inventoryData[3].metricLabels = ["ISO BASE", "DYNAMIC RANGE", "COLOR SPACE"];
+    inventoryData[3].keyword = "Dramatic";
+    inventoryData[3].videoWebm = "/videos/qqq.webm";
+    inventoryData[3].videoMov = "/videos/qqq.mov";
 }
 if (inventoryData[4]) {
     inventoryData[4].summary =
-        "Orchestrated hyper-localized campus launch generating massive organic reach.";
+        "CINEMATOGRAPHER • OTT SERIES LAUNCH & NIGHT URBAN CAMPAIGN";
     inventoryData[4].points = [
-        "Turned a streaming show launch into an organic campus moment",
-        "Scaled 25-40 micro-influencers to reach 30,000+ students",
-        "Converted event footfall into 8,000+ organic peer-to-peer shares",
+        "Custom Astera tube lighting rigs synchronized with practical streetlights",
+        "Extreme low-angle framing capturing towering urban scale and haze",
+        "High-fidelity ACES color workflow maintaining clean saturated highlights",
     ];
     inventoryData[4].name = "Jio Hotstar";
-    inventoryData[4].metrics = ["7L+", "15%", "40K+"];
-    inventoryData[4].metricLabels = ["IMPRESSIONS", "CONVERSION", "SIGNUPS"];
-    inventoryData[4].keyword = "Launch";
+    inventoryData[4].metrics = ["ACES CCT", "4K DCI", "REC 709 / P3"];
+    inventoryData[4].metricLabels = ["COLOR PIPELINE", "RESOLUTION", "GAMUT"];
+    inventoryData[4].keyword = "Commercial";
+    inventoryData[4].videoWebm = "/videos/Untitled dg.webm";
+    inventoryData[4].videoMov = "/videos/Untitled dg.mov";
 }
 
 const dmrcStations = [
-    "NORTH CAMPUS",
-    "GTB NAGAR",
-    "VISHWAVIDYALAYA",
-    "KASHMERE GATE",
-    "RAJIV CHOWK",
-    "RNTL TERMINAL",
+    "SHOWREEL",
+    "NARRATIVE",
+    "COMMERCIAL",
+    "DOCUMENTARY",
+    "MUSIC VIDEO",
+    "CINEMA REEL",
 ];
 
 const dummyStationsList = [
-    "VISHWAVIDYALAYA",
-    "GTB NAGAR",
-    "KASHMERE GATE",
-    "RAJIV CHOWK",
-    "MANDI HOUSE",
+    "FICTION",
+    "INDIE",
+    "CAMPAIGN",
+    "SERIES",
+    "FEATURE",
 ];
 
 const enrichedProjects: ProjectConfig[] = inventoryData.map(
     (d: any, i: number) => ({
         ...d,
-        stationName: dmrcStations[i + 1] || `STATION ${i + 2}`,
+        stationName: dmrcStations[i + 1] || `PROJECT ${i + 2}`,
     }),
 );
 
@@ -1482,28 +1496,30 @@ export const BEST_WORK_CONFIG: BestWorkConfig = {
         boardBg: "#F4EFE6",
         dmrcStations,
         dummyStationsList,
-        originLabel: "ORIGIN",
+        originLabel: "SHOWREEL",
     },
     welcomeDoors: {
-        hindiHeadingLine1: "दिल्ली मेट्रो में",
-        hindiHeadingLine2: "आपका स्वागत है",
-        englishSubtitle: "Welcome to Delhi Metro",
-        enterButtonText: "ENTER METRO",
+        hindiHeadingLine1: "STEP INTO THE CINEMATIC WORLD",
+        hindiHeadingLine2: "OF ANUP RAWAT",
+        englishSubtitle: "Curated Works • Selected Films & Commercial Projects",
+        enterButtonText: "EXPLORE ANUP'S WORKS →",
     },
     originStation: {
         isOrigin: true,
-        name: "NORTH CAMPUS",
+        name: "SHOWREEL",
         stationName: dmrcStations[0],
-        stat: "Origin",
-        summary: "INSTRUCTION MANUAL",
+        stat: "Featured",
+        summary: "CINEMATOGRAPHY SHOWREEL • ANUP RAWAT WORKS",
+        videoWebm: "/videos/qqq.webm",
+        videoMov: "/videos/qqq.mov",
         points: [
             `<svg class="w-3 h-3 inline-block mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg> SWIPE L/R`,
-            `<svg class="w-3 h-3 inline-block mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg> STEP OUT`,
-            `<svg class="w-3 h-3 inline-block mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> MIND GAP`,
+            `<svg class="w-3 h-3 inline-block mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg> CINEMA VIEW`,
+            `<svg class="w-3 h-3 inline-block mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg> FEATURED`,
         ],
-        metricLabels: ["SYSTEM", "MODE", "STATUS"],
-        metrics: ["ACTIVE", "MANUAL", "READY"],
-        keyword: "Terminal",
+        metricLabels: ["DIRECTOR OF PHOTOGRAPHY", "COLOR PIPELINE", "ALUMNI"],
+        metrics: ["ANUP RAWAT", "ACES / DA VINCI", "FTII '24"],
+        keyword: "Showreel",
         instructions: [
             {
                 badgeBg: "#D4A017",
@@ -1513,35 +1529,35 @@ export const BEST_WORK_CONFIG: BestWorkConfig = {
                 titleFont: "font-['DM_Mono']",
                 titleSize: "text-[9px] md:text-[10px]",
                 descSize: "text-[9px] md:text-[10px]",
-                title: "Navigate",
-                description: "Arrow keys to browse projects.",
+                title: "Browse Projects",
+                description: "Swipe or use arrow keys to navigate film works.",
                 iconSvgPath: "M5 12h14M12 5l7 7-7 7",
             },
             {
-                badgeBg: "#012CEB",
+                badgeBg: "#14100E",
                 badgeText: "#FFFFFF",
                 titleColor: "#FFFFFF",
                 descColor: "rgba(255,255,255,0.7)",
                 titleFont: "font-['Inter']",
                 titleSize: "text-[10px] md:text-[11px]",
                 descSize: "text-[10px] md:text-[11px]",
-                title: "Step Out",
-                description: "Yellow button → deep-dive the project.",
+                title: "Audio & Fullscreen",
+                description: "Tap speaker icon or screen for full unmuted film playback.",
                 iconSvgPath: "M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7",
             },
         ],
     },
     train: {
         graffitiText: "framing by light, more critical by moonlight",
-        bodyLabel: "BLUE LINE // ANUP RAWAT TRANSIT",
+        bodyLabel: "SELECTED CINEMATOGRAPHY // ANUP RAWAT",
         secondaryAnnouncements: [
-            "kripya darwazo se duri banaye rakhein",
-            "apni zaruri vastuon ka dhyan rakhein",
-            "darwaze bayin aur khulenge",
+            "crafted with precision, light & shadow",
+            "visual poetry in motion",
+            "cinematography portfolio edition",
         ],
-        stepOutLine1: "STEP OUT FOR",
-        stepOutLine2: "DISSECTION",
-        returnButtonText: "Return to Platform",
+        stepOutLine1: "VIEW PROJECT",
+        stepOutLine2: "CASE STUDY",
+        returnButtonText: "Return to Projects",
     },
     platform: {
         leftPrimary: "anup rawat studio",

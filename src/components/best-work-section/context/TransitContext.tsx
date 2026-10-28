@@ -216,53 +216,24 @@ export const TransitProvider: React.FC<{
 
       const targetX = -(index * 100);
       const gsap = window.gsap;
-      const Tone = window.Tone;
 
       // Real physical device vibration (Haptics)
       if (typeof navigator !== 'undefined' && navigator.vibrate) {
         navigator.vibrate([40, 50, 40, 50, 60, 50, 200]);
       }
 
-      // Visual vibration: tight, high-frequency, multi-axis rattle
-      if (gsap) {
-        gsap.to('#transit-train', {
-          y: 'random(-1.5, 1.5)',
-          x: 'random(-0.5, 0.5)',
-          rotationZ: 'random(-0.2, 0.2)',
-          duration: 0.04,
-          yoyo: true,
-          repeat: 40,
-          ease: 'power1.inOut',
-          onComplete: () => {
-            gsap.set('#transit-train', { y: 0, x: 0, rotationZ: 0 });
-          },
-        });
-      }
-
-      if (audioRef.current.initialized && Tone) {
-        const { f1MetroSynth, gearSynth } = audioRef.current;
-        if (f1MetroSynth) {
-          f1MetroSynth.triggerAttackRelease('C3', 0.9);
-          f1MetroSynth.frequency.setValueAtTime('C2', Tone.now());
-          f1MetroSynth.frequency.exponentialRampToValueAtTime('C6', Tone.now() + 0.45);
-          f1MetroSynth.frequency.exponentialRampToValueAtTime('C2', Tone.now() + 0.9);
-        }
-        if (gearSynth) {
-          for (let i = 0; i < 4; i++) {
-            gearSynth.triggerAttackRelease(
-              'C1',
-              '32n',
-              Tone.now() + i * 0.2 + Math.random() * 0.1
-            );
-          }
-        }
+      // Train remains static at the platform - moving animation removed
+      const trainEl = transitTrainRef.current || document.getElementById('transit-train');
+      if (gsap && trainEl) {
+        gsap.killTweensOf(trainEl);
+        gsap.set(trainEl, { x: 0, y: 0, rotationZ: 0 });
       }
 
       if (gsap && transitWorldRef.current) {
         gsap.to(transitWorldRef.current, {
           x: `${targetX}vw`,
-          duration: 3.5,
-          ease: 'sine.inOut',
+          duration: 1.8,
+          ease: 'power3.inOut',
         });
       }
 
@@ -273,11 +244,13 @@ export const TransitProvider: React.FC<{
 
       // Step Out Button visibility
       if (gsap) {
-        gsap.to('.step-out-btn', {
-          opacity: 0,
-          pointerEvents: 'none',
-          duration: 0.3,
-        });
+        if (document.querySelector('.step-out-btn')) {
+          gsap.to('.step-out-btn', {
+            opacity: 0,
+            pointerEvents: 'none',
+            duration: 0.3,
+          });
+        }
         if (index > 0) {
           const activeBtn = document.getElementById(`step-out-btn-${index}`);
           if (activeBtn) {
@@ -285,7 +258,7 @@ export const TransitProvider: React.FC<{
               opacity: 1,
               pointerEvents: 'auto',
               duration: 0.5,
-              delay: 1,
+              delay: 1.5,
             });
           }
         }
@@ -528,8 +501,41 @@ export const TransitProvider: React.FC<{
       }
     };
 
+    let touchStartX = 0;
+    let touchStartY = 0;
+
+    const handleTouchStart = (e: TouchEvent) => {
+      touchStartX = e.changedTouches[0].screenX;
+      touchStartY = e.changedTouches[0].screenY;
+    };
+
+    const handleTouchEnd = (e: TouchEvent) => {
+      const csView = transitCsViewRef.current;
+      if (csView && !csView.classList.contains('hidden')) return;
+      if (!areDoorsHidden) return;
+
+      const diffX = e.changedTouches[0].screenX - touchStartX;
+      const diffY = e.changedTouches[0].screenY - touchStartY;
+
+      // Detect horizontal swipe if deltaX > 40px and dominant over deltaY
+      if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 40) {
+        if (diffX < 0) {
+          nextStation();
+        } else {
+          prevStation();
+        }
+      }
+    };
+
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener('touchstart', handleTouchStart, { passive: true });
+    window.addEventListener('touchend', handleTouchEnd, { passive: true });
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('touchstart', handleTouchStart);
+      window.removeEventListener('touchend', handleTouchEnd);
+    };
   }, [areDoorsHidden, nextStation, prevStation, returnToTransit, triggerMetroEntrance]);
 
   const value = useMemo<TransitContextValue>(

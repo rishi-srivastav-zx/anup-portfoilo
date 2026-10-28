@@ -15,7 +15,7 @@ export const BestWorkSection: React.FC = () => {
     return (
         <section
             id="work"
-            className="w-full relative h-[100vh] min-h-[750px] max-h-[1100px] overflow-hidden z-20 border-b-[2px] border-[#14100E]"
+            className="w-full relative h-[100dvh] min-h-[700px] sm:min-h-[720px] md:h-[100vh] md:min-h-[750px] md:max-h-[1100px] overflow-hidden z-20 border-b-[2px] border-[#14100E]"
             style={
                 {
                     "--beige": theme.beige,
@@ -36,12 +36,12 @@ export const BestWorkSection: React.FC = () => {
             <div
                 id="transit-map-view"
                 ref={transitMapViewRef}
-                className="absolute top-0 bottom-0 -left-[3vw] w-[106vw] h-full z-20 overflow-hidden pointer-events-auto scale-[0.95] origin-bottom"
+                className="absolute top-0 bottom-0 -left-[3vw] w-[106vw] h-full z-20 overflow-hidden pointer-events-auto scale-100 md:scale-[0.95] origin-bottom"
             >
                 <TransitWorld />
 
                 {/* THE PLATFORM AND TRAIN */}
-                <div className="absolute bottom-0 left-0 w-full h-[35vh] z-[80] pointer-events-none flex flex-col justify-end overflow-visible">
+                <div className="absolute bottom-0 left-0 w-full h-[22vh] sm:h-[26vh] md:h-[35vh] z-[80] pointer-events-none flex flex-col justify-end overflow-visible">
                     <MetroTrain />
                     <PlatformSurface />
                 </div>

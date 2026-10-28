@@ -60,99 +60,166 @@ export const DEFAULT_SKETCHBOOK_TYPOGRAPHY: SketchbookTypography = {
 };
 
 export const DEFAULT_SKETCHBOOK_METADATA: SketchbookMetadata = {
-    title: "Singapore Sketchbook",
-    author: "Meng To",
-    subtitle: "An illustrated visual chronicle across the Lion City",
-    edition: "First Edition",
+    title: "Visual Chronicles",
+    author: "Anup Rawat",
+    subtitle: "A photographic visual chronicle & creative archive",
+    edition: "Portfolio Edition",
     year: "2026",
-    location: "Singapore, SG",
+    location: "Rishikesh & Beyond",
     introText:
-        "Nine original plates depicting heritage shophouses, botanical sanctuaries, riverside quays, and the futuristic skyline of Singapore.",
+        "Fifteen original plates capturing mindful retreats, creative workshops, nature walks, and intimate portrait studies.",
 };
 
 export const INITIAL_SKETCHBOOK_PAGES: SketchbookPage[] = [
     {
         id: "plate-1",
-        file: "marina-bay-sands.png",
-        title: "Marina Bay Sands",
-        place: "Bayfront",
+        file: "1956C3DE-266A-4B87-95D6-B5705F71403D_1_201_a.webp",
+        title: "Synchronized Asanas",
+        place: "Ganges Riverbank",
         description:
-            "Iconic curved towers crowned with the sky park floating above the bay water.",
-        thumbnailUrl: "/landing-pages/meng-to-sketchbook/marina-bay-sands.png",
+            "Morning yoga practitioners finding balance and union along the sacred river valley.",
+        thumbnailUrl:
+            "/landing-pages/meng-to-sketchbook/1956C3DE-266A-4B87-95D6-B5705F71403D_1_201_a.webp",
     },
     {
         id: "plate-2",
-        file: "gardens-by-the-bay.png",
-        title: "Gardens by the Bay",
-        place: "Supertree Grove",
+        file: "32E40AED-445C-4C30-BE11-CF56C53DB3B3.webp",
+        title: "Creative Dialogue",
+        place: "Retreat Pavillion",
         description:
-            "Living vertical garden supertrees draped in ferns, orchids, and tropical bromeliads.",
+            "Designers and storytellers gathered in warm morning light sharing drafts and ideas.",
         thumbnailUrl:
-            "/landing-pages/meng-to-sketchbook/gardens-by-the-bay.png",
+            "/landing-pages/meng-to-sketchbook/32E40AED-445C-4C30-BE11-CF56C53DB3B3.webp",
     },
     {
         id: "plate-3",
-        file: "merlion.png",
-        title: "The Merlion",
-        place: "Merlion Park",
+        file: "90FAD19F-0B33-4498-9988-80A4EC7F916E.webp",
+        title: "Circle of Stories",
+        place: "Open Veranda",
         description:
-            "Mythical guardian of the Lion City looking out across the sparkling marina basin.",
-        thumbnailUrl: "/landing-pages/meng-to-sketchbook/merlion.png",
+            "Candid reflections, shared laughter, and intimate discussions during the workshop.",
+        thumbnailUrl:
+            "/landing-pages/meng-to-sketchbook/90FAD19F-0B33-4498-9988-80A4EC7F916E.webp",
     },
     {
         id: "plate-4",
-        file: "buddha-tooth.png",
-        title: "Buddha Tooth Relic Temple",
-        place: "Chinatown",
+        file: "929C8E5F-4089-4A7E-8A55-B4DD4BF9E3CE_1_201_a.webp",
+        title: "Valley Harmony",
+        place: "Himalayan Foothills",
         description:
-            "Tang dynasty architecture rendered in sacred red and gold lacquer on South Bridge Road.",
-        thumbnailUrl: "/landing-pages/meng-to-sketchbook/buddha-tooth.png",
+            "Outdoor movement practice framed against mountain peaks and gentle breeze.",
+        thumbnailUrl:
+            "/landing-pages/meng-to-sketchbook/929C8E5F-4089-4A7E-8A55-B4DD4BF9E3CE_1_201_a.webp",
     },
     {
         id: "plate-5",
-        file: "joo-chiat.png",
-        title: "Joo Chiat Shophouses",
-        place: "Katong",
+        file: "BC6B84CC-A454-4FFD-BED9-50603DC17A27.webp",
+        title: "Evening Reflections",
+        place: "Gathering Lounge",
         description:
-            "Pastel Peranakan ceramic tile details and carved timber shutters along Koon Seng Road.",
-        thumbnailUrl: "/landing-pages/meng-to-sketchbook/joo-chiat.png",
+            "Deep focus and collective listening as dusk settles over the retreat grounds.",
+        thumbnailUrl:
+            "/landing-pages/meng-to-sketchbook/BC6B84CC-A454-4FFD-BED9-50603DC17A27.webp",
     },
     {
         id: "plate-6",
-        file: "lau-pa-sat.png",
-        title: "Lau Pa Sat",
-        place: "Raffles Quay",
+        file: "BF6EEE2F-E74B-4CCA-8066-59CB3E28EA00.webp",
+        title: "Shared Perspectives",
+        place: "Studio Workshop",
         description:
-            "Victorian cast-iron octagonal market bustling with sizzling satay smoke at dusk.",
-        thumbnailUrl: "/landing-pages/meng-to-sketchbook/lau-pa-sat.png",
+            "Active discourse, handwritten notes, and shared blueprints for new creative ventures.",
+        thumbnailUrl:
+            "/landing-pages/meng-to-sketchbook/BF6EEE2F-E74B-4CCA-8066-59CB3E28EA00.webp",
     },
     {
         id: "plate-7",
-        file: "marina-bay-skyline.png",
-        title: "Marina Bay Skyline",
-        place: "The Bay",
+        file: "C4299386-1599-4DD7-B54C-787F7F4C05EE.webp",
+        title: "Golden Hour Gathering",
+        place: "Garden Hall",
         description:
-            "Financial skyscrapers reflecting deep cobalt hues and dusk illumination onto the water.",
+            "Warm ambient lantern light and lively discussions following the afternoon session.",
         thumbnailUrl:
-            "/landing-pages/meng-to-sketchbook/marina-bay-skyline.png",
+            "/landing-pages/meng-to-sketchbook/C4299386-1599-4DD7-B54C-787F7F4C05EE.webp",
     },
     {
         id: "plate-8",
-        file: "singapore-river.png",
-        title: "Singapore River",
-        place: "Boat Quay",
+        file: "DSC06133.webp",
+        title: "Mindful Serenity",
+        place: "Yoga Sanctuary",
         description:
-            "Historic merchant bumboats moored along riverside shophouse bistros.",
-        thumbnailUrl: "/landing-pages/meng-to-sketchbook/singapore-river.png",
+            "A serene seated moment adorned with marigold garlands in quiet joy and clarity.",
+        thumbnailUrl:
+            "/landing-pages/meng-to-sketchbook/DSC06133.webp",
     },
     {
         id: "plate-9",
-        file: "botanic-gardens.png",
-        title: "Botanic Gardens",
-        place: "Tanglin",
+        file: "DSC06149.webp",
+        title: "Morning Sunburst",
+        place: "Veranda Studio",
         description:
-            "UNESCO World Heritage tropical rainforest sanctuary, ancient trees, and swan lake.",
-        thumbnailUrl: "/landing-pages/meng-to-sketchbook/botanic-gardens.png",
+            "Radiant natural lighting illuminating personal stories and shared spiritual practice.",
+        thumbnailUrl:
+            "/landing-pages/meng-to-sketchbook/DSC06149.webp",
+    },
+    {
+        id: "plate-10",
+        file: "F60F25E7-9F10-4D0A-9C18-9B8D9582ECFA.webp",
+        title: "Collaborative Mindset",
+        place: "Courtyard Session",
+        description:
+            "Community members examining ideas with passion, camaraderie, and curiosity.",
+        thumbnailUrl:
+            "/landing-pages/meng-to-sketchbook/F60F25E7-9F10-4D0A-9C18-9B8D9582ECFA.webp",
+    },
+    {
+        id: "plate-11",
+        file: "P1000926.webp",
+        title: "Earth & Sunlight",
+        place: "Forest Trail",
+        description:
+            "A barefoot walk bathed in golden sunshine under canopy foliage.",
+        thumbnailUrl:
+            "/landing-pages/meng-to-sketchbook/P1000926.webp",
+    },
+    {
+        id: "plate-12",
+        file: "P1000931.webp",
+        title: "Canopy Walk",
+        place: "Woodland Path",
+        description:
+            "Sunlit dirt trails lined with ancient trees offering peace and contemplation.",
+        thumbnailUrl:
+            "/landing-pages/meng-to-sketchbook/P1000931.webp",
+    },
+    {
+        id: "plate-13",
+        file: "P1000941.webp",
+        title: "Quiet Presence",
+        place: "Green Canopy",
+        description:
+            "Graceful contemplation among wild leaves and dappled forest shadows.",
+        thumbnailUrl:
+            "/landing-pages/meng-to-sketchbook/P1000941.webp",
+    },
+    {
+        id: "plate-14",
+        file: "P1001077.webp",
+        title: "River Stones & Flow",
+        place: "Mountain Stream",
+        description:
+            "Clear flowing water caressing riverbed boulders under crisp mountain air.",
+        thumbnailUrl:
+            "/landing-pages/meng-to-sketchbook/P1001077.webp",
+    },
+    {
+        id: "plate-15",
+        file: "P1001082.webp",
+        title: "Breeze & Shallows",
+        place: "Riverside Bank",
+        description:
+            "Standing ankle-deep in pure Himalayan currents soaking in nature's stillness.",
+        thumbnailUrl:
+            "/landing-pages/meng-to-sketchbook/P1001082.webp",
     },
 ];
 

@@ -1,0 +1,171 @@
+/* Cinema Grid Background matching the blueprint/paper aesthetic */
+.bg-cinema-grid {
+  background-color: #FAF9F6;
+  background-image: 
+    linear-gradient(rgba(20, 16, 14, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(20, 16, 14, 0.05) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.font-mono-tech {
+  font-family: 'DM Mono', monospace, Courier, monospace;
+}
+
+.font-signature {
+  font-family: 'Homemade Apple', 'Caveat', cursive;
+}
+
+/* Mechanical Login Rig Stage */
+.login-rig-container {
+  position: fixed;
+  top: 38%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.login-rig-svg {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 1000px;
+  pointer-events: none;
+  fill: none;
+  stroke: #000000;
+  stroke-width: 2;
+}
+
+.form-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 270px;
+  pointer-events: auto;
+  z-index: 20;
+}
+
+.form-container .form-row {
+  width: 100%;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  font-family: 'DM Mono', monospace;
+  font-size: 13px;
+  color: #14100E;
+}
+
+.form-container .form-row input[type="text"],
+.form-container .form-row input[type="email"],
+.form-container .form-row input[type="password"] {
+  width: 100%;
+  height: 32px;
+  margin: 0;
+  padding: 5px 10px;
+  outline: none;
+  background: #ffffff;
+  border: 2px solid #dddddd;
+  font-family: 'DM Mono', monospace;
+  font-size: 13px;
+  color: #14100E;
+  transition: border-color 0.2s;
+}
+
+.form-container .form-row input[type="text"]:focus,
+.form-container .form-row input[type="email"]:focus,
+.form-container .form-row input[type="password"]:focus {
+  border-color: #000000;
+}
+
+.form-container .form-row input[type="text"].valid,
+.form-container .form-row input[type="email"].valid,
+.form-container .form-row input[type="password"].valid {
+  border-color: #000000;
+}
+
+/* Seamless browser-native autofill styling matching theme */
+.form-container .form-row input:-webkit-autofill,
+.form-container .form-row input:-webkit-autofill:hover, 
+.form-container .form-row input:-webkit-autofill:focus {
+  -webkit-text-fill-color: #14100E;
+  -webkit-box-shadow: 0 0 0px 1000px #ffffff inset;
+  transition: background-color 5000s ease-in-out 0s;
+  font-family: 'DM Mono', monospace;
+  font-size: 13px;
+}
+
+
+.form-container .form-row input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  margin: 0 10px 0 0;
+  padding: 0;
+  border: 2px solid #dddddd;
+  accent-color: #000000;
+  cursor: pointer;
+}
+
+.form-container .form-row input[type="submit"] {
+  width: 100%;
+  height: 32px;
+  margin: 0;
+  padding: 0;
+  cursor: pointer;
+  background: #000000;
+  color: #ffffff;
+  border: 1px solid #000000;
+  font-family: 'DM Mono', monospace;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  transition: background-color 0.2s, box-shadow 0.2s;
+  display: block;
+  text-align: center;
+  line-height: 30px;
+}
+
+.form-container .form-row input[type="submit"]:hover {
+  background: #222222;
+}
+
+.form-container .form-row input[type="submit"]:active {
+  background: #333333;
+}
+
+.form-container .form-row input[type="submit"]:disabled {
+  opacity: 0.35 !important;
+  cursor: not-allowed !important;
+  background: #333333 !important;
+  color: rgba(255, 255, 255, 0.4) !important;
+  box-shadow: none !important;
+  border-color: #333333 !important;
+}
+
+.login-error-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 6px 10px;
+  margin-top: -6px;
+  margin-bottom: 8px;
+  background-color: #FEF2F2;
+  border: 1.5px solid #EF4444;
+  border-radius: 4px;
+  box-shadow: 2px 2px 0px rgba(239, 68, 68, 0.2);
+  animation: fadeInError 0.2s ease-out;
+}
+
+@keyframes fadeInError {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+

@@ -5,7 +5,12 @@ import React from "react";
 export const HeroSection: React.FC = () => {
     const scrollToOrigin = () => {
         const el = document.getElementById("origin");
-        if (el) {
+        if (typeof window !== "undefined" && (window as any).lenis) {
+            (window as any).lenis.scrollTo(el || "#origin", {
+                duration: 1.4,
+                easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+            });
+        } else if (el) {
             el.scrollIntoView({ behavior: "smooth" });
         }
     };

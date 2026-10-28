@@ -21,13 +21,20 @@ export function MyImagesSection() {
         <SketchbookProvider>
             <section
                 id="my-images-section"
-                className="relative w-full h-screen overflow-hidden bg-[#E6DDD2] select-none -mt-14 md:mt-0 z-10"
+                className="relative w-full h-screen overflow-hidden bg-[#E6DDD2] select-none z-10"
             >
                 {/* Seamless ambient transition from Origin Section */}
                 <div className="absolute top-0 left-0 right-0 h-16 pointer-events-none z-20 bg-gradient-to-b from-[#E6DDD2] to-transparent" />
 
                 {/* Seamless ambient transition to Best Work Section */}
                 <div className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none z-20 bg-gradient-to-t from-[#E6DDD2] to-transparent" />
+
+                {/* Botanical Watercolor Paper Canvas Ground */}
+                <div
+                    className="absolute inset-0 pointer-events-none z-0 bg-cover bg-center bg-no-repeat opacity-95 transition-opacity duration-700"
+                    style={{ backgroundImage: `url('/images/botanical_sketchbook_bg.jpg')` }}
+                    aria-hidden="true"
+                />
 
                 {/* 3D Curled Sketchbook Scene */}
                 <Scene />
