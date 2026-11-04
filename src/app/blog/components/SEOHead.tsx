@@ -1,3 +1,5 @@
+'use client';
+
 import { useEffect } from 'react';
 import { BlogArticle } from '../data/articles';
 
@@ -9,7 +11,9 @@ interface BreadcrumbItem {
 interface SEOHeadProps {
   title: string;
   description: string;
-  canonicalPath: string;
+  keywords?: string | string[];
+  canonicalPath?: string;
+  canonicalUrl?: string;
   ogType?: 'website' | 'article';
   ogImage?: string;
   noindex?: boolean;
@@ -33,7 +37,9 @@ export function getConfiguredSiteOrigin(): string {
 export default function SEOHead({
   title,
   description,
-  canonicalPath,
+  keywords,
+  canonicalPath = '',
+  canonicalUrl,
   ogType = 'website',
   ogImage = '/images/hero-cinematic-set.svg',
   noindex = false,
@@ -42,8 +48,10 @@ export default function SEOHead({
 }: SEOHeadProps) {
   useEffect(() => {
     const origin = getConfiguredSiteOrigin();
-    const cleanPath = canonicalPath.startsWith('/') ? canonicalPath : `/${canonicalPath}`;
-    const fullCanonicalUrl = `${origin}${cleanPath}`;
+    const cleanPath = canonicalPath
+      ? (canonicalPath.startsWith('/') ? canonicalPath : `/${canonicalPath}`)
+      : '';
+    const fullCanonicalUrl = canonicalUrl || `${origin}${cleanPath}`;
     const fullImageUrl = ogImage.startsWith('http') ? ogImage : `${origin}${ogImage}`;
 
     document.title = title;
@@ -60,6 +68,14 @@ export default function SEOHead({
 
     setMetaTag('name', 'description', description);
     setMetaTag('name', 'robots', noindex ? 'noindex, nofollow' : 'index, follow, max-image-preview:large');
+
+    // Meta Keywords
+    const resolvedKeywords = Array.isArray(keywords)
+      ? keywords.filter(Boolean).join(', ')
+      : keywords || article?.seoKeywords || (article?.tags ? article.tags.join(', ') : '');
+    if (resolvedKeywords) {
+      setMetaTag('name', 'keywords', resolvedKeywords);
+    }
 
     // OpenGraph
     setMetaTag('property', 'og:title', title);
@@ -112,7 +128,7 @@ export default function SEOHead({
           datePublished: article.publishedAt,
           dateModified: article.updatedAt || article.publishedAt,
           articleSection: article.category,
-          keywords: article.tags.join(', '),
+          keywords: resolvedKeywords || article.tags.join(', '),
           author: {
             '@type': 'Person',
             name: article.author.name,
@@ -168,7 +184,7 @@ export default function SEOHead({
       script.text = JSON.stringify(graph.length === 1 ? graph[0] : graph);
       document.head.appendChild(script);
     }
-  }, [title, description, canonicalPath, ogType, ogImage, noindex, article, breadcrumbs]);
+  }, [title, description, keywords, canonicalPath, canonicalUrl, ogType, ogImage, noindex, article, breadcrumbs]);
 
   return null;
 }

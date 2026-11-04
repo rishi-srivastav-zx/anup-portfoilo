@@ -21,3 +21,6 @@ export const authorizeRoles = (...roles) => {
         next();
     };
 };
+
+export const authorizeRole = authorizeRoles;
+

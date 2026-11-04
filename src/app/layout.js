@@ -20,6 +20,7 @@ import CustomCursor from "@/components/CustomCursor/CustomCursor";
 import BottomNav from "@/components/BottomNav/BottomNav";
 import SmoothScroll from "@/components/SmoothScroll";
 import { AuthProvider } from "@/context/AuthContext";
+import ChatAssistant from "@/components/chat-assistant/ChatAssistant";
 
 export default function RootLayout({ children }) {
     return (
@@ -32,18 +33,20 @@ export default function RootLayout({ children }) {
                 <link
                     rel="preconnect"
                     href="https://fonts.gstatic.com"
-                    crossOrigin="anonymous"
+                    crossOrigin="anonymous" />
+                <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Jost:wght@400;500;600&display=swap"
                 />
                 <link
-                    href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Caveat:wght@400;600;700&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Dr+Sugiyama&family=Gloria+Hallelujah&family=Homemade+Apple&family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&family=Kalam:wght@400;700&family=Kaushan+Script&family=Patrick+Hand&family=Permanent+Marker&family=Plus+Jakarta+Sans:wght@400;600;800;900&family=Rock+Salt&family=Schoolbell&display=swap"
+                    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Jost:wght@400;500;600&family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600&family=Bebas+Neue&family=Caveat:wght@400;600;700&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Dr+Sugiyama&family=Gloria+Hallelujah&family=Homemade+Apple&family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&family=Kalam:wght@400;700&family=Kaushan+Script&family=Patrick+Hand&family=Permanent+Marker&family=Plus+Jakarta+Sans:wght@400;600;800;900&family=Rock+Salt&family=Schoolbell&display=swap"
                     rel="stylesheet"
                 />
             </head>
-            <body className="min-h-full flex flex-col">
+            <body className="min-h-full flex flex-col font-sans">
                 <AuthProvider>
                     <SmoothScroll>{children}</SmoothScroll>
                     <CustomCursor />
                     <BottomNav />
+                    <ChatAssistant />
                 </AuthProvider>
             </body>
         </html>

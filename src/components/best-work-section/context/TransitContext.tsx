@@ -17,6 +17,7 @@ import {
   ProjectConfig,
   TransitStationConfig,
 } from '../config/bestWorkConfig';
+import { workProjectService } from '@/api';
 
 if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger);
@@ -64,11 +65,66 @@ export const TransitProvider: React.FC<{
   config?: BestWorkConfig;
   children: React.ReactNode;
 }> = ({ config = BEST_WORK_CONFIG, children }) => {
+  const [activeConfig, setActiveConfig] = useState<BestWorkConfig>(config);
   const [activeStationIdx, setActiveStationIdx] = useState<number>(0);
   const [areDoorsHidden, setAreDoorsHidden] = useState<boolean>(false);
 
   const activeStationIdxRef = useRef<number>(0);
   activeStationIdxRef.current = activeStationIdx;
+
+  useEffect(() => {
+    let isMounted = true;
+    const loadDynamicProjects = async () => {
+      try {
+        const res = await workProjectService.getProjects();
+        if (isMounted && res?.success && Array.isArray(res.data) && res.data.length > 0) {
+          const mappedProjects: ProjectConfig[] = res.data.map((item: any, idx: number) => ({
+            id: item.id,
+            client: item.client || "ANUP WORKS",
+            name: item.title,
+            stationName: item.station_name || item.title.toUpperCase(),
+            tags: [item.floating_tag || "FEATURED"],
+            stat: item.title,
+            bg: "#14100E",
+            text: "#FFFFFF",
+            sysId: `WP-${idx + 1}`,
+            summary: item.summary || item.seo_description || "CINEMATOGRAPHY SHOWCASE",
+            points: [
+              `CAMERA: ${item.camera || "ARRI LF"}`,
+              `OPTICS: ${item.lens || "ANAMORPHIC"}`,
+              `FORMAT: ${item.format_ratio || "2.39:1"}`,
+            ],
+            metrics: [
+              item.camera || "ARRI LF",
+              item.lens || "ANAMORPHIC",
+              item.format_ratio || "2.39:1",
+            ] as [string, string, string],
+            metricLabels: ["CAMERA", "LENS", "RATIO"] as [string, string, string],
+            keyword: item.keyword || "Cinematography",
+            customHTML: "",
+            videoWebm: item.video_url,
+            videoMov: item.video_mov_url || item.video_url,
+            floatingTag: item.floating_tag || "FEATURED",
+          }));
+
+          setActiveConfig((prev) => ({
+            ...prev,
+            projects: mappedProjects,
+            routeBoard: {
+              ...prev.routeBoard,
+              dummyStationsList: mappedProjects.map((p: any) => p.floatingTag || "FEATURED"),
+            },
+          }));
+        }
+      } catch (err) {
+        console.warn("[TransitContext] Fallback to static projects:", err);
+      }
+    };
+    loadDynamicProjects();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   // Element refs
   const transitWorldRef = useRef<HTMLDivElement | null>(null);
@@ -95,15 +151,15 @@ export const TransitProvider: React.FC<{
   const dissectScrollLockRef = useRef<((e: Event) => void) | null>(null);
 
   const transitStations = useMemo<TransitStationConfig[]>(() => {
-    const { instructions: _unused, ...originStationData } = config.originStation;
+    const { instructions: _unused, ...originStationData } = activeConfig.originStation;
     return [
       originStationData,
-      ...config.projects.map((project) => ({
+      ...activeConfig.projects.map((project) => ({
         ...project,
         isOrigin: false,
       })),
     ];
-  }, [config]);
+  }, [activeConfig]);
 
   const ensureMetroAudio = useCallback(async () => {
     if (audioRef.current.initialized || typeof window === 'undefined' || !window.Tone) {
@@ -288,7 +344,7 @@ export const TransitProvider: React.FC<{
       }
       ensureMetroAudio();
 
-      const data: ProjectConfig | undefined = config.projects[dataIndex];
+      const data: ProjectConfig | undefined = activeConfig.projects[dataIndex];
       if (!data) return;
 
       document.body.style.overflow = 'hidden';
@@ -540,7 +596,7 @@ export const TransitProvider: React.FC<{
 
   const value = useMemo<TransitContextValue>(
     () => ({
-      config,
+      config: activeConfig,
       transitStations,
       activeStationIdx,
       areDoorsHidden,
@@ -561,7 +617,7 @@ export const TransitProvider: React.FC<{
       returnToTransit,
     }),
     [
-      config,
+      activeConfig,
       transitStations,
       activeStationIdx,
       areDoorsHidden,

@@ -1,13 +1,17 @@
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-import { pool } from "../config/db.js";
+import pg from "pg";
+import { env } from "../config/env.js";
+
+const { Client } = pg;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export const runMigrations = async () => {
-    const client = await pool.connect();
+    const client = new Client({ connectionString: env.DATABASE_URL });
+    await client.connect();
     try {
         console.log("🚀 Starting database migrations...");
 
@@ -61,7 +65,7 @@ export const runMigrations = async () => {
 
         console.log("🎉 All migrations applied successfully!");
     } finally {
-        client.release();
+        await client.end();
     }
 };
 

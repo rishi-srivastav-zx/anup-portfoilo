@@ -1,4 +1,7 @@
 import { AuthError } from "../services/auth.service.js";
+import { ChatError } from "../services/chat.service.js";
+import { KnowledgeError } from "../services/portfolioKnowledge.service.js";
+import { ChatDatabaseError } from "../repositories/chat.repository.js";
 import { env } from "../config/env.js";
 
 /**
@@ -22,6 +25,33 @@ export const errorHandler = (err, req, res, next) => {
 
     // Custom Application Auth Errors
     if (err instanceof AuthError) {
+        return res.status(err.statusCode).json({
+            success: false,
+            message: err.message,
+            code: err.code,
+        });
+    }
+
+    // Custom Application Chat Errors
+    if (err instanceof ChatError) {
+        return res.status(err.statusCode).json({
+            success: false,
+            message: err.message,
+            code: err.code,
+        });
+    }
+
+    // Custom Application Knowledge Management Errors
+    if (err instanceof KnowledgeError || (err.statusCode && err.statusCode < 500)) {
+        return res.status(err.statusCode || 400).json({
+            success: false,
+            message: err.message,
+            code: err.code || "KNOWLEDGE_ERROR",
+        });
+    }
+
+    // Database Failures (Clean response without exposing internal credentials)
+    if (err instanceof ChatDatabaseError) {
         return res.status(err.statusCode).json({
             success: false,
             message: err.message,

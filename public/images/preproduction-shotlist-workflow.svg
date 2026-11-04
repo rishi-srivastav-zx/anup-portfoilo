@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900">
+  <defs>
+    <linearGradient id="prepBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a0a0c" />
+      <stop offset="50%" stop-color="#14100e" />
+      <stop offset="100%" stop-color="#080706" />
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="900" fill="url(#prepBg)" />
+
+  <!-- Storyboard Frames Flow -->
+  <g transform="translate(250, 300)">
+    <!-- Frame 1 -->
+    <rect x="0" y="0" width="300" height="170" rx="6" fill="#1b1715" stroke="#f4efe6" stroke-width="2" stroke-opacity="0.4" />
+    <text x="20" y="30" font-family="monospace" font-size="12" fill="#012ceb" font-weight="bold">SCENE 14A // INT. NIGHT</text>
+    <line x1="40" y1="90" x2="260" y2="90" stroke="#ff9a3c" stroke-width="2" stroke-opacity="0.6" />
+    
+    <!-- Arrow 1 -->
+    <line x1="330" y1="85" x2="380" y2="85" stroke="#012ceb" stroke-width="3" />
+    <polygon points="380,85 370,78 370,92" fill="#012ceb" />
+
+    <!-- Frame 2 -->
+    <rect x="410" y="0" width="300" height="170" rx="6" fill="#1b1715" stroke="#012ceb" stroke-width="2" />
+    <text x="430" y="30" font-family="monospace" font-size="12" fill="#012ceb" font-weight="bold">SCENE 14B // CLOSE UP</text>
+    <circle cx="560" cy="95" r="40" fill="none" stroke="#ff9a3c" stroke-width="2" stroke-opacity="0.6" />
+
+    <!-- Arrow 2 -->
+    <line x1="740" y1="85" x2="790" y2="85" stroke="#012ceb" stroke-width="3" />
+    <polygon points="790,85 780,78 780,92" fill="#012ceb" />
+
+    <!-- Frame 3 -->
+    <rect x="820" y="0" width="300" height="170" rx="6" fill="#1b1715" stroke="#f4efe6" stroke-width="2" stroke-opacity="0.4" />
+    <text x="840" y="30" font-family="monospace" font-size="12" fill="#012ceb" font-weight="bold">SCENE 14C // REVERSE POV</text>
+    <rect x="860" y="70" width="80" height="50" fill="#012ceb" fill-opacity="0.2" />
+  </g>
+
+  <g font-family="monospace" font-size="13" fill="#f4efe6" fill-opacity="0.6" letter-spacing="2">
+    <text x="100" y="100">SHOT LISTING // FLOOR PLAN BLOCKING &amp; CAM CHOREOGRAPHY</text>
+    <text x="1500" y="100" text-anchor="end">CALL SHEET LOGISTICS // SUN PATH &amp; LENS PACKS</text>
+  </g>
+
+  <g transform="translate(100, 780)">
+    <rect x="0" y="0" width="380" height="34" rx="4" fill="#012ceb" fill-opacity="0.25" stroke="#012ceb" stroke-width="1" />
+    <text x="15" y="22" font-family="monospace" font-size="12" fill="#f4efe6" letter-spacing="3" font-weight="bold">PRE-PRODUCTION &amp; SHOT LISTING</text>
+  </g>
+</svg>

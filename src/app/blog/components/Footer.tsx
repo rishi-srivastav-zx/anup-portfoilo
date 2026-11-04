@@ -1,14 +1,35 @@
+'use client';
+
+import { useRouter } from 'next/navigation';
 import { BLOG_CATEGORIES, BlogCategory } from '../data/articles';
 
 interface FooterProps {
-  onNavigate: (path: string) => void;
+  onNavigate?: (path: string) => void;
   onSelectCategory?: (category: BlogCategory) => void;
 }
 
 export default function Footer({ onNavigate, onSelectCategory }: FooterProps) {
+  const router = useRouter();
+
+  const handleNavigate = (path: string) => {
+    if (onNavigate) {
+      onNavigate(path);
+      return;
+    }
+    if (path === '/' || path === '/home' || path.startsWith('/#')) {
+      window.location.href = path === '/' ? '/#home' : path;
+      return;
+    }
+    if (path === '/about' || path === '/work' || path === '/visuals' || path === '/contact') {
+      window.location.href = `/#${path.replace('/', '')}`;
+      return;
+    }
+    router.push(path);
+  };
+
   const handleLink = (e: React.MouseEvent<HTMLAnchorElement>, path: string) => {
     e.preventDefault();
-    onNavigate(path);
+    handleNavigate(path);
   };
 
   const handleCategoryClick = (e: React.MouseEvent<HTMLAnchorElement>, category: BlogCategory) => {
@@ -16,12 +37,12 @@ export default function Footer({ onNavigate, onSelectCategory }: FooterProps) {
     if (onSelectCategory) {
       onSelectCategory(category);
     } else {
-      onNavigate(`/blog?category=${encodeURIComponent(category)}`);
+      handleNavigate(`/blog?category=${encodeURIComponent(category)}`);
     }
   };
 
   return (
-    <footer className="border-t border-[#14100E]/15 bg-[#DDD3C5] text-[#14100E]">
+    <footer className="border-t border-[#14100E]/15 bg-[#E6DDD2] text-[#14100E]">
       <div className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-12 py-16">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-12 pb-12 border-b border-[#14100E]/15">
           {/* Column 1: Identity & Signature */}

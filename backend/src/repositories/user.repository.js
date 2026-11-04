@@ -70,14 +70,24 @@ export const userRepository = {
      * @param {Object} options
      * @param {number} [options.limit=50]
      * @param {number} [options.offset=0]
+     * @param {boolean} [options.includeCount=true]
      */
-    async listUsers({ limit = 50, offset = 0 } = {}, client = pool) {
+    async listUsers({ limit = 50, offset = 0, includeCount = true } = {}, client = pool) {
         const query = `
             SELECT id, name, email, role, is_active, email_verified, last_login_at, created_at, updated_at
             FROM users
             ORDER BY created_at DESC
             LIMIT $1 OFFSET $2;
         `;
+
+        if (!includeCount) {
+            const listRes = await client.query(query, [limit, offset]);
+            return {
+                users: listRes.rows,
+                total: null,
+            };
+        }
+
         const countQuery = `SELECT COUNT(*) AS total FROM users;`;
 
         const [listRes, countRes] = await Promise.all([

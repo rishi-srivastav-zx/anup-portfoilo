@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a0a0c" />
+      <stop offset="50%" stop-color="#14100e" />
+      <stop offset="100%" stop-color="#050507" />
+    </linearGradient>
+    <radialGradient id="tungstenGlow" cx="25%" cy="35%" r="45%">
+      <stop offset="0%" stop-color="#ff9a3c" stop-opacity="0.35" />
+      <stop offset="40%" stop-color="#ff7b25" stop-opacity="0.12" />
+      <stop offset="100%" stop-color="#000000" stop-opacity="0" />
+    </radialGradient>
+    <radialGradient id="cyanFill" cx="80%" cy="65%" r="50%">
+      <stop offset="0%" stop-color="#012ceb" stop-opacity="0.25" />
+      <stop offset="60%" stop-color="#0055ff" stop-opacity="0.05" />
+      <stop offset="100%" stop-color="#000000" stop-opacity="0" />
+    </radialGradient>
+    <pattern id="filmGrid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#f4efe6" stroke-width="0.5" stroke-opacity="0.05" />
+    </pattern>
+  </defs>
+
+  <rect width="1600" height="900" fill="url(#bgGrad)" />
+  <rect width="1600" height="900" fill="url(#filmGrid)" />
+  <rect width="1600" height="900" fill="url(#tungstenGlow)" />
+  <rect width="1600" height="900" fill="url(#cyanFill)" />
+
+  <!-- 2.39:1 Frame Guides -->
+  <line x1="80" y1="115" x2="1520" y2="115" stroke="#f4efe6" stroke-opacity="0.2" stroke-dasharray="8 8" />
+  <line x1="80" y1="785" x2="1520" y2="785" stroke="#f4efe6" stroke-opacity="0.2" stroke-dasharray="8 8" />
+
+  <!-- Center Crosshairs -->
+  <circle cx="800" cy="450" r="140" fill="none" stroke="#f4efe6" stroke-opacity="0.1" stroke-width="1.5" />
+  <line x1="800" y1="360" x2="800" y2="540" stroke="#f4efe6" stroke-opacity="0.2" stroke-width="1.5" />
+  <line x1="710" y1="450" x2="890" y2="450" stroke="#f4efe6" stroke-opacity="0.2" stroke-width="1.5" />
+
+  <!-- Dolly Track & Soundstage Grid -->
+  <g opacity="0.4" stroke="#ff9a3c" stroke-width="1.5">
+    <line x1="300" y1="780" x2="700" y2="520" />
+    <line x1="420" y1="800" x2="760" y2="520" />
+    <line x1="330" y1="760" x2="445" y2="780" />
+    <line x1="380" y1="720" x2="490" y2="740" />
+    <line x1="440" y1="675" x2="540" y2="690" />
+    <line x1="500" y1="630" x2="590" y2="645" />
+    <line x1="570" y1="580" x2="650" y2="595" />
+  </g>
+
+  <!-- Cinema Camera Silhouette -->
+  <g transform="translate(680, 320)">
+    <!-- Tripod / Dolly Base -->
+    <path d="M 120 180 L 70 320 M 120 180 L 170 320 M 120 180 L 120 330" stroke="#f4efe6" stroke-width="3" stroke-opacity="0.6" />
+    <!-- Camera Body -->
+    <rect x="70" y="90" width="130" height="90" rx="10" fill="#1b1715" stroke="#f4efe6" stroke-width="2" stroke-opacity="0.5" />
+    <!-- Mattebox & Cinema Prime Lens -->
+    <polygon points="50,110 70,120 70,150 50,160" fill="#012ceb" opacity="0.7" />
+    <polygon points="10,95 50,110 50,160 10,175" fill="#14100e" stroke="#ff9a3c" stroke-width="2" />
+    <!-- Viewfinder / Top Handle -->
+    <rect x="95" y="65" width="80" height="25" rx="5" fill="#26211e" />
+    <circle cx="160" cy="77" r="14" fill="#0a0a0c" stroke="#f4efe6" stroke-width="1.5" stroke-opacity="0.4" />
+    <!-- Battery / Gold Mount -->
+    <rect x="200" y="105" width="22" height="60" rx="3" fill="#ff9a3c" opacity="0.8" />
+  </g>
+
+  <!-- Technical Overlay HUD -->
+  <g font-family="monospace" font-size="13" fill="#f4efe6" fill-opacity="0.6" letter-spacing="2">
+    <text x="90" y="145">FPS: 24.000 // SHUTTER: 180.0°</text>
+    <text x="90" y="170">COLOR TEMP: 3200K TUNGSTEN</text>
+    <text x="90" y="195">LENS: 35MM T1.3 CINEMA ANAMORPHIC</text>
+    <text x="1280" y="145" text-anchor="end">EI 800 // DUAL NATIVE ISO</text>
+    <text x="1280" y="170" text-anchor="end">CODEC: 4.5K RAW LOG-C</text>
+    <text x="1280" y="195" text-anchor="end">PLATE 01: SOUNDSTAGE SET</text>
+  </g>
+
+  <!-- Bottom Title Badge -->
+  <rect x="80" y="810" width="280" height="32" rx="4" fill="#012ceb" fill-opacity="0.3" stroke="#012ceb" stroke-width="1" />
+  <text x="95" y="831" font-family="monospace" font-size="12" fill="#f4efe6" letter-spacing="3" font-weight="bold">SOUNDSTAGE STUDY // 2.39:1</text>
+</svg>

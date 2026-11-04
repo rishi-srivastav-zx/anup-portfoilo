@@ -1,0 +1,147 @@
+/**
+ * Intent Constants for Cinematographer Portfolio AI Assistant
+ * Step 3: Intent Detection Engine
+ */
+
+export const INTENT_CATEGORIES = Object.freeze({
+    PERSONAL: "personal",
+    PORTFOLIO: "portfolio",
+    SERVICES: "services",
+    TECHNICAL: "technical",
+    BUSINESS: "business",
+    CONTACT: "contact",
+    NAVIGATION: "navigation",
+    GENERAL: "general",
+});
+
+export const INTENTS = Object.freeze({
+    // A. Personal Information
+    GREETING: "greeting",
+    ABOUT_PERSON: "about_person",
+    EXPERIENCE_INQUIRY: "experience_inquiry",
+    LOCATION_INQUIRY: "location_inquiry",
+    LANGUAGE_INQUIRY: "language_inquiry",
+
+    // B. Portfolio
+    VIEW_PORTFOLIO: "view_portfolio",
+    FEATURED_WORK: "featured_work",
+    PROJECT_DETAILS: "project_details",
+    FILMOGRAPHY_INQUIRY: "filmography_inquiry",
+    AWARDS_INQUIRY: "awards_inquiry",
+    BEHIND_THE_SCENES: "behind_the_scenes",
+
+    // C. Services
+    SERVICES_INQUIRY: "services_inquiry",
+    WEDDING_INQUIRY: "wedding_inquiry",
+    COMMERCIAL_INQUIRY: "commercial_inquiry",
+    DOCUMENTARY_INQUIRY: "documentary_inquiry",
+    MUSIC_VIDEO_INQUIRY: "music_video_inquiry",
+    BRAND_FILM_INQUIRY: "brand_film_inquiry",
+
+    // D. Technical Information
+    EQUIPMENT_INQUIRY: "equipment_inquiry",
+    CAMERA_INQUIRY: "camera_inquiry",
+    LENS_INQUIRY: "lens_inquiry",
+    PRODUCTION_PROCESS: "production_process",
+    CREATIVE_STYLE: "creative_style",
+
+    // E. Business and Hiring
+    HIRE_INQUIRY: "hire_inquiry",
+    AVAILABILITY_INQUIRY: "availability_inquiry",
+    PRICING_INQUIRY: "pricing_inquiry",
+    COLLABORATION_INQUIRY: "collaboration_inquiry",
+    BOOKING_INQUIRY: "booking_inquiry",
+
+    // F. Contact
+    CONTACT_INQUIRY: "contact_inquiry",
+    EMAIL_INQUIRY: "email_inquiry",
+    PHONE_INQUIRY: "phone_inquiry",
+    SOCIAL_MEDIA_INQUIRY: "social_media_inquiry",
+
+    // G. Navigation
+    NAVIGATE_HOME: "navigate_home",
+    NAVIGATE_ABOUT: "navigate_about",
+    NAVIGATE_WORK: "navigate_work",
+    NAVIGATE_SERVICES: "navigate_services",
+    NAVIGATE_CONTACT: "navigate_contact",
+    NAVIGATE_BLOG: "navigate_blog",
+
+    // H. General
+    GENERAL_QUESTION: "general_question",
+    OUT_OF_SCOPE: "out_of_scope",
+    UNCLEAR_INTENT: "unclear_intent",
+});
+
+/**
+ * Mapping from intent name to its overarching category
+ */
+export const INTENT_TO_CATEGORY_MAP = Object.freeze({
+    // Personal
+    [INTENTS.GREETING]: INTENT_CATEGORIES.PERSONAL,
+    [INTENTS.ABOUT_PERSON]: INTENT_CATEGORIES.PERSONAL,
+    [INTENTS.EXPERIENCE_INQUIRY]: INTENT_CATEGORIES.PERSONAL,
+    [INTENTS.LOCATION_INQUIRY]: INTENT_CATEGORIES.PERSONAL,
+    [INTENTS.LANGUAGE_INQUIRY]: INTENT_CATEGORIES.PERSONAL,
+
+    // Portfolio
+    [INTENTS.VIEW_PORTFOLIO]: INTENT_CATEGORIES.PORTFOLIO,
+    [INTENTS.FEATURED_WORK]: INTENT_CATEGORIES.PORTFOLIO,
+    [INTENTS.PROJECT_DETAILS]: INTENT_CATEGORIES.PORTFOLIO,
+    [INTENTS.FILMOGRAPHY_INQUIRY]: INTENT_CATEGORIES.PORTFOLIO,
+    [INTENTS.AWARDS_INQUIRY]: INTENT_CATEGORIES.PORTFOLIO,
+    [INTENTS.BEHIND_THE_SCENES]: INTENT_CATEGORIES.PORTFOLIO,
+
+    // Services
+    [INTENTS.SERVICES_INQUIRY]: INTENT_CATEGORIES.SERVICES,
+    [INTENTS.WEDDING_INQUIRY]: INTENT_CATEGORIES.SERVICES,
+    [INTENTS.COMMERCIAL_INQUIRY]: INTENT_CATEGORIES.SERVICES,
+    [INTENTS.DOCUMENTARY_INQUIRY]: INTENT_CATEGORIES.SERVICES,
+    [INTENTS.MUSIC_VIDEO_INQUIRY]: INTENT_CATEGORIES.SERVICES,
+    [INTENTS.BRAND_FILM_INQUIRY]: INTENT_CATEGORIES.SERVICES,
+
+    // Technical
+    [INTENTS.EQUIPMENT_INQUIRY]: INTENT_CATEGORIES.TECHNICAL,
+    [INTENTS.CAMERA_INQUIRY]: INTENT_CATEGORIES.TECHNICAL,
+    [INTENTS.LENS_INQUIRY]: INTENT_CATEGORIES.TECHNICAL,
+    [INTENTS.PRODUCTION_PROCESS]: INTENT_CATEGORIES.TECHNICAL,
+    [INTENTS.CREATIVE_STYLE]: INTENT_CATEGORIES.TECHNICAL,
+
+    // Business
+    [INTENTS.HIRE_INQUIRY]: INTENT_CATEGORIES.BUSINESS,
+    [INTENTS.AVAILABILITY_INQUIRY]: INTENT_CATEGORIES.BUSINESS,
+    [INTENTS.PRICING_INQUIRY]: INTENT_CATEGORIES.BUSINESS,
+    [INTENTS.COLLABORATION_INQUIRY]: INTENT_CATEGORIES.BUSINESS,
+    [INTENTS.BOOKING_INQUIRY]: INTENT_CATEGORIES.BUSINESS,
+
+    // Contact
+    [INTENTS.CONTACT_INQUIRY]: INTENT_CATEGORIES.CONTACT,
+    [INTENTS.EMAIL_INQUIRY]: INTENT_CATEGORIES.CONTACT,
+    [INTENTS.PHONE_INQUIRY]: INTENT_CATEGORIES.CONTACT,
+    [INTENTS.SOCIAL_MEDIA_INQUIRY]: INTENT_CATEGORIES.CONTACT,
+
+    // Navigation
+    [INTENTS.NAVIGATE_HOME]: INTENT_CATEGORIES.NAVIGATION,
+    [INTENTS.NAVIGATE_ABOUT]: INTENT_CATEGORIES.NAVIGATION,
+    [INTENTS.NAVIGATE_WORK]: INTENT_CATEGORIES.NAVIGATION,
+    [INTENTS.NAVIGATE_SERVICES]: INTENT_CATEGORIES.NAVIGATION,
+    [INTENTS.NAVIGATE_CONTACT]: INTENT_CATEGORIES.NAVIGATION,
+    [INTENTS.NAVIGATE_BLOG]: INTENT_CATEGORIES.NAVIGATION,
+
+    // General
+    [INTENTS.GENERAL_QUESTION]: INTENT_CATEGORIES.GENERAL,
+    [INTENTS.OUT_OF_SCOPE]: INTENT_CATEGORIES.GENERAL,
+    [INTENTS.UNCLEAR_INTENT]: INTENT_CATEGORIES.GENERAL,
+});
+
+/**
+ * Confidence scoring configuration and thresholds
+ */
+export const CONFIDENCE_THRESHOLDS = Object.freeze({
+    EXACT_PHRASE_HIGH: 0.95,
+    STRONG_MATCH: 0.88,
+    MODERATE_MATCH: 0.70,
+    MIN_ACCEPTABLE: 0.45,
+    UNCLEAR_FALLBACK: 0.25,
+    AMBIGUITY_DELTA: 0.08, // When top 2 candidates are within this delta, trigger clarification
+});
+

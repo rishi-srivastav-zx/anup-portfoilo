@@ -79,6 +79,9 @@ export const ContactFooterSection: React.FC = () => {
     message: '',
   });
   const [errors, setErrors] = useState<FormErrors>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [isFormFocused, setIsFormFocused] = useState(false);
   const [clapCount, setClapCount] = useState(0);
   const [activeTakeStill, setActiveTakeStill] =
@@ -107,19 +110,15 @@ export const ContactFooterSection: React.FC = () => {
   const validate = (): FormErrors => {
     const nextErrors: FormErrors = {};
 
-    if (!values.name.trim()) {
-      nextErrors.name = 'Please enter your name.';
+    if (!values.name.trim() || values.name.trim().length < 2) {
+      nextErrors.name = 'Please enter your full name (compulsory).';
     }
 
     const cleanedPhone = values.phone.trim();
     if (!cleanedPhone) {
-      nextErrors.phone = 'Please enter your phone number.';
-    } else if (!/^[+\d\s().-]{7,20}$/.test(cleanedPhone)) {
-      nextErrors.phone = 'Please enter a valid phone number.';
-    }
-
-    if (!values.message.trim()) {
-      nextErrors.message = 'Please share a few details about your project.';
+      nextErrors.phone = 'Please enter your phone number (compulsory).';
+    } else if (!/^[+\d\s().-]{7,30}$/.test(cleanedPhone)) {
+      nextErrors.phone = 'Please enter a valid phone number (minimum 7 digits).';
     }
 
     return nextErrors;
@@ -134,9 +133,12 @@ export const ContactFooterSection: React.FC = () => {
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: undefined }));
     }
+    if (submitError) {
+      setSubmitError(null);
+    }
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const validationErrors = validate();
     if (Object.keys(validationErrors).length > 0) {
@@ -145,17 +147,43 @@ export const ContactFooterSection: React.FC = () => {
     }
 
     setErrors({});
+    setSubmitError(null);
+    setIsSubmitting(true);
     triggerSlateClap();
 
-    const subject = encodeURIComponent(
-      `Cinematography Inquiry — ${values.name.trim()}`
-    );
-    const body = encodeURIComponent(
-      `Name: ${values.name.trim()}\nPhone Number: ${values.phone.trim()}\n\nProject Details:\n${values.message.trim()}`
-    );
+    try {
+      const response = await fetch('/api/contact/enquiry', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: values.name.trim(),
+          phone: values.phone.trim(),
+          message: values.message.trim(),
+          source: 'Footer Slate Section',
+        }),
+      });
 
-    const mailtoUri = `mailto:${PORTFOLIO_OWNER_EMAIL}?subject=${subject}&body=${body}`;
-    window.location.href = mailtoUri;
+      const data = await response.json().catch(() => null);
+
+      if (!response.ok || !data?.success) {
+        throw new Error(data?.error || 'Unable to submit your details. Please try again.');
+      }
+
+      setIsSubmitted(true);
+      setValues({
+        name: '',
+        phone: '',
+        message: '',
+      });
+    } catch (err: unknown) {
+      const msg =
+        err instanceof Error
+          ? err.message
+          : 'Failed to record details. Please try again.';
+      setSubmitError(msg);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const currentTakeFormatted =
@@ -165,7 +193,7 @@ export const ContactFooterSection: React.FC = () => {
     : '24';
 
   return (
-    <div className="min-h-screen flex flex-col justify-between bg-[#E6DDD2] text-[#14100E] relative overflow-hidden selection:bg-[#14100E] selection:text-[#F4EDE4]">
+    <div className="min-h-screen flex flex-col justify-between bg-[#E6DDD2] text-[#14100E] relative overflow-hidden selection:bg-[#14100E] selection:text-[#F4EDE4] font-sans">
       {/* Seamless ambient transition from preceding section */}
       <div className="absolute top-0 left-0 right-0 h-16 pointer-events-none z-20 bg-gradient-to-b from-[#E6DDD2] to-transparent" />
 
@@ -424,13 +452,26 @@ export const ContactFooterSection: React.FC = () => {
                   )}
                 </div>
 
+                {/* Submission Notifications */}
+                {isSubmitted && (
+                  <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-900 text-xs sm:text-sm font-medium">
+                    ✓ Thank you! Your message has been sent. Anup Rawat will reach out to you promptly.
+                  </div>
+                )}
+                {submitError && (
+                  <div className="p-3.5 rounded-xl bg-red-500/10 border border-red-500/30 text-red-900 text-xs sm:text-sm font-medium">
+                    {submitError}
+                  </div>
+                )}
+
                 {/* Submit Button & Login Link */}
                 <div className="pt-1 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <button
                     type="submit"
-                    className="group relative inline-flex items-center justify-center gap-2.5 w-full sm:w-auto min-w-[200px] px-8 py-3.5 rounded-xl bg-[#14100E] hover:bg-[#012CEB] active:bg-[#0022b8] text-[#F4EDE4] font-semibold text-sm sm:text-base tracking-wide transition-all duration-200 shadow-[0_8px_24px_rgba(20,16,14,0.18)] hover:shadow-[0_10px_28px_rgba(1,44,235,0.3)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#012CEB] whitespace-nowrap shrink-0 cursor-pointer"
+                    disabled={isSubmitting}
+                    className="group relative inline-flex items-center justify-center gap-2.5 w-full sm:w-auto min-w-[200px] px-8 py-3.5 rounded-xl bg-[#14100E] hover:bg-[#012CEB] active:bg-[#0022b8] text-[#F4EDE4] font-semibold text-sm sm:text-base tracking-wide transition-all duration-200 shadow-[0_8px_24px_rgba(20,16,14,0.18)] hover:shadow-[0_10px_28px_rgba(1,44,235,0.3)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#012CEB] whitespace-nowrap shrink-0 cursor-pointer disabled:opacity-60"
                   >
-                    <span>Send Message</span>
+                    <span>{isSubmitting ? 'Sending...' : 'Send Message'}</span>
                     <span
                       aria-hidden="true"
                       className="inline-block transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"

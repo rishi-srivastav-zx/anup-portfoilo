@@ -17,7 +17,18 @@ export const validateRequest = (schema, source = "body") => {
         }
 
         // Assign sanitized data back to the request
-        req[source] = result.data;
+        if (source === "body") {
+            req.body = result.data;
+        } else if (source === "params") {
+            req.params = Object.assign({}, req.params, result.data);
+        } else if (source === "query") {
+            req.validatedQuery = result.data;
+            try {
+                Object.assign(req.query, result.data);
+            } catch {
+                // In Express 5 req.query may be getter-only
+            }
+        }
         next();
     };
 };

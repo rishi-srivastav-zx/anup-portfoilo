@@ -8,12 +8,12 @@ export const SectionTitleBlock: React.FC = () => {
     return (
         <div className="absolute top-3 left-3 sm:top-5 sm:left-5 md:top-7 md:left-8 lg:left-12 z-30 pointer-events-none leading-none flex flex-col">
             {/* Section badge */}
-            <span className="font-['Schoolbell'] text-[9px] sm:text-[11px] md:text-[12px] font-bold uppercase tracking-widest text-[#14100E] block mb-1.5 sm:mb-2 md:mb-2 border-2 border-[#14100E] px-2 py-0.5 sm:px-3 sm:py-1 md:px-3 md:py-1 bg-[#E6DDD2] w-max shadow-[2px_2px_0_#14100E] md:shadow-[3px_3px_0_#14100E]">
+            <span className="font-sans text-[9px] sm:text-[11px] md:text-[12px] font-bold uppercase tracking-widest text-[#14100E] block mb-1.5 sm:mb-2 md:mb-2 border-2 border-[#14100E] px-2 py-0.5 sm:px-3 sm:py-1 md:px-3 md:py-1 bg-[#E6DDD2] w-max shadow-[2px_2px_0_#14100E] md:shadow-[3px_3px_0_#14100E]">
                 {sectionHeader.badge}
             </span>
 
             {/* Heading — pointer-events-auto so hover works without blocking metro UI */}
-            <div className="group relative font-['Schoolbell'] leading-[0.85] py-1.5 pl-1.5 sm:py-2.5 sm:pl-2.5 md:py-2 md:pl-3 overflow-visible cursor-pointer pointer-events-auto">
+            <div className="group relative font-sans leading-[0.85] py-1.5 pl-1.5 sm:py-2.5 sm:pl-2.5 md:py-2 md:pl-3 overflow-visible cursor-pointer pointer-events-auto">
                 {/* Tilted box covers "Best" row only (fixed height = one line) */}
                 <div
                     id="vw-tilted-box"

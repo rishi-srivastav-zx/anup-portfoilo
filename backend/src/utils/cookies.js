@@ -4,15 +4,15 @@ export const ACCESS_COOKIE_NAME = "accessToken";
 export const REFRESH_COOKIE_NAME = "refreshToken";
 
 /**
- * Parses time strings like "15m", "1h", "7d", "900s" to milliseconds
+ * Parses time strings like "15m", "1h", "24h", "7d", "900s" to milliseconds
  * @param {string|number} expiresIn
  * @returns {number} milliseconds
  */
 const parseExpiresInMs = (expiresIn) => {
     if (typeof expiresIn === "number") return expiresIn * 1000;
-    if (typeof expiresIn !== "string") return 15 * 60 * 1000;
+    if (typeof expiresIn !== "string") return 24 * 60 * 60 * 1000;
     const match = expiresIn.match(/^(\d+)([smhd])$/);
-    if (!match) return 15 * 60 * 1000;
+    if (!match) return 24 * 60 * 60 * 1000;
     const val = parseInt(match[1], 10);
     const unit = match[2];
     switch (unit) {
@@ -25,7 +25,7 @@ const parseExpiresInMs = (expiresIn) => {
         case "d":
             return val * 24 * 60 * 60 * 1000;
         default:
-            return 15 * 60 * 1000;
+            return 24 * 60 * 60 * 1000;
     }
 };
 
@@ -36,7 +36,7 @@ const parseExpiresInMs = (expiresIn) => {
 export const getAccessCookieOptions = () => ({
     httpOnly: true,
     secure: env.NODE_ENV === "production",
-    sameSite: "lax",
+    sameSite: env.NODE_ENV === "production" ? "none" : "lax",
     path: "/",
     maxAge: parseExpiresInMs(env.ACCESS_TOKEN_EXPIRES_IN),
 });
@@ -48,8 +48,8 @@ export const getAccessCookieOptions = () => ({
 export const getRefreshCookieOptions = () => ({
     httpOnly: true,
     secure: env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/api/auth",
+    sameSite: env.NODE_ENV === "production" ? "none" : "lax",
+    path: "/",
     maxAge: env.REFRESH_TOKEN_DAYS * 24 * 60 * 60 * 1000,
 });
 
@@ -79,7 +79,7 @@ export const clearAccessTokenCookie = (res) => {
     res.clearCookie(ACCESS_COOKIE_NAME, {
         httpOnly: true,
         secure: env.NODE_ENV === "production",
-        sameSite: "lax",
+        sameSite: env.NODE_ENV === "production" ? "none" : "lax",
         path: "/",
     });
 };
@@ -92,8 +92,8 @@ export const clearRefreshTokenCookie = (res) => {
     res.clearCookie(REFRESH_COOKIE_NAME, {
         httpOnly: true,
         secure: env.NODE_ENV === "production",
-        sameSite: "lax",
-        path: "/api/auth",
+        sameSite: env.NODE_ENV === "production" ? "none" : "lax",
+        path: "/",
     });
 };
 

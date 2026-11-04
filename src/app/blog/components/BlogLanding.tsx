@@ -1,27 +1,35 @@
+'use client';
+
 import { useState, useEffect, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import { ArrowRight, ArrowDown, Search, X, SlidersHorizontal } from 'lucide-react';
 import {
   BLOG_CATEGORIES,
   BlogArticle,
   BlogCategory,
-  getFeaturedArticle,
   getPublishedArticles,
+  fetchDynamicArticles,
 } from '../data/articles';
 import CinematicMedia from './CinematicMedia';
-import NewsletterSection from './NewsletterSection';
 import ContactCtaSection from './ContactCtaSection';
 import SEOHead from './SEOHead';
 
 interface BlogLandingProps {
   initialCategory?: string;
   initialQuery?: string;
-  onNavigate: (path: string) => void;
-  onSyncFilterParams: (category: string, query: string) => void;
+  initialArticles?: BlogArticle[];
+  onNavigate?: (path: string) => void;
+  onSyncFilterParams?: (category: string, query: string) => void;
 }
 
 export function formatEditorialDate(isoDate: string): string {
-  const parsed = new Date(`${isoDate}T00:00:00`);
-  if (Number.isNaN(parsed.getTime())) return isoDate;
+  if (!isoDate) return '';
+  const clean = String(isoDate).trim();
+  let parsed = new Date(clean);
+  if (Number.isNaN(parsed.getTime())) {
+    parsed = new Date(`${clean}T00:00:00`);
+  }
+  if (Number.isNaN(parsed.getTime())) return clean;
   return parsed.toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
@@ -29,21 +37,85 @@ export function formatEditorialDate(isoDate: string): string {
   });
 }
 
+export function formatPublishedWithTime(isoDate: string): string {
+  if (!isoDate) return '';
+  const clean = String(isoDate).trim();
+  let parsed = new Date(clean);
+  if (Number.isNaN(parsed.getTime())) {
+    parsed = new Date(`${clean}T00:00:00`);
+  }
+  if (Number.isNaN(parsed.getTime())) return clean;
+
+  const dateFormatted = parsed.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
+
+  const hours = parsed.getHours();
+  const minutes = parsed.getMinutes();
+  const hasSpecificTime = (hours !== 0 || minutes !== 0) && clean.includes('T') && !clean.endsWith('T00:00:00.000Z');
+
+  if (hasSpecificTime) {
+    const timeFormatted = parsed.toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+    });
+    return `${dateFormatted} at ${timeFormatted}`;
+  }
+
+  return dateFormatted;
+}
+
 const INITIAL_VISIBLE_COUNT = 6;
 
 export default function BlogLanding({
   initialCategory = 'All',
   initialQuery = '',
+  initialArticles,
   onNavigate,
   onSyncFilterParams,
 }: BlogLandingProps) {
-  const allPublished = useMemo(() => getPublishedArticles(), []);
-  const featuredArticle = useMemo(() => getFeaturedArticle(), []);
+  const router = useRouter();
+  const [allPublished, setAllPublished] = useState<BlogArticle[]>(() => {
+    if (initialArticles && initialArticles.length > 0) return initialArticles;
+    return getPublishedArticles();
+  });
+
+  // Dynamic fetch to merge any newly created articles from DB
+  useEffect(() => {
+    let isCancelled = false;
+    fetchDynamicArticles().then((articles) => {
+      if (!isCancelled && articles && articles.length > 0) {
+        setAllPublished(articles);
+      }
+    });
+    return () => {
+      isCancelled = true;
+    };
+  }, []);
 
   const [selectedCategory, setSelectedCategory] = useState<string>(initialCategory || 'All');
   const [searchInput, setSearchInput] = useState<string>(initialQuery || '');
   const [debouncedQuery, setDebouncedQuery] = useState<string>(initialQuery || '');
   const [visibleCount, setVisibleCount] = useState<number>(INITIAL_VISIBLE_COUNT);
+
+  const handleNavigate = (path: string) => {
+    if (onNavigate) {
+      onNavigate(path);
+      return;
+    }
+    if (path === '/' || path === '/home' || path.startsWith('/#')) {
+      window.location.href = path === '/' ? '/#home' : path;
+      return;
+    }
+    if (path === '/about' || path === '/work' || path === '/visuals' || path === '/contact') {
+      window.location.href = `/#${path.replace('/', '')}`;
+      return;
+    }
+    router.push(path);
+  };
 
   // Sync props when URL changes via browser back/forward or footer category clicks
   useEffect(() => {
@@ -65,7 +137,9 @@ export default function BlogLanding({
 
   // Sync active filters to URL query parameters
   useEffect(() => {
-    onSyncFilterParams(selectedCategory, debouncedQuery);
+    if (onSyncFilterParams) {
+      onSyncFilterParams(selectedCategory, debouncedQuery);
+    }
   }, [selectedCategory, debouncedQuery, onSyncFilterParams]);
 
   // Only show categories that actually have published content
@@ -81,6 +155,11 @@ export default function BlogLanding({
   }, [allPublished]);
 
   const isFiltering = selectedCategory !== 'All' || debouncedQuery.length > 0;
+
+  // Identify the single active featured article (if any)
+  const featuredArticle = useMemo(() => {
+    return allPublished.find((article) => Boolean(article.isFeatured));
+  }, [allPublished]);
 
   const filteredArticles = useMemo(() => {
     return allPublished.filter((article) => {
@@ -102,14 +181,15 @@ export default function BlogLanding({
     });
   }, [allPublished, selectedCategory, debouncedQuery]);
 
-  // When not filtering, Featured Story is shown in its dedicated spotlight above the grid,
-  // while the grid displays all remaining articles (plus allows browsing everything when filtered).
+  // When an article is featured, show it at the top hero and keep the archive grid clean (no duplicate)
   const gridArticles = useMemo(() => {
-    if (isFiltering) {
-      return filteredArticles;
+    if (featuredArticle && !isFiltering) {
+      return filteredArticles.filter(
+        (article) => article.id !== featuredArticle.id && article.slug !== featuredArticle.slug
+      );
     }
-    return filteredArticles.filter((a) => a.id !== featuredArticle.id);
-  }, [filteredArticles, featuredArticle.id, isFiltering]);
+    return filteredArticles;
+  }, [filteredArticles, featuredArticle, isFiltering]);
 
   const displayedGridArticles = useMemo(() => {
     return gridArticles.slice(0, visibleCount);
@@ -129,7 +209,7 @@ export default function BlogLanding({
 
   const handleArticleClick = (e: React.MouseEvent<HTMLAnchorElement>, slug: string) => {
     e.preventDefault();
-    onNavigate(`/blog/${slug}`);
+    handleNavigate(`/blog/${slug}`);
   };
 
   return (
@@ -152,150 +232,169 @@ export default function BlogLanding({
         className="border-b border-[#14100E]/15 bg-[#E6DDD2] text-[#14100E]"
       >
         <div className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-12 py-12 sm:py-16 lg:py-20">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-stretch">
-            {/* Left Column: Expressive Editorial Typography */}
-            <div className="lg:col-span-6 flex flex-col justify-between space-y-8">
-              <div className="space-y-5">
-                <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#F4EFE6] border border-[#14100E]/15 rounded-md text-xs font-mono-tech tracking-[0.18em] text-[#012CEB] font-semibold">
-                  <span>●</span>
-                  <span>THE CINEMATIC JOURNAL</span>
+          {featuredArticle ? (
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-stretch">
+              {/* Left Column: Featured Article Editorial Typography */}
+              <div className="lg:col-span-6 flex flex-col justify-between space-y-8">
+                <div className="space-y-5">
+                  <div className="flex flex-wrap items-center gap-2.5">
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#012CEB] text-white rounded-md text-xs font-mono-tech tracking-[0.16em] font-bold shadow-xs">
+                      <span className="text-amber-300">★</span>
+                      <span>FEATURED ESSAY</span>
+                    </div>
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#F4EFE6] border border-[#14100E]/15 rounded-md text-xs font-mono-tech tracking-[0.18em] text-[#14100E] font-semibold uppercase">
+                      <span>●</span>
+                      <span>{featuredArticle.category}</span>
+                    </div>
+                  </div>
+
+                  <a
+                    href={`/blog/${featuredArticle.slug}`}
+                    onClick={(e) => handleArticleClick(e, featuredArticle.slug)}
+                    className="group block"
+                  >
+                    <h1
+                      id="journal-hero-heading"
+                      className="font-editorial text-4xl sm:text-5xl lg:text-[3.65rem] font-semibold text-[#14100E] group-hover:text-[#012CEB] tracking-tight leading-[1.06] transition-colors"
+                      style={{ textWrap: 'balance' }}
+                    >
+                      {featuredArticle.title}
+                    </h1>
+                  </a>
+
+                  <p className="text-base sm:text-lg text-[#6B625A] leading-relaxed max-w-xl line-clamp-3">
+                    {featuredArticle.excerpt}
+                  </p>
                 </div>
-                <h1
-                  id="journal-hero-heading"
-                  className="font-editorial text-4xl sm:text-5xl lg:text-[3.65rem] font-semibold text-[#14100E] tracking-tight leading-[1.06]"
-                  style={{ textWrap: 'balance' }}
-                >
-                  Stories Behind the Frame.
-                </h1>
-                <p className="text-base sm:text-lg text-[#6B625A] leading-relaxed max-w-xl">
-                  An ongoing monograph by cinematographer Anup Rawat exploring the architecture of
-                  light, camera movement psychology, optical character, and the quiet technical
-                  decisions that shape emotional visual storytelling.
-                </p>
+
+                <div className="pt-4 border-t border-[#14100E]/15 flex flex-wrap items-center justify-between gap-4">
+                  <div className="flex flex-wrap items-center gap-2.5 text-xs text-[#6B625A] font-mono-tech">
+                    <span className="font-semibold text-[#14100E]">
+                      By {featuredArticle.author?.name || 'Anup Rawat'}
+                    </span>
+                    <span aria-hidden="true">·</span>
+                    <span>{formatEditorialDate(featuredArticle.publishedAt)}</span>
+                    <span aria-hidden="true">·</span>
+                    <span>{featuredArticle.readingTime}</span>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <a
+                      href={`/blog/${featuredArticle.slug}`}
+                      onClick={(e) => handleArticleClick(e, featuredArticle.slug)}
+                      className="inline-flex items-center gap-2 px-4 py-2 bg-[#012CEB] text-white rounded-xl text-xs font-mono-tech font-bold hover:bg-[#14100E] transition-all shadow-[2px_2px_0_#14100E] group"
+                    >
+                      <span>Read Featured Essay</span>
+                      <ArrowRight
+                        className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform"
+                        aria-hidden="true"
+                      />
+                    </a>
+
+                    <a
+                      href="#journal-archive"
+                      className="inline-flex items-center gap-1.5 text-xs font-mono-tech font-semibold text-[#6B625A] hover:text-[#14100E] transition-colors whitespace-nowrap shrink-0"
+                    >
+                      <span>Explore Archive</span>
+                      <ArrowDown className="w-3.5 h-3.5" aria-hidden="true" />
+                    </a>
+                  </div>
+                </div>
               </div>
 
-              <div className="pt-4 border-t border-[#14100E]/15 flex flex-wrap items-center justify-between gap-4">
-                <div className="flex flex-wrap items-center gap-2 text-xs text-[#6B625A] font-mono-tech">
-                  <span>Lighting &amp; Exposure</span>
-                  <span aria-hidden="true">·</span>
-                  <span>Camera &amp; Lenses</span>
-                  <span aria-hidden="true">·</span>
-                  <span>Visual Grammar</span>
+              {/* Right Column: Featured Image Cinematic Plate */}
+              <div className="lg:col-span-6 flex flex-col justify-center">
+                <div className="relative h-full flex flex-col justify-center">
+                  <a
+                    href={`/blog/${featuredArticle.slug}`}
+                    onClick={(e) => handleArticleClick(e, featuredArticle.slug)}
+                    className="group relative block overflow-hidden rounded-2xl border-2 border-[#14100E] bg-[#14100E] shadow-[5px_5px_0_#14100E] transition-all duration-300 hover:-translate-y-1 hover:shadow-[7px_7px_0_#14100E]"
+                  >
+                    <CinematicMedia
+                      src={featuredArticle.featuredImage || '/images/hero-cinematic-set.svg'}
+                      alt={featuredArticle.featuredImageAlt || featuredArticle.title}
+                      width={1600}
+                      height={900}
+                      priority={true}
+                      aspectClassName="aspect-[16/10] lg:h-full"
+                      overlayScrim={true}
+                    />
+                    <div className="absolute top-3.5 left-3.5 z-10 flex items-center gap-1.5 px-3 py-1 bg-[#14100E]/90 backdrop-blur-md rounded-md border border-white/20 text-[10px] font-mono-tech tracking-wider text-white font-semibold shadow-xs">
+                      <span className="text-amber-300">★</span>
+                      <span>FEATURED ESSAY</span>
+                    </div>
+                  </a>
+                  <div className="mt-2.5 flex items-center justify-between text-xs font-mono-tech text-[#6B625A] px-1">
+                    <span className="uppercase truncate max-w-[70%]">
+                      PLATE 01 · {featuredArticle.category} STUDY
+                    </span>
+                    <span>{featuredArticle.readingTime}</span>
+                  </div>
                 </div>
-
-                <a
-                  href="#featured-story"
-                  className="inline-flex items-center gap-2 text-xs font-mono-tech font-semibold text-[#012CEB] hover:text-[#14100E] transition-colors whitespace-nowrap shrink-0"
-                >
-                  <span>Explore Essays</span>
-                  <ArrowDown className="w-3.5 h-3.5" aria-hidden="true" />
-                </a>
               </div>
             </div>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-stretch">
+              {/* Left Column: Expressive Editorial Typography */}
+              <div className="lg:col-span-6 flex flex-col justify-between space-y-8">
+                <div className="space-y-5">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#F4EFE6] border border-[#14100E]/15 rounded-md text-xs font-mono-tech tracking-[0.18em] text-[#012CEB] font-semibold">
+                    <span>●</span>
+                    <span>THE CINEMATIC JOURNAL</span>
+                  </div>
+                  <h1
+                    id="journal-hero-heading"
+                    className="font-editorial text-4xl sm:text-5xl lg:text-[3.65rem] font-semibold text-[#14100E] tracking-tight leading-[1.06]"
+                    style={{ textWrap: 'balance' }}
+                  >
+                    Stories Behind the Frame.
+                  </h1>
+                  <p className="text-base sm:text-lg text-[#6B625A] leading-relaxed max-w-xl">
+                    An ongoing monograph by cinematographer Anup Rawat exploring the architecture of
+                    light, camera movement psychology, optical character, and the quiet technical
+                    decisions that shape emotional visual storytelling.
+                  </p>
+                </div>
 
-            {/* Right Column: Composed Soundstage Visual Plate */}
-            <div className="lg:col-span-6 flex flex-col justify-center">
-              <div className="relative h-full">
-                <CinematicMedia
-                  src="/images/hero-cinematic-set.svg"
-                  alt="Soundstage cinematography study showing a cinema camera rigged on a dolly track with a warm tungsten fresnel backlight cutting through mist."
-                  width={1600}
-                  height={900}
-                  priority={true}
-                  aspectClassName="aspect-[16/10] lg:h-full"
-                  overlayScrim={true}
-                />
-                <div className="mt-2.5 flex items-center justify-between text-xs font-mono-tech text-[#6B625A]">
-                  <span>PLATE 01 · SOUNDSTAGE DOLLY &amp; TUNGSTEN BACKLIGHT STUDY</span>
-                  <span>2.39:1 SCOPE</span>
+                <div className="pt-4 border-t border-[#14100E]/15 flex flex-wrap items-center justify-between gap-4">
+                  <div className="flex flex-wrap items-center gap-2 text-xs text-[#6B625A] font-mono-tech">
+                    <span>Lighting &amp; Exposure</span>
+                    <span aria-hidden="true">·</span>
+                    <span>Camera &amp; Lenses</span>
+                    <span aria-hidden="true">·</span>
+                    <span>Visual Grammar</span>
+                  </div>
+
+                  <a
+                    href="#journal-archive"
+                    className="inline-flex items-center gap-2 text-xs font-mono-tech font-semibold text-[#012CEB] hover:text-[#14100E] transition-colors whitespace-nowrap shrink-0"
+                  >
+                    <span>Explore Essays</span>
+                    <ArrowDown className="w-3.5 h-3.5" aria-hidden="true" />
+                  </a>
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
-      </section>
 
-      {/* C. Featured Story (Directly Below Hero - Split Editorial Layout) */}
-      <section
-        id="featured-story"
-        aria-labelledby="featured-story-heading"
-        className="border-b border-[#14100E]/15 bg-[#F4EFE6] text-[#14100E] scroll-mt-16"
-      >
-        <div className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-12 py-14 sm:py-20">
-          <div className="mb-8 flex items-center justify-between gap-4 border-b border-[#14100E]/15 pb-4">
-            <span className="text-xs font-mono-tech tracking-wider text-[#012CEB] font-semibold">
-              FEATURED ESSAY
-            </span>
-            <span className="text-xs font-mono-tech text-[#6B625A]">
-              {featuredArticle.technicalNote}
-            </span>
-          </div>
-
-          <article className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center group">
-            <div className="lg:col-span-7">
-              <a
-                href={`/blog/${featuredArticle.slug}`}
-                onClick={(e) => handleArticleClick(e, featuredArticle.slug)}
-                className="block focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#012CEB]"
-              >
-                <CinematicMedia
-                  src={featuredArticle.featuredImage}
-                  alt={featuredArticle.featuredImageAlt}
-                  width={1600}
-                  height={900}
-                  aspectClassName="aspect-[16/9]"
-                  imgClassName="group-hover:scale-[1.02]"
-                />
-              </a>
-            </div>
-
-            <div className="lg:col-span-5 space-y-5">
-              {/* Unboxed Metadata */}
-              <div className="flex flex-wrap items-center gap-2 text-xs font-mono-tech text-[#6B625A]">
-                <span className="text-[#012CEB] font-semibold">{featuredArticle.category}</span>
-                <span aria-hidden="true">·</span>
-                <time dateTime={featuredArticle.publishedAt}>
-                  {formatEditorialDate(featuredArticle.publishedAt)}
-                </time>
-                <span aria-hidden="true">·</span>
-                <span>{featuredArticle.readingTime}</span>
-              </div>
-
-              <h2
-                id="featured-story-heading"
-                className="font-editorial text-2xl sm:text-3xl lg:text-4xl font-semibold text-[#14100E] leading-[1.15] tracking-tight"
-                style={{ textWrap: 'balance' }}
-              >
-                <a
-                  href={`/blog/${featuredArticle.slug}`}
-                  onClick={(e) => handleArticleClick(e, featuredArticle.slug)}
-                  className="hover:text-[#012CEB] transition-colors focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#012CEB]"
-                >
-                  {featuredArticle.title}
-                </a>
-              </h2>
-
-              <p className="text-sm sm:text-base text-[#6B625A] leading-relaxed line-clamp-3">
-                {featuredArticle.excerpt}
-              </p>
-
-              <div className="pt-2">
-                <a
-                  href={`/blog/${featuredArticle.slug}`}
-                  onClick={(e) => handleArticleClick(e, featuredArticle.slug)}
-                  className="inline-flex items-center gap-2.5 text-sm font-semibold text-[#14100E] group-hover:text-[#012CEB] transition-colors focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#012CEB]"
-                >
-                  <span className="underline underline-offset-8 decoration-[#012CEB]/60 group-hover:decoration-[#012CEB]">
-                    Read the story
-                  </span>
-                  <ArrowRight
-                    className="w-4 h-4 transition-transform duration-150 group-hover:translate-x-1"
-                    aria-hidden="true"
+              {/* Right Column: Composed Soundstage Visual Plate */}
+              <div className="lg:col-span-6 flex flex-col justify-center">
+                <div className="relative h-full">
+                  <CinematicMedia
+                    src="/images/hero-cinematic-set.svg"
+                    alt="Soundstage cinematography study showing a cinema camera rigged on a dolly track with a warm tungsten fresnel backlight cutting through mist."
+                    width={1600}
+                    height={900}
+                    priority={true}
+                    aspectClassName="aspect-[16/10] lg:h-full"
+                    overlayScrim={true}
                   />
-                </a>
+                  <div className="mt-2.5 flex items-center justify-between text-xs font-mono-tech text-[#6B625A]">
+                    <span>PLATE 01 · SOUNDSTAGE DOLLY &amp; TUNGSTEN BACKLIGHT STUDY</span>
+                    <span>2.39:1 SCOPE</span>
+                  </div>
+                </div>
               </div>
             </div>
-          </article>
+          )}
         </div>
       </section>
 
@@ -417,33 +516,48 @@ export default function BlogLanding({
 
           {/* Empty State When No Articles Match */}
           {gridArticles.length === 0 ? (
-            <div className="border-2 border-[#14100E] bg-[#F4EFE6] rounded-2xl shadow-[4px_4px_0_#14100E] p-10 sm:p-16 text-center max-w-2xl mx-auto my-8 space-y-5">
-              <SlidersHorizontal
-                className="w-8 h-8 text-[#012CEB] mx-auto opacity-80"
-                aria-hidden="true"
-              />
-              <div className="space-y-2">
+            featuredArticle && !isFiltering ? (
+              <div className="border-2 border-[#14100E] bg-[#F4EFE6] rounded-2xl shadow-[4px_4px_0_#14100E] p-10 sm:p-14 text-center max-w-2xl mx-auto my-8 space-y-4">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#012CEB]/10 text-[#012CEB] rounded-md text-xs font-mono-tech tracking-wider font-semibold">
+                  <span className="text-amber-500">★</span>
+                  <span>1 FEATURED ESSAY HIGHLIGHTED ABOVE</span>
+                </div>
                 <h3 className="font-editorial text-2xl font-semibold text-[#14100E]">
-                  No journal entries match your current filter.
+                  Featured Spotlight Active
                 </h3>
                 <p className="text-sm text-[#6B625A] leading-relaxed">
-                  {debouncedQuery
-                    ? `No articles matched "${debouncedQuery}"${
-                        selectedCategory !== 'All' ? ` in ${selectedCategory}` : ''
-                      }. Try searching for broader terms such as "lighting", "lenses", "ISO", or "movement".`
-                    : `No articles found in ${selectedCategory}.`}
+                  Currently featuring <strong>&ldquo;{featuredArticle.title}&rdquo;</strong> as the lead essay above. Additional field journal entries and case studies are being authored.
                 </p>
               </div>
-              <div className="pt-2">
-                <button
-                  type="button"
-                  onClick={handleResetFilters}
-                  className="min-h-[44px] px-6 py-2.5 bg-[#14100E] hover:bg-[#012CEB] text-[#F4EDE4] text-xs font-semibold rounded-xl shadow-[2px_2px_0_#012CEB] transition-colors cursor-pointer"
-                >
-                  Reset Search &amp; Category Filters
-                </button>
+            ) : (
+              <div className="border-2 border-[#14100E] bg-[#F4EFE6] rounded-2xl shadow-[4px_4px_0_#14100E] p-10 sm:p-16 text-center max-w-2xl mx-auto my-8 space-y-5">
+                <SlidersHorizontal
+                  className="w-8 h-8 text-[#012CEB] mx-auto opacity-80"
+                  aria-hidden="true"
+                />
+                <div className="space-y-2">
+                  <h3 className="font-editorial text-2xl font-semibold text-[#14100E]">
+                    No journal entries match your current filter.
+                  </h3>
+                  <p className="text-sm text-[#6B625A] leading-relaxed">
+                    {debouncedQuery
+                      ? `No articles matched "${debouncedQuery}"${
+                          selectedCategory !== 'All' ? ` in ${selectedCategory}` : ''
+                        }. Try searching for broader terms such as "lighting", "lenses", "ISO", or "movement".`
+                      : `No articles found in ${selectedCategory}.`}
+                  </p>
+                </div>
+                <div className="pt-2">
+                  <button
+                    type="button"
+                    onClick={handleResetFilters}
+                    className="min-h-[44px] px-6 py-2.5 bg-[#14100E] hover:bg-[#012CEB] text-[#F4EDE4] text-xs font-semibold rounded-xl shadow-[2px_2px_0_#012CEB] transition-colors cursor-pointer"
+                  >
+                    Reset Search &amp; Category Filters
+                  </button>
+                </div>
               </div>
-            </div>
+            )
           ) : (
             /* D. Varied Editorial Article Grid (Asymmetric 12-Col Bento Layout) */
             <div className="grid grid-cols-1 md:grid-cols-12 gap-x-8 gap-y-14">
@@ -489,6 +603,14 @@ export default function BlogLanding({
 
                       {/* Clean Unboxed Metadata with Typographic Separators */}
                       <div className="flex flex-wrap items-center gap-2 text-xs font-mono-tech text-[#6B625A]">
+                        {article.isFeatured && (
+                          <>
+                            <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-[#012CEB] text-[#F4EFE6]">
+                              Featured Essay
+                            </span>
+                            <span aria-hidden="true">·</span>
+                          </>
+                        )}
                         <span className="text-[#012CEB] font-semibold">{article.category}</span>
                         <span aria-hidden="true">·</span>
                         <time dateTime={article.publishedAt}>
@@ -557,9 +679,6 @@ export default function BlogLanding({
           )}
         </div>
       </section>
-
-      {/* G. Reader Connection / Newsletter */}
-      <NewsletterSection />
 
       {/* H. Cinematic Contact CTA */}
       <ContactCtaSection onNavigate={onNavigate} />

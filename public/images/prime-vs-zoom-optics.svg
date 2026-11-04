@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900">
+  <defs>
+    <linearGradient id="opticsBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a0a0c" />
+      <stop offset="50%" stop-color="#14100e" />
+      <stop offset="100%" stop-color="#050508" />
+    </linearGradient>
+    <radialGradient id="lensFlare" cx="50%" cy="50%" r="40%">
+      <stop offset="0%" stop-color="#ff7b25" stop-opacity="0.3" />
+      <stop offset="45%" stop-color="#012ceb" stop-opacity="0.15" />
+      <stop offset="100%" stop-color="#000000" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+  <rect width="1600" height="900" fill="url(#opticsBg)" />
+  <rect width="1600" height="900" fill="url(#lensFlare)" />
+
+  <!-- Lens Element Schematics -->
+  <g transform="translate(800, 450)" stroke="#f4efe6" stroke-opacity="0.4" stroke-width="1.5" fill="none">
+    <!-- Outer Barrel -->
+    <rect x="-350" y="-140" width="700" height="280" rx="8" stroke="#f4efe6" stroke-opacity="0.2" />
+    <!-- Glass Elements (Doublet, Meniscus, Aspherical) -->
+    <path d="M -260 -110 C -220 -30 -220 30 -260 110 L -230 110 C -190 30 -190 -30 -230 -110 Z" fill="#012ceb" fill-opacity="0.15" stroke="#012ceb" />
+    <path d="M -120 -110 C -150 -30 -150 30 -120 110 L -90 110 C -120 30 -120 -30 -90 -110 Z" fill="#ff7b25" fill-opacity="0.15" stroke="#ff7b25" />
+    <!-- Iris Blades Aperture -->
+    <polygon points="0,-110 40,-40 20,40 -20,40 -40,-40" stroke="#ff9a3c" stroke-width="2" />
+    <circle cx="0" cy="0" r="35" stroke="#ff9a3c" stroke-width="2" stroke-dasharray="4 4" />
+    <!-- Rear Elements & Sensor Plane -->
+    <path d="M 160 -110 C 190 -40 190 40 160 110" stroke="#012ceb" stroke-width="2" />
+    <line x1="280" y1="-120" x2="280" y2="120" stroke="#f4efe6" stroke-width="3" stroke-opacity="0.7" />
+  </g>
+
+  <!-- Technical Overlay -->
+  <g font-family="monospace" font-size="13" fill="#f4efe6" fill-opacity="0.6" letter-spacing="2">
+    <text x="100" y="100">OPTICAL ABERRATIONS // COMA &amp; ASTIGMATISM</text>
+    <text x="1500" y="100" text-anchor="end">T-STOP TRANSMISSION EFFICIENCY // T1.5 VS T2.8</text>
+  </g>
+
+  <g transform="translate(100, 780)">
+    <rect x="0" y="0" width="340" height="34" rx="4" fill="#012ceb" fill-opacity="0.25" stroke="#012ceb" stroke-width="1" />
+    <text x="15" y="22" font-family="monospace" font-size="12" fill="#f4efe6" letter-spacing="3" font-weight="bold">PRIME VS ZOOM OPTICS</text>
+  </g>
+</svg>

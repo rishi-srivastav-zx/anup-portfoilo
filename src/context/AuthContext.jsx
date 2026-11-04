@@ -7,129 +7,223 @@ import React, {
     useEffect,
     useCallback,
     useMemo,
+    useRef,
 } from "react";
 import { useRouter } from "next/navigation";
 import { apiClient } from "@/api";
 
 const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
+const AUTH_SESSION_KEY = "studio_auth_session";
 
 const AuthContext = createContext(null);
 
-// Module-level in-flight promise to deduplicate concurrent checkAuth calls (React StrictMode, concurrent components)
+// Module-level in-flight promise to deduplicate concurrent checkAuth calls across components & re-renders
 let inFlightAuthPromise = null;
+let lastVerifiedTimestamp = 0;
+const VERIFY_THROTTLE_MS = 15000; // 15 seconds throttle for background validation
+
+/**
+ * Safely hydrate user from sessionStorage on client mount (NO tokens, only public profile metadata)
+ */
+const getInitialUser = () => {
+    if (typeof window === "undefined") return null;
+    try {
+        const stored = sessionStorage.getItem(AUTH_SESSION_KEY);
+        if (stored) {
+            const parsed = JSON.parse(stored);
+            if (parsed && parsed.id) return parsed;
+        }
+    } catch {
+        // Ignore JSON or storage errors
+    }
+    return null;
+};
 
 export const AuthProvider = ({ children }) => {
+    // Initialize user as null during SSR and initial hydration to guarantee 100% server-client parity
     const [user, setUser] = useState(null);
+    const userRef = useRef(null);
     const [isInitializing, setIsInitializing] = useState(true);
-    const [loading, setLoading] = useState(true);
+    const [isValidating, setIsValidating] = useState(false);
+    const [loading, setLoading] = useState(false);
     const [authError, setAuthError] = useState(null);
     const [networkError, setNetworkError] = useState(false);
     const router = useRouter();
 
+    // Keep userRef synchronized with state without re-triggering effects
+    useEffect(() => {
+        userRef.current = user;
+    }, [user]);
+
+    /**
+     * Persist public user info to sessionStorage
+     */
+    const saveUserSession = useCallback((userData) => {
+        if (!userData) return;
+        userRef.current = userData;
+        setUser(userData);
+        if (typeof window !== "undefined") {
+            try {
+                sessionStorage.setItem(AUTH_SESSION_KEY, JSON.stringify(userData));
+            } catch {
+                // Ignore storage exceptions
+            }
+        }
+    }, []);
+
+    /**
+     * Clear user session from state and storage
+     */
+    const clearUserSession = useCallback(() => {
+        userRef.current = null;
+        setUser(null);
+        lastVerifiedTimestamp = 0;
+        if (typeof window !== "undefined") {
+            try {
+                sessionStorage.removeItem(AUTH_SESSION_KEY);
+            } catch {
+                // Ignore storage exceptions
+            }
+        }
+    }, []);
+
     /**
      * Centralized, idempotent session validation via HttpOnly cookies.
      * Deduplicates in-flight calls and protects against concurrent token-reuse triggers.
-     * Separates 401 unauthorized from temporary network/server 5xx errors.
+     * Uses userRef to maintain a stable callback identity and prevent render loops.
      */
-    const checkAuth = useCallback(async (force = false) => {
-        if (inFlightAuthPromise && !force) {
-            return inFlightAuthPromise;
-        }
+    const checkAuth = useCallback(
+        async (force = false) => {
+            const currentUser = userRef.current;
+            // Fast return if already recently validated and user exists in memory
+            if (!force && currentUser && Date.now() - lastVerifiedTimestamp < VERIFY_THROTTLE_MS) {
+                return { success: true, user: currentUser };
+            }
 
-        inFlightAuthPromise = (async () => {
-            try {
-                setAuthError(null);
-                setNetworkError(false);
+            // Deduplicate concurrent calls in flight
+            if (inFlightAuthPromise && !force) {
+                return inFlightAuthPromise;
+            }
 
-                // 1. Try /api/auth/me (browser attaches HttpOnly accessToken cookie)
-                const meRes = await fetch(`${API_BASE}/api/auth/me`, {
-                    method: "GET",
-                    credentials: "include",
-                    headers: { "X-Requested-With": "XMLHttpRequest" },
-                });
+            inFlightAuthPromise = (async () => {
+                setIsValidating(true);
+                try {
+                    setAuthError(null);
+                    setNetworkError(false);
 
-                if (meRes.ok) {
-                    const meData = await meRes.json();
-                    if (meData?.user) {
-                        setUser(meData.user);
-                        return { success: true, user: meData.user };
+                    // 1. Query /api/auth/me (HttpOnly access cookie attached by browser automatically)
+                    const meRes = await fetch(`${API_BASE}/api/auth/me`, {
+                        method: "GET",
+                        credentials: "include",
+                        headers: { "X-Requested-With": "XMLHttpRequest" },
+                    });
+
+                    if (meRes.ok) {
+                        const meData = await meRes.json();
+                        if (meData?.user) {
+                            saveUserSession(meData.user);
+                            lastVerifiedTimestamp = Date.now();
+                            return { success: true, user: meData.user };
+                        }
                     }
-                }
 
-                // 2. If 401, accessToken may be expired. Attempt silent rotation via HttpOnly refreshToken cookie
-                if (meRes.status === 401) {
-                    try {
-                        const refreshRes = await fetch(
-                            `${API_BASE}/api/auth/refresh`,
-                            {
-                                method: "POST",
-                                credentials: "include",
-                                headers: {
-                                    "Content-Type": "application/json",
-                                    "X-Requested-With": "XMLHttpRequest",
-                                },
-                            }
-                        );
+                    // 2. If 401, access token may have reached expiration. Attempt silent refresh via HttpOnly refreshToken cookie
+                    if (meRes.status === 401) {
+                        try {
+                            const refreshRes = await fetch(
+                                `${API_BASE}/api/auth/refresh`,
+                                {
+                                    method: "POST",
+                                    credentials: "include",
+                                    headers: {
+                                        "Content-Type": "application/json",
+                                        "X-Requested-With": "XMLHttpRequest",
+                                    },
+                                }
+                            );
 
-                        if (refreshRes.ok) {
-                            const refreshData = await refreshRes.json();
-                            if (refreshData?.user) {
-                                setUser(refreshData.user);
-                                return { success: true, user: refreshData.user };
+                            if (refreshRes.ok) {
+                                const refreshData = await refreshRes.json();
+                                if (refreshData?.user) {
+                                    saveUserSession(refreshData.user);
+                                    lastVerifiedTimestamp = Date.now();
+                                    return { success: true, user: refreshData.user };
+                                }
                             }
-                        } else if (
-                            refreshRes.status === 401 ||
-                            refreshRes.status === 403
-                        ) {
-                            // Definitively unauthenticated: refresh token expired or invalid
-                            setUser(null);
-                            return { success: false, reason: "unauthorized" };
-                        } else {
-                            // 5xx on refresh: server error, do not clear existing session
+
+                            // Only confirmed 401 on refresh means the session has genuinely expired
+                            if (refreshRes.status === 401) {
+                                clearUserSession();
+                                return { success: false, reason: "unauthorized" };
+                            }
+
+                            // 5xx or rate limit (429) on refresh: server hiccup, keep session
                             setNetworkError(true);
                             return { success: false, reason: "server_error" };
+                        } catch {
+                            // Network drop during refresh: preserve session
+                            setNetworkError(true);
+                            return { success: false, reason: "network_error" };
                         }
-                    } catch {
-                        // Network drop during refresh
-                        setNetworkError(true);
-                        return { success: false, reason: "network_error" };
                     }
-                } else if (meRes.status >= 500) {
-                    // 5xx on /me: server error, do not log user out
+
+                    // 3. 403 Forbidden: User is authenticated but lacks access to a specific resource.
+                    // DO NOT log user out on 403!
+                    if (meRes.status === 403) {
+                        return { success: true, user: userRef.current };
+                    }
+
+                    // 4. 5xx or 429: Server error or rate limit. DO NOT log user out!
+                    if (meRes.status >= 500 || meRes.status === 429) {
+                        setNetworkError(true);
+                        return { success: false, reason: "server_error" };
+                    }
+
+                    // Other unexpected response: only clear if we had no cached session
+                    if (!userRef.current) {
+                        clearUserSession();
+                        return { success: false, reason: "unauthorized" };
+                    }
+
+                    return { success: true, user: userRef.current };
+                } catch (err) {
+                    // Network error (offline, connection refused, temporary drop)
+                    // Never clear user on network errors!
                     setNetworkError(true);
-                    return { success: false, reason: "server_error" };
+                    return {
+                        success: Boolean(userRef.current),
+                        reason: "network_error",
+                        error: err.message,
+                    };
+                } finally {
+                    setIsInitializing(false);
+                    setIsValidating(false);
+                    setLoading(false);
+                    inFlightAuthPromise = null;
                 }
+            })();
 
-                // Other unexpected 4xx status
-                setUser(null);
-                return { success: false, reason: "unauthorized" };
-            } catch (err) {
-                // Network error (offline, connection refused, temporary drop)
-                // Never clear user on network errors!
-                setNetworkError(true);
-                return {
-                    success: false,
-                    reason: "network_error",
-                    error: err.message,
-                };
-            } finally {
-                setIsInitializing(false);
-                setLoading(false);
-                inFlightAuthPromise = null;
-            }
-        })();
+            return inFlightAuthPromise;
+        },
+        [saveUserSession, clearUserSession]
+    );
 
-        return inFlightAuthPromise;
-    }, []);
-
-    // Initial auth verification on boot/refresh
+    // Initial auth verification and client-side session hydration (runs strictly ONCE on mount)
     useEffect(() => {
         let isMounted = true;
+
+        // Synchronously rehydrate user session from client storage on mount
+        const cached = getInitialUser();
+        if (cached && isMounted) {
+            setUser(cached);
+            userRef.current = cached;
+            setIsInitializing(false);
+        }
 
         // Skip auth initialization on public login routes to avoid unnecessary calls
         if (
             typeof window !== "undefined" &&
-            window.location.pathname.startsWith("/login")
+            (window.location.pathname.startsWith("/login") || window.location.pathname.startsWith("/login-page"))
         ) {
             setIsInitializing(false);
             setLoading(false);
@@ -146,56 +240,62 @@ export const AuthProvider = ({ children }) => {
         return () => {
             isMounted = false;
         };
-    }, [checkAuth]);
+        // Empty dependency array ensures this effect executes strictly once on initial mount
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     // Listen for global unauthorized events from Axios interceptors
     useEffect(() => {
         if (apiClient?.onUnauthorized) {
             apiClient.onUnauthorized(() => {
-                setUser(null);
+                clearUserSession();
                 setIsInitializing(false);
                 router.push("/login-page");
             });
         }
-    }, [router]);
+    }, [clearUserSession, router]);
 
     /**
      * Authenticate user with credentials (browser receives HttpOnly cookies)
      */
-    const login = useCallback(async ({ email, password }) => {
-        setLoading(true);
-        setAuthError(null);
-        setNetworkError(false);
+    const login = useCallback(
+        async ({ email, password }) => {
+            setLoading(true);
+            setAuthError(null);
+            setNetworkError(false);
 
-        try {
-            const res = await fetch(`${API_BASE}/api/auth/login`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-Requested-With": "XMLHttpRequest",
-                },
-                credentials: "include",
-                body: JSON.stringify({ email, password }),
-            });
+            try {
+                const res = await fetch(`${API_BASE}/api/auth/login`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-Requested-With": "XMLHttpRequest",
+                    },
+                    credentials: "include",
+                    body: JSON.stringify({ email, password }),
+                });
 
-            const data = await res.json();
+                const data = await res.json();
 
-            if (!res.ok || !data.success) {
-                throw new Error(data.message || "Failed to log in.");
+                if (!res.ok || !data.success) {
+                    throw new Error(data.message || "Failed to log in.");
+                }
+
+                // Immediately establish authenticated state and cache
+                saveUserSession(data.user);
+                lastVerifiedTimestamp = Date.now();
+                setIsInitializing(false);
+
+                return { success: true, user: data.user };
+            } catch (err) {
+                setAuthError(err.message);
+                throw err;
+            } finally {
+                setLoading(false);
             }
-
-            // Immediately establish authenticated state
-            setUser(data.user);
-            setIsInitializing(false);
-
-            return { success: true, user: data.user };
-        } catch (err) {
-            setAuthError(err.message);
-            throw err;
-        } finally {
-            setLoading(false);
-        }
-    }, []);
+        },
+        [saveUserSession]
+    );
 
     /**
      * Register a new user account
@@ -258,12 +358,12 @@ export const AuthProvider = ({ children }) => {
         } catch (err) {
             console.error("Logout request error:", err);
         } finally {
-            setUser(null);
+            clearUserSession();
             setIsInitializing(false);
             setLoading(false);
             router.push("/login-page");
         }
-    }, [router]);
+    }, [clearUserSession, router]);
 
     /**
      * Invalidate all sessions across all devices
@@ -282,12 +382,12 @@ export const AuthProvider = ({ children }) => {
         } catch (err) {
             console.error("Logout-all request error:", err);
         } finally {
-            setUser(null);
+            clearUserSession();
             setIsInitializing(false);
             setLoading(false);
             router.push("/login-page");
         }
-    }, [router]);
+    }, [clearUserSession, router]);
 
     /**
      * Authenticated fetch helper for backwards compatibility
@@ -315,14 +415,14 @@ export const AuthProvider = ({ children }) => {
                         credentials: "include",
                     });
                 } else {
-                    setUser(null);
+                    clearUserSession();
                     router.push("/login-page");
                 }
             }
 
             return response;
         },
-        [checkAuth, router]
+        [checkAuth, clearUserSession, router]
     );
 
     const value = useMemo(
@@ -331,6 +431,7 @@ export const AuthProvider = ({ children }) => {
             isAuthenticated: Boolean(user),
             isLoading: loading,
             isInitializing,
+            isValidating,
             authError,
             networkError,
             checkAuth,
@@ -345,6 +446,7 @@ export const AuthProvider = ({ children }) => {
             user,
             loading,
             isInitializing,
+            isValidating,
             authError,
             networkError,
             checkAuth,

@@ -32,15 +32,51 @@ function LenisScrollTriggerBridge() {
     // Allow standard lag smoothing (500ms max lag, 33ms target) so brief main-thread pauses don't cause sudden jumpy stutters
     gsap.ticker.lagSmoothing(500, 33);
 
-    // Refresh ScrollTrigger once Lenis has initialized and DOM metrics are settled
-    const timer = setTimeout(() => {
+    // Scroll smoothly to target hash element using Lenis
+    const scrollToHashTarget = (hash, immediate = false) => {
+      if (!hash || typeof document === 'undefined') return;
+      const cleanId = hash.replace(/^#\/?/, '').replace('#', '');
+      if (!cleanId) return;
+      const el = document.getElementById(cleanId);
+      if (el) {
+        lenis.scrollTo(el, {
+          duration: immediate ? 0.01 : 1.2,
+          offset: 0,
+          immediate,
+          easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+        });
+      }
+    };
+
+    // Refresh ScrollTrigger once Lenis has initialized and DOM metrics are settled,
+    // then smoothly scroll to target hash if present in URL
+    const timer1 = setTimeout(() => {
       ScrollTrigger.refresh();
-    }, 150);
+      if (typeof window !== 'undefined' && window.location.hash) {
+        scrollToHashTarget(window.location.hash, false);
+      }
+    }, 200);
+
+    const timer2 = setTimeout(() => {
+      ScrollTrigger.refresh();
+      if (typeof window !== 'undefined' && window.location.hash) {
+        scrollToHashTarget(window.location.hash, false);
+      }
+    }, 600);
+
+    const handleHashChange = () => {
+      if (typeof window !== 'undefined' && window.location.hash) {
+        scrollToHashTarget(window.location.hash, false);
+      }
+    };
+    window.addEventListener('hashchange', handleHashChange);
 
     return () => {
       lenis.off('scroll', handleScroll);
       gsap.ticker.remove(onTick);
-      clearTimeout(timer);
+      window.removeEventListener('hashchange', handleHashChange);
+      clearTimeout(timer1);
+      clearTimeout(timer2);
     };
   }, [lenis]);
 
@@ -66,5 +102,3 @@ export default function SmoothScroll({ children }) {
     </ReactLenis>
   );
 }
-
-

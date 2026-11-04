@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900">
+  <defs>
+    <linearGradient id="gradeBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a0a0c" />
+      <stop offset="50%" stop-color="#14100e" />
+      <stop offset="100%" stop-color="#070605" />
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="900" fill="url(#gradeBg)" />
+
+  <!-- Vectorscope Color Wheel -->
+  <g transform="translate(800, 450)">
+    <circle cx="0" cy="0" r="180" fill="none" stroke="#f4efe6" stroke-width="1.5" stroke-opacity="0.3" />
+    <circle cx="0" cy="0" r="120" fill="none" stroke="#f4efe6" stroke-width="1" stroke-opacity="0.2" stroke-dasharray="4 4" />
+    
+    <!-- Target Boxes: Red, Magenta, Blue, Cyan, Green, Yellow -->
+    <rect x="-140" y="-80" width="14" height="14" fill="#012ceb" opacity="0.8" />
+    <rect x="120" y="70" width="14" height="14" fill="#ff7b25" opacity="0.8" />
+    <rect x="-80" y="110" width="14" height="14" fill="#00e5ff" opacity="0.8" />
+    <rect x="70" y="-130" width="14" height="14" fill="#ff4444" opacity="0.8" />
+    
+    <!-- Skin Tone Indicator Line (I-Line) -->
+    <line x1="-160" y1="-95" x2="160" y2="95" stroke="#ffb356" stroke-width="2.5" stroke-dasharray="6 4" />
+    <text x="175" y="100" font-family="monospace" font-size="11" fill="#ffb356">SKIN TONE AXIS</text>
+
+    <!-- Trace Bloom -->
+    <ellipse cx="20" cy="15" rx="70" ry="45" fill="#ff9a3c" fill-opacity="0.2" />
+    <ellipse cx="-30" cy="-20" rx="60" ry="40" fill="#012ceb" fill-opacity="0.25" />
+  </g>
+
+  <g font-family="monospace" font-size="13" fill="#f4efe6" fill-opacity="0.6" letter-spacing="2">
+    <text x="100" y="100">COLOR TEMPERATURE: TEAL &amp; ORANGE CONTRAST</text>
+    <text x="1500" y="100" text-anchor="end">ACES COLOR MANAGEMENT // LOG-C TO REC.709</text>
+  </g>
+
+  <g transform="translate(100, 780)">
+    <rect x="0" y="0" width="340" height="34" rx="4" fill="#012ceb" fill-opacity="0.25" stroke="#012ceb" stroke-width="1" />
+    <text x="15" y="22" font-family="monospace" font-size="12" fill="#f4efe6" letter-spacing="3" font-weight="bold">COLOR MOOD &amp; GRADING</text>
+  </g>
+</svg>

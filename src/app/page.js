@@ -14,7 +14,9 @@ export default function Home() {
             <section id="visuals">
                 <MyImagesSection />
             </section>
-            <BestWorkSection />
+            <section id="work">
+                <BestWorkSection />
+            </section>
             <ContactFooterSection />
         </div>
     );

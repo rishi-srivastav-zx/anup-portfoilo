@@ -1640,6 +1640,12 @@
                 im.draggable = false;
                 im.alt = "";
                 im.src = PAGES[i].url;
+                im.onerror = function () {
+                    const fallback = (PAGES[i] && PAGES[i].fallbackUrl) ? PAGES[i].fallbackUrl : (DIR + "1956C3DE-266A-4B87-95D6-B5705F71403D_1_201_a.webp");
+                    if (this.src !== fallback) {
+                        this.src = fallback;
+                    }
+                };
                 return im;
             }
 

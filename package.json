@@ -8,6 +8,8 @@
     "start": "next start"
   },
   "dependencies": {
+    "@imagekit/next": "^2.1.6",
+    "@tinymce/tinymce-react": "^6.3.1",
     "@types/three": "^0.186.0",
     "axios": "^1.20.0",
     "framer-motion": "^13.5.0",
@@ -17,6 +19,7 @@
     "next": "16.3.8",
     "react": "19.2.8",
     "react-dom": "19.2.8",
+    "sharp": "^0.35.5",
     "three": "^0.186.1"
   },
   "devDependencies": {

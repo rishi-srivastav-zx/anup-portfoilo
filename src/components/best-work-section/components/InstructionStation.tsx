@@ -13,7 +13,7 @@ export const InstructionStation: React.FC = () => {
             data-index={0}
         >
             {/* Oversized Faded Background Keyword */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 font-['Schoolbell'] text-[35vw] md:text-[25vw] leading-none text-[#0B0B0B] opacity-[0.03] whitespace-nowrap z-0 pointer-events-none tracking-tighter mix-blend-multiply">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 font-sans text-[35vw] md:text-[25vw] leading-none text-[#0B0B0B] opacity-[0.03] whitespace-nowrap z-0 pointer-events-none tracking-tighter mix-blend-multiply">
                 {originStation.keyword}
             </div>
 
@@ -75,7 +75,7 @@ export const InstructionStation: React.FC = () => {
 
                         {/* Top: Campaign Description & Key Points */}
                         <div className="flex flex-col gap-1.5 sm:gap-2 relative z-10">
-                            <p className="font-['Inter'] font-bold text-[10px] sm:text-[12px] md:text-[15px] leading-[1.3] md:leading-[1.4] text-[#F4EFE6] w-[95%] uppercase tracking-[-0.02em]">
+                            <p className="font-sans font-bold text-[10px] sm:text-[12px] md:text-[15px] leading-[1.3] md:leading-[1.4] text-[#F4EFE6] w-[95%] uppercase tracking-[-0.02em]">
                                 {originStation.summary}
                             </p>
 
@@ -127,7 +127,7 @@ export const InstructionStation: React.FC = () => {
                                             </div>
                                             <div
                                                 aria-hidden="true"
-                                                className={`font-['Inter'] text-[8px] sm:text-[9px] md:text-[12px] font-medium leading-tight`}
+                                                className={`font-sans text-[8px] sm:text-[9px] md:text-[12px] font-medium leading-tight`}
                                                 style={{
                                                     color: inst.descColor,
                                                 }}

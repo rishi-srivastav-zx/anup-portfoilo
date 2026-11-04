@@ -35,7 +35,7 @@ export const PlatformSurface: React.FC = () => {
             <div className="flex justify-between items-center px-3 sm:px-8 md:px-16 mt-1.5 sm:mt-2 md:mt-3 mb-1 md:mb-2 relative z-10">
                 <div
                     aria-hidden="true"
-                    className="font-['Schoolbell'] text-[10px] sm:text-[12px] md:text-[14px] text-[#14100E] opacity-80 truncate mr-2"
+                    className="font-sans text-[10px] sm:text-[12px] md:text-[14px] text-[#14100E] opacity-80 truncate mr-2"
                 >
                     {platform.leftPrimary}{" "}
                     <span className="hidden sm:inline opacity-40 mx-2">
@@ -47,7 +47,7 @@ export const PlatformSurface: React.FC = () => {
                 </div>
                 <div
                     aria-hidden="true"
-                    className="font-['Schoolbell'] text-[10px] sm:text-[12px] md:text-[14px] text-[#14100E] opacity-80 shrink-0"
+                    className="font-sans text-[10px] sm:text-[12px] md:text-[14px] text-[#14100E] opacity-80 shrink-0"
                 >
                     <span className="hidden sm:inline">{platform.rightCautionPrefix} </span>
                     <span className="text-[#14100E] font-bold">

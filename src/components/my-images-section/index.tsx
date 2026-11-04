@@ -21,7 +21,7 @@ export function MyImagesSection() {
         <SketchbookProvider>
             <section
                 id="my-images-section"
-                className="relative w-full h-screen overflow-hidden bg-[#E6DDD2] select-none z-10"
+                className="relative w-full h-screen overflow-hidden bg-[#E6DDD2] select-none z-10 font-sans"
             >
                 {/* Seamless ambient transition from Origin Section */}
                 <div className="absolute top-0 left-0 right-0 h-16 pointer-events-none z-20 bg-gradient-to-b from-[#E6DDD2] to-transparent" />

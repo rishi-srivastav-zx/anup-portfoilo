@@ -92,8 +92,11 @@ export const authController = {
                 user: sanitizeUser(user),
             });
         } catch (error) {
-            // If refresh fails due to reuse, expiration, etc., clear cookies
-            clearAuthCookies(res);
+            // Only clear cookies if the failure is definitively an authentication error (401),
+            // and NOT on temporary database disconnects, lock timeouts, or 5xx server errors
+            if (error?.statusCode === 401) {
+                clearAuthCookies(res);
+            }
             next(error);
         }
     },

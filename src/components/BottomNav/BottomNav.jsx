@@ -10,7 +10,6 @@ const navLinks = [
     { label: "Visuals", href: "#visuals" },
     { label: "Work", href: "#work" },
     { label: "Blog", href: "/blog" },
-    { label: "Login", href: "/login-page" },
     { label: "Contact", href: "#contact" },
 ];
 

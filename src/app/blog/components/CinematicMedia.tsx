@@ -1,3 +1,5 @@
+'use client';
+
 import { useState } from 'react';
 import { Film } from 'lucide-react';
 

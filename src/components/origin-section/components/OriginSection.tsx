@@ -1014,7 +1014,7 @@ export const OriginSection: React.FC = () => {
         <section
             id="origin"
             ref={containerRef}
-            className="relative w-full h-screen bg-[#E6DDD2] text-[#14100E] selection:bg-[#14100E] selection:text-[#F4EDE4] select-none overflow-hidden"
+            className="relative w-full h-screen bg-[#E6DDD2] text-[#14100E] selection:bg-[#14100E] selection:text-[#F4EDE4] select-none overflow-hidden font-sans"
         >
             {/* Pinned Camera Viewport */}
             <div

@@ -23,7 +23,7 @@ const envSchema = z.object({
     ACCESS_TOKEN_SECRET: z
         .string()
         .min(32, "ACCESS_TOKEN_SECRET must be at least 32 characters"),
-    ACCESS_TOKEN_EXPIRES_IN: z.string().default("15m"),
+    ACCESS_TOKEN_EXPIRES_IN: z.string().default("24h"),
     REFRESH_TOKEN_DAYS: z
         .string()
         .transform((v) => parseInt(v, 10))

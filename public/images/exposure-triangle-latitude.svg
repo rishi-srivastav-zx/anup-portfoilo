@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900">
+  <defs>
+    <linearGradient id="expBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a0a0c" />
+      <stop offset="50%" stop-color="#14100e" />
+      <stop offset="100%" stop-color="#070605" />
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="900" fill="url(#expBg)" />
+
+  <!-- Waveform / False Color Representation -->
+  <g transform="translate(450, 220)">
+    <!-- Scope Border -->
+    <rect x="0" y="0" width="700" height="380" rx="8" fill="#0d0b0a" stroke="#f4efe6" stroke-width="1.5" stroke-opacity="0.3" />
+    <!-- IRE Levels -->
+    <line x1="0" y1="38" x2="700" y2="38" stroke="#ff4444" stroke-opacity="0.6" stroke-dasharray="4 4" />
+    <line x1="0" y1="190" x2="700" y2="190" stroke="#f4efe6" stroke-opacity="0.4" stroke-dasharray="4 4" />
+    <line x1="0" y1="342" x2="700" y2="342" stroke="#4488ff" stroke-opacity="0.6" stroke-dasharray="4 4" />
+    <!-- Waveform Gradients -->
+    <path d="M 50 340 Q 150 280 250 190 T 450 100 T 650 40" fill="none" stroke="#ff9a3c" stroke-width="3" />
+    <path d="M 50 360 Q 180 320 280 220 T 500 130 T 650 60" fill="none" stroke="#012ceb" stroke-width="2.5" opacity="0.8" />
+
+    <text x="715" y="42" font-family="monospace" font-size="11" fill="#ff4444">100 IRE (CLIPPING)</text>
+    <text x="715" y="194" font-family="monospace" font-size="11" fill="#f4efe6" fill-opacity="0.6">18% MIDDLE GREY</text>
+    <text x="715" y="346" font-family="monospace" font-size="11" fill="#4488ff">0 IRE (NOISE FLOOR)</text>
+  </g>
+
+  <g font-family="monospace" font-size="13" fill="#f4efe6" fill-opacity="0.6" letter-spacing="2">
+    <text x="100" y="100">DYNAMIC RANGE: 16.5 STOPS DUAL GAIN</text>
+    <text x="1500" y="100" text-anchor="end">EXPOSURE LATITUDE: +8 / -7 STOPS</text>
+  </g>
+
+  <g transform="translate(100, 780)">
+    <rect x="0" y="0" width="360" height="34" rx="4" fill="#012ceb" fill-opacity="0.25" stroke="#012ceb" stroke-width="1" />
+    <text x="15" y="22" font-family="monospace" font-size="12" fill="#f4efe6" letter-spacing="3" font-weight="bold">EXPOSURE TRIANGLE &amp; LATITUDE</text>
+  </g>
+</svg>

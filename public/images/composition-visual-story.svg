@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900">
+  <defs>
+    <linearGradient id="compBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#090807" />
+      <stop offset="50%" stop-color="#14100e" />
+      <stop offset="100%" stop-color="#050506" />
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="900" fill="url(#compBg)" />
+
+  <!-- Rule of Thirds & Golden Ratio Guides -->
+  <g stroke="#012ceb" stroke-opacity="0.3" stroke-width="2">
+    <line x1="533" y1="100" x2="533" y2="800" stroke-dasharray="6 6" />
+    <line x1="1066" y1="100" x2="1066" y2="800" stroke-dasharray="6 6" />
+    <line x1="200" y1="333" x2="1400" y2="333" stroke-dasharray="6 6" />
+    <line x1="200" y1="566" x2="1400" y2="566" stroke-dasharray="6 6" />
+  </g>
+
+  <!-- Power Points -->
+  <circle cx="533" cy="333" r="14" fill="#ff9a3c" fill-opacity="0.8" />
+  <circle cx="1066" cy="333" r="10" fill="#012ceb" fill-opacity="0.8" />
+  <circle cx="533" cy="566" r="10" fill="#012ceb" fill-opacity="0.8" />
+  <circle cx="1066" cy="566" r="10" fill="#ff9a3c" fill-opacity="0.8" />
+
+  <!-- Golden Spiral Curve -->
+  <path d="M 533 333 A 180 180 0 0 1 713 513 A 110 110 0 0 1 603 623 A 70 70 0 0 1 533 553" fill="none" stroke="#f4efe6" stroke-width="2" stroke-opacity="0.5" />
+
+  <g font-family="monospace" font-size="13" fill="#f4efe6" fill-opacity="0.6" letter-spacing="2">
+    <text x="100" y="100">VISUAL GRAMMAR // EYE-LINE TRACE &amp; NEGATIVE SPACE</text>
+    <text x="1500" y="100" text-anchor="end">GOLDEN RATIO (φ) &amp; SUBVERTED SYMMETRY</text>
+  </g>
+
+  <g transform="translate(100, 780)">
+    <rect x="0" y="0" width="380" height="34" rx="4" fill="#012ceb" fill-opacity="0.25" stroke="#012ceb" stroke-width="1" />
+    <text x="15" y="22" font-family="monospace" font-size="12" fill="#f4efe6" letter-spacing="3" font-weight="bold">COMPOSITION &amp; VISUAL STORYTELLING</text>
+  </g>
+</svg>

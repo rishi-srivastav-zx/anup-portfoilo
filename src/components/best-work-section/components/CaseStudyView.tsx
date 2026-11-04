@@ -20,7 +20,7 @@ export const CaseStudyView: React.FC = () => {
                     onClick={returnToTransit}
                     data-cursor="pointer"
                     aria-label="Back to Transit Map"
-                    className="focus-visible:outline-none group flex items-center gap-3 bg-[var(--beige)] text-[#14100E] font-['Schoolbell'] text-[13px] md:text-[15px] font-bold uppercase tracking-widest px-5 md:px-7 py-3 md:py-3.5 border-[3px] border-[#14100E] shadow-[5px_5px_0_#14100E] hover:shadow-[2px_2px_0_#14100E] hover:translate-x-[3px] hover:translate-y-[3px] hover:bg-[#14100E] hover:text-[#ECE8E1] hover:border-[#14100E] transition-all duration-200 cursor-pointer rotate-[2deg] hover:rotate-0 rounded-none"
+                    className="focus-visible:outline-none group flex items-center gap-3 bg-[var(--beige)] text-[#14100E] font-sans text-[13px] md:text-[15px] font-bold uppercase tracking-widest px-5 md:px-7 py-3 md:py-3.5 border-[3px] border-[#14100E] shadow-[5px_5px_0_#14100E] hover:shadow-[2px_2px_0_#14100E] hover:translate-x-[3px] hover:translate-y-[3px] hover:bg-[#14100E] hover:text-[#ECE8E1] hover:border-[#14100E] transition-all duration-200 cursor-pointer rotate-[2deg] hover:rotate-0 rounded-none"
                 >
                     <svg
                         width="18"

@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900">
+  <defs>
+    <linearGradient id="bgMov" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a0a0c" />
+      <stop offset="50%" stop-color="#14100e" />
+      <stop offset="100%" stop-color="#08080a" />
+    </linearGradient>
+    <radialGradient id="blueGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#012ceb" stop-opacity="0.3" />
+      <stop offset="60%" stop-color="#012ceb" stop-opacity="0.05" />
+      <stop offset="100%" stop-color="#000000" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+  <rect width="1600" height="900" fill="url(#bgMov)" />
+  <rect width="1600" height="900" fill="url(#blueGlow)" />
+  
+  <!-- Vector Motion Curves & Camera Path -->
+  <path d="M 200 680 C 450 650 600 350 900 300 C 1200 250 1350 500 1450 480" fill="none" stroke="#012ceb" stroke-width="4" stroke-dasharray="12 8" />
+  <circle cx="200" cy="680" r="8" fill="#ff9a3c" />
+  <circle cx="900" cy="300" r="10" fill="#012ceb" stroke="#f4efe6" stroke-width="2" />
+  <circle cx="1450" cy="480" r="8" fill="#ff9a3c" />
+
+  <!-- Gimbal / Steadicam Dynamic Axis Ring -->
+  <g transform="translate(800, 450)">
+    <circle cx="0" cy="0" r="160" fill="none" stroke="#f4efe6" stroke-width="1.5" stroke-opacity="0.25" stroke-dasharray="4 6" />
+    <circle cx="0" cy="0" r="120" fill="none" stroke="#012ceb" stroke-width="2" stroke-opacity="0.6" />
+    <line x1="-180" y1="0" x2="180" y2="0" stroke="#f4efe6" stroke-opacity="0.3" />
+    <line x1="0" y1="-180" x2="0" y2="180" stroke="#f4efe6" stroke-opacity="0.3" />
+    <!-- Dynamic Inertia Arrows -->
+    <path d="M 85 -85 A 120 120 0 0 1 120 0" fill="none" stroke="#ff9a3c" stroke-width="3" />
+    <polygon points="120,0 112,-12 128,-10" fill="#ff9a3c" />
+  </g>
+
+  <g font-family="monospace" font-size="13" fill="#f4efe6" fill-opacity="0.6" letter-spacing="2">
+    <text x="100" y="100">DOLLY TRACK VELOCITY // 1.2M/S PARALLAX</text>
+    <text x="1500" y="100" text-anchor="end">SUBJECTIVE POV VS OBJECTIVE WITNESS</text>
+  </g>
+
+  <g transform="translate(100, 780)">
+    <rect x="0" y="0" width="360" height="34" rx="4" fill="#012ceb" fill-opacity="0.25" stroke="#012ceb" stroke-width="1" />
+    <text x="15" y="22" font-family="monospace" font-size="12" fill="#f4efe6" letter-spacing="3" font-weight="bold">CAMERA MOVEMENT PSYCHOLOGY</text>
+  </g>
+</svg>

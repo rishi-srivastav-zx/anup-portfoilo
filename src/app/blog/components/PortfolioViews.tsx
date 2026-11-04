@@ -1,3 +1,5 @@
+'use client';
+
 import { useState, useEffect } from 'react';
 import {
   ArrowRight,
@@ -9,7 +11,11 @@ import {
   Loader2,
 } from 'lucide-react';
 import { SELECTED_WORKS, PHILOSOPHY_PILLARS, PortfolioWorkItem } from '../data/portfolio';
-import { getPublishedArticles } from '../data/articles';
+import {
+  BlogArticle,
+  getPublishedArticles,
+  fetchDynamicArticles,
+} from '../data/articles';
 import { formatEditorialDate } from './BlogLanding';
 import CinematicMedia from './CinematicMedia';
 import ContactCtaSection from './ContactCtaSection';
@@ -20,8 +26,21 @@ interface PortfolioViewProps {
 }
 
 export function HomeView({ onNavigate }: PortfolioViewProps) {
-  const recentJournal = getPublishedArticles().slice(0, 3);
+  const [journalArticles, setJournalArticles] = useState<BlogArticle[]>([]);
+  const recentJournal = journalArticles.slice(0, 3);
   const [lightboxWork, setLightboxWork] = useState<PortfolioWorkItem | null>(null);
+
+  useEffect(() => {
+    let isCancelled = false;
+    fetchDynamicArticles().then((articles) => {
+      if (!isCancelled && articles) {
+        setJournalArticles(articles);
+      }
+    });
+    return () => {
+      isCancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
@@ -506,24 +525,22 @@ export function AboutView({ onNavigate }: PortfolioViewProps) {
 
 export function ContactView() {
   const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [projectType, setProjectType] = useState('Narrative Feature / Short');
-  const [timeline, setTimeline] = useState('');
+  const [phone, setPhone] = useState('');
   const [message, setMessage] = useState('');
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [feedback, setFeedback] = useState('');
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!name.trim() || !email.trim() || !message.trim()) {
+    if (!name.trim() || name.trim().length < 2) {
       setStatus('error');
-      setFeedback('Please complete your name, email address, and project brief.');
+      setFeedback('Please enter your full name (compulsory).');
       return;
     }
 
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.trim())) {
+    if (!phone.trim() || !/^[+\d\s().-]{7,30}$/.test(phone.trim())) {
       setStatus('error');
-      setFeedback('Please provide a valid email address so we can respond to your enquiry.');
+      setFeedback('Please provide a valid phone or WhatsApp number (compulsory).');
       return;
     }
 
@@ -536,26 +553,24 @@ export function ContactView() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: name.trim(),
-          email: email.trim(),
-          projectType,
-          timeline: timeline.trim(),
+          phone: phone.trim(),
           message: message.trim(),
+          source: 'Contact View Form',
         }),
       });
       const data = await response.json().catch(() => null);
       if (!response.ok) {
         setStatus('error');
-        setFeedback(data?.error || 'Could not submit project enquiry. Please try again.');
+        setFeedback(data?.error || 'Could not submit your details. Please try again.');
         return;
       }
       setStatus('success');
       setFeedback(
         data?.message ||
-          'Thank you. Your project brief has been logged for Anup Rawat and will be reviewed promptly.'
+          'Thank you. Your message has been logged for Anup Rawat and will be reviewed promptly.'
       );
       setName('');
-      setEmail('');
-      setTimeline('');
+      setPhone('');
       setMessage('');
     } catch {
       setStatus('error');
@@ -626,60 +641,18 @@ export function ContactView() {
 
                   <div>
                     <label
-                      htmlFor="enquiry-email"
+                      htmlFor="enquiry-phone"
                       className="block text-xs font-medium text-[#F4F1EA] mb-2"
                     >
-                      Email Address *
+                      Phone / WhatsApp Number *
                     </label>
                     <input
-                      id="enquiry-email"
-                      type="email"
+                      id="enquiry-phone"
+                      type="tel"
                       required
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="producer@productionhouse.com"
-                      className="w-full min-h-[44px] px-4 py-2.5 bg-[#070708] border border-[#F4F1EA]/20 text-sm text-[#F4F1EA] focus:outline-none focus:border-[#C8A45D]"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  <div>
-                    <label
-                      htmlFor="enquiry-type"
-                      className="block text-xs font-medium text-[#F4F1EA] mb-2"
-                    >
-                      Production Format
-                    </label>
-                    <select
-                      id="enquiry-type"
-                      value={projectType}
-                      onChange={(e) => setProjectType(e.target.value)}
-                      className="w-full min-h-[44px] px-4 py-2.5 bg-[#070708] border border-[#F4F1EA]/20 text-sm text-[#F4F1EA] focus:outline-none focus:border-[#C8A45D]"
-                    >
-                      <option value="Narrative Feature / Short">Narrative Feature / Short</option>
-                      <option value="Commercial / Brand Film">Commercial / Brand Film</option>
-                      <option value="Documentary / Visual Essay">Documentary / Visual Essay</option>
-                      <option value="Music Video / Performance">Music Video / Performance</option>
-                      <option value="Visual & Lighting Consultation">
-                        Visual &amp; Lighting Consultation
-                      </option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label
-                      htmlFor="enquiry-timeline"
-                      className="block text-xs font-medium text-[#F4F1EA] mb-2"
-                    >
-                      Estimated Shoot Window / Location
-                    </label>
-                    <input
-                      id="enquiry-timeline"
-                      type="text"
-                      value={timeline}
-                      onChange={(e) => setTimeline(e.target.value)}
-                      placeholder="e.g. November 2026 · Mumbai / Ladakh"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      placeholder="+91 98765 43210"
                       className="w-full min-h-[44px] px-4 py-2.5 bg-[#070708] border border-[#F4F1EA]/20 text-sm text-[#F4F1EA] focus:outline-none focus:border-[#C8A45D]"
                     />
                   </div>

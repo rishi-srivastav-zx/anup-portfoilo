@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { Loader2, ShieldAlert, RefreshCw } from "lucide-react";
@@ -8,49 +8,51 @@ import { Loader2, ShieldAlert, RefreshCw } from "lucide-react";
 /**
  * Dashboard Authentication Guard (Client Component)
  * Ensures only authenticated users access protected dashboard routes.
- * Displays a branded cinematic loading state during initial session validation,
- * preventing layout flashing, empty state renders, or premature redirects.
+ * Uses a mounted-state boundary to guarantee 100% matching SSR HTML and client hydration.
+ * Renders immediately for authenticated sessions without layout shifts or full-screen flash.
  */
 export default function DashboardAuthGuard({ children }) {
     const { isAuthenticated, isInitializing, networkError, checkAuth } = useAuth();
     const router = useRouter();
+    const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
-        // Only redirect once initialization is strictly complete and user is confirmed unauthenticated
-        if (!isInitializing && !isAuthenticated && !networkError) {
+        setMounted(true);
+    }, []);
+
+    useEffect(() => {
+        // Only redirect once initialization is strictly complete on the client
+        if (mounted && !isInitializing && !isAuthenticated && !networkError) {
             router.replace("/login-page");
         }
-    }, [isInitializing, isAuthenticated, networkError, router]);
+    }, [mounted, isInitializing, isAuthenticated, networkError, router]);
 
-    // 1. Initial Authentication Check in progress (refresh or initial boot)
+    // 1. During SSR and initial client hydration, render children directly to guarantee
+    // server and client HTML match identically with zero hydration mismatch
+    if (!mounted) {
+        return <>{children}</>;
+    }
+
+    // 2. Client is mounted and authenticated: render children directly
+    if (isAuthenticated) {
+        return <>{children}</>;
+    }
+
+    // 3. Client is mounted and verifying a brand-new session with NO cached user
     if (isInitializing) {
         return (
             <div className="min-h-screen bg-[#E6DDD2] text-[#14100E] flex flex-col items-center justify-center p-6 antialiased select-none">
-                <div className="max-w-md w-full bg-[#F4EDE4] border border-[#D6CDC2] rounded-2xl p-8 shadow-xl text-center flex flex-col items-center">
-                    {/* Visual pulse icon */}
-                    <div className="w-12 h-12 rounded-xl bg-[#14100E] flex items-center justify-center text-[#F4EDE4] mb-5 shadow-md">
-                        <Loader2 className="w-6 h-6 animate-spin" />
-                    </div>
-
-                    <h2 className="font-sans font-bold text-lg text-[#14100E] tracking-tight mb-2">
-                        Authenticating Workspace
-                    </h2>
-                    <p className="font-mono text-xs text-[#6B625A] mb-6">
-                        Verifying encrypted session credentials with security vault...
-                    </p>
-
-                    {/* Security telemetry strip */}
-                    <div className="w-full bg-[#EAE2D7] border border-[#D6CDC2]/80 rounded-lg p-3 text-[10px] font-mono text-[#8C8278] flex items-center justify-between">
-                        <span>SESSION: VALIDATING</span>
-                        <span>&bull;</span>
-                        <span>HTTPONLY &bull; ARGON2ID</span>
-                    </div>
+                <div className="flex flex-col items-center gap-3">
+                    <Loader2 className="w-6 h-6 animate-spin text-[#14100E]" />
+                    <span className="font-mono text-xs text-[#6B625A] tracking-wider uppercase">
+                        Loading Studio Workspace...
+                    </span>
                 </div>
             </div>
         );
     }
 
-    // 2. Network or Backend Failure (prevent logging out on temporary server drops)
+    // 4. Connection interrupted on unauthenticated session: provide retry options
     if (networkError && !isAuthenticated) {
         return (
             <div className="min-h-screen bg-[#E6DDD2] text-[#14100E] flex flex-col items-center justify-center p-6 antialiased select-none">
@@ -86,15 +88,10 @@ export default function DashboardAuthGuard({ children }) {
         );
     }
 
-    // 3. Confirmed Unauthenticated: display placeholder while router.replace executes
-    if (!isAuthenticated) {
-        return (
-            <div className="min-h-screen bg-[#E6DDD2] text-[#14100E] flex items-center justify-center">
-                <Loader2 className="w-6 h-6 animate-spin text-[#8C8278]" />
-            </div>
-        );
-    }
-
-    // 4. Fully Authenticated: render protected dashboard pages
-    return <>{children}</>;
+    // 5. Unauthenticated: placeholder while router.replace executes
+    return (
+        <div className="min-h-screen bg-[#E6DDD2] text-[#14100E] flex items-center justify-center">
+            <Loader2 className="w-6 h-6 animate-spin text-[#8C8278]" />
+        </div>
+    );
 }

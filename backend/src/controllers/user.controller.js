@@ -13,6 +13,8 @@ export const userController = {
                 [req.user.id]
             );
 
+            res.setHeader("Cache-Control", "private, no-cache, no-store, must-revalidate");
+
             res.status(200).json({
                 success: true,
                 message: "User dashboard data retrieved.",

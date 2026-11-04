@@ -6,15 +6,19 @@ export const RouteMapBoard: React.FC = () => {
     const { routeBoard, projects } = config;
     const { dummyStationsList } = routeBoard;
 
-    const totalNodes = transitStations.length + dummyStationsList.length; // 6 + 5 = 11
+    const totalNodes =
+        transitStations.length <= 1
+            ? 1
+            : transitStations.length + (transitStations.length - 1);
+    const divisor = Math.max(1, totalNodes - 1);
     const targetNodeIndex = activeStationIdx * 2;
-    const targetPercentage = (targetNodeIndex / (totalNodes - 1)) * 100;
+    const targetPercentage = (targetNodeIndex / divisor) * 100;
 
     const nodes = Array.from({ length: totalNodes }, (_, i) => {
         const isMajor = i % 2 === 0;
         const majorIndex = isMajor ? i / 2 : -1;
         const dummyIndex = isMajor ? -1 : (i - 1) / 2;
-        const left = (i / (totalNodes - 1)) * 100;
+        const left = (i / divisor) * 100;
         const isCompletedOrActive = i <= targetNodeIndex;
 
         if (isMajor) {
@@ -62,7 +66,12 @@ export const RouteMapBoard: React.FC = () => {
             );
         }
 
-        let name = dummyStationsList[dummyIndex] || "";
+        let name =
+            (projects[dummyIndex] as any)?.floatingTag ||
+            projects[dummyIndex]?.tags?.[0] ||
+            dummyStationsList[dummyIndex] ||
+            "FEATURED";
+        name = name.toUpperCase();
         if (name === "VISHWAVIDYALAYA") {
             name = "VISHWA-<br/>VIDYALAYA";
         } else if (name.includes(" ")) {

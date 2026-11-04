@@ -18,6 +18,7 @@ import {
     type SketchbookPage,
     type SketchbookTypography,
 } from "../config/sketchbook.config";
+import { sketchbookService } from "@/api";
 
 interface SketchbookContextType {
     // State
@@ -130,6 +131,33 @@ export function SketchbookProvider({
     // Template HTML fetched from public
     const [baseHtml, setBaseHtml] = useState<string>("");
     const frameRef = useRef<HTMLIFrameElement | null>(null);
+
+    // Fetch curated plates from backend API (max 10)
+    useEffect(() => {
+        let isCancelled = false;
+        const loadPlates = async () => {
+            try {
+                const res = await sketchbookService.getImages();
+                if (isCancelled) return;
+                if (res?.data && Array.isArray(res.data) && res.data.length > 0) {
+                    const mapped = res.data.map((item, idx) => ({
+                        id: item.id || ("custom-plate-" + idx),
+                        file: item.image_url,
+                        title: item.title || ("Plate " + (idx + 1)),
+                        place: item.place || "",
+                        description: item.description || "",
+                        thumbnailUrl: item.thumbnail_url || item.image_url,
+                        isCustom: true,
+                    }));
+                    setPages(mapped);
+                }
+            } catch (err) {
+                console.log("Using initial fallback plates:", err);
+            }
+        };
+        loadPlates();
+        return () => { isCancelled = true; };
+    }, []);
 
     // Fetch base HTML template for dynamic page rewriting
     useEffect(() => {

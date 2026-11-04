@@ -15,12 +15,12 @@ export const verifyCsrfOrigin = (req, res, next) => {
 
     // Allowed origins: configured frontend URL and local dev URLs
     const allowedOrigins = [
-        env.FRONTEND_URL,
+        env.FRONTEND_URL?.replace(/\/+$/, ""),
         "http://localhost:3000",
         "http://localhost:3001",
         "http://127.0.0.1:3000",
         "http://127.0.0.1:3001",
-    ];
+    ].filter(Boolean);
 
     if (origin) {
         if (allowedOrigins.some((allowed) => origin.startsWith(allowed))) {

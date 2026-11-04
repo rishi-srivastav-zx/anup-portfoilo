@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { usePathname } from 'next/navigation';
 import { motion, useMotionValue, useSpring, useTransform, useVelocity, useReducedMotion } from 'framer-motion';
 
@@ -53,6 +53,94 @@ function ClosedHandIcon({ className = "w-4 h-4" }) {
   );
 }
 
+/**
+ * Checks whether an element or its nearest visible container has a dark background
+ * by traversing up ancestors and checking attributes, classes, and computed color luminance.
+ */
+function isDarkBackground(element) {
+  if (!element || typeof window === 'undefined') return false;
+
+  let curr = element;
+  let depth = 0;
+
+  while (curr && curr !== document.documentElement && curr !== document.body && depth < 10) {
+    depth++;
+
+    // 1. Explicit data attributes
+    if (curr.dataset) {
+      if (
+        curr.dataset.theme === 'dark' ||
+        curr.dataset.theme === 'dark-section' ||
+        curr.dataset.cursorDark === 'true' ||
+        curr.dataset.cursorTheme === 'dark'
+      ) {
+        return true;
+      }
+      if (curr.dataset.theme === 'light' || curr.dataset.cursorDark === 'false') {
+        return false;
+      }
+    }
+
+    // 2. Common dark classes and video / dark media tags
+    if (curr.tagName === 'VIDEO') return true;
+
+    if (curr.classList) {
+      if (
+        curr.classList.contains('dark') ||
+        curr.classList.contains('bg-black') ||
+        curr.classList.contains('bg-ink') ||
+        curr.classList.contains('bg-panel') ||
+        curr.classList.contains('bg-zinc-900') ||
+        curr.classList.contains('bg-zinc-950') ||
+        curr.classList.contains('bg-neutral-900') ||
+        curr.classList.contains('bg-neutral-950')
+      ) {
+        return true;
+      }
+    }
+
+    // 3. Computed background color luminance calculation
+    try {
+      const style = window.getComputedStyle(curr);
+      const bg = style.backgroundColor;
+      if (bg && bg !== 'transparent' && bg !== 'rgba(0, 0, 0, 0)') {
+        const rgb = bg.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
+        if (rgb) {
+          const alpha = rgb[4] !== undefined ? parseFloat(rgb[4]) : 1;
+          if (alpha > 0.25) {
+            const r = parseInt(rgb[1], 10);
+            const g = parseInt(rgb[2], 10);
+            const b = parseInt(rgb[3], 10);
+            // Perceived brightness (ITU-R BT.601)
+            const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
+            return luminance < 135; // Luminance < 135 qualifies as dark
+          }
+        }
+      }
+    } catch {
+      // Ignore security or frame errors
+    }
+
+    curr = curr.parentElement;
+  }
+
+  // Check document.body computed background
+  try {
+    const bodyBg = window.getComputedStyle(document.body).backgroundColor;
+    if (bodyBg && bodyBg !== 'transparent' && bodyBg !== 'rgba(0, 0, 0, 0)') {
+      const rgb = bodyBg.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
+      if (rgb) {
+        const r = parseInt(rgb[1], 10);
+        const g = parseInt(rgb[2], 10);
+        const b = parseInt(rgb[3], 10);
+        return (0.299 * r + 0.587 * g + 0.114 * b) < 135;
+      }
+    }
+  } catch {}
+
+  return false;
+}
+
 export default function CustomCursor() {
   const pathname = usePathname();
   const isDashboard = pathname?.startsWith('/dashboard');
@@ -62,6 +150,7 @@ export default function CustomCursor() {
   const [hoverLabel, setHoverLabel] = useState(null);
   const [isMouseDown, setIsMouseDown] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
+  const [isDark, setIsDark] = useState(false);
   const shouldReduceMotion = useReducedMotion();
 
   const mouseX = useMotionValue(-100);
@@ -87,10 +176,11 @@ export default function CustomCursor() {
     }
   );
 
-  const isVisibleRef = React.useRef(false);
-  const hoverTypeRef = React.useRef(hoverType);
-  const hoverLabelRef = React.useRef(hoverLabel);
-  const lastTargetRef = React.useRef(null);
+  const isVisibleRef = useRef(false);
+  const hoverTypeRef = useRef(hoverType);
+  const hoverLabelRef = useRef(hoverLabel);
+  const isDarkRef = useRef(false);
+  const lastTargetRef = useRef(null);
 
   useEffect(() => {
     setMounted(true);
@@ -121,6 +211,14 @@ export default function CustomCursor() {
       }
     };
 
+    const updateDarkMode = (target) => {
+      const dark = isDarkBackground(target);
+      if (isDarkRef.current !== dark) {
+        isDarkRef.current = dark;
+        setIsDark(dark);
+      }
+    };
+
     const moveCursor = (e) => {
       mouseX.set(e.clientX);
       mouseY.set(e.clientY);
@@ -135,6 +233,8 @@ export default function CustomCursor() {
       // Skip expensive DOM traversal if target element hasn't changed
       if (target === lastTargetRef.current) return;
       lastTargetRef.current = target;
+
+      updateDarkMode(target);
 
       let nextType = null;
       let nextLabel = null;
@@ -165,6 +265,24 @@ export default function CustomCursor() {
       updateHoverState(nextType, nextLabel);
     };
 
+    // When scrolling with mouse fixed, re-evaluate target element and dark section status
+    let scrollRaf = null;
+    const handleScroll = () => {
+      if (scrollRaf) return;
+      scrollRaf = requestAnimationFrame(() => {
+        scrollRaf = null;
+        const x = mouseX.get();
+        const y = mouseY.get();
+        if (x >= 0 && y >= 0 && x <= window.innerWidth && y <= window.innerHeight) {
+          const el = document.elementFromPoint(x, y);
+          if (el && el !== lastTargetRef.current) {
+            lastTargetRef.current = el;
+            updateDarkMode(el);
+          }
+        }
+      });
+    };
+
     const handleCustomCursor = (e) => {
       const { clientX, clientY, hoverType: customHover, hoverLabel: customLabel, isDown, isLeave } = e.detail || {};
       if (isLeave) {
@@ -179,6 +297,8 @@ export default function CustomCursor() {
           isVisibleRef.current = true;
           setIsVisible(true);
         }
+        const el = document.elementFromPoint(clientX, clientY);
+        if (el) updateDarkMode(el);
       }
       if (customHover !== undefined || customLabel !== undefined) {
         updateHoverState(
@@ -206,6 +326,7 @@ export default function CustomCursor() {
     };
 
     window.addEventListener('mousemove', moveCursor);
+    window.addEventListener('scroll', handleScroll, { passive: true, capture: true });
     window.addEventListener('custom-cursor-move', handleCustomCursor);
     window.addEventListener('mousedown', handleMouseDown);
     window.addEventListener('mouseup', handleMouseUp);
@@ -215,25 +336,27 @@ export default function CustomCursor() {
     return () => {
       document.body.style.cursor = 'auto';
       window.removeEventListener('mousemove', moveCursor);
+      window.removeEventListener('scroll', handleScroll, { capture: true });
       window.removeEventListener('custom-cursor-move', handleCustomCursor);
       window.removeEventListener('mousedown', handleMouseDown);
       window.removeEventListener('mouseup', handleMouseUp);
       document.removeEventListener('mouseleave', handleMouseLeave);
       document.removeEventListener('mouseenter', handleMouseEnter);
+      if (scrollRaf) cancelAnimationFrame(scrollRaf);
     };
   }, [mouseX, mouseY, isDashboard]);
 
   if (!mounted || shouldReduceMotion || isDashboard) return null;
   if (typeof window !== 'undefined' && window.matchMedia('(hover: none) and (pointer: coarse)').matches) return null;
 
-  // Variants for the outer cursor element
+  // Variants for the outer cursor element with seamless dark/light section color adaptation
   const ringVariants = {
     default: {
       width: 36,
       minWidth: 36,
       height: 36,
       backgroundColor: 'rgba(20, 16, 14, 0)',
-      border: '1.5px solid #14100E',
+      border: isDark ? '1.5px solid #FFFFFF' : '1.5px solid #14100E',
       borderRadius: '50%',
       scale: isMouseDown ? 0.8 : 1,
       padding: '0px',
@@ -242,8 +365,8 @@ export default function CustomCursor() {
       width: 44,
       minWidth: 44,
       height: 44,
-      backgroundColor: '#14100E',
-      border: '1.5px solid rgba(244, 237, 228, 0.35)',
+      backgroundColor: isDark ? '#FFFFFF' : '#14100E',
+      border: isDark ? '1.5px solid rgba(20, 16, 14, 0.15)' : '1.5px solid rgba(244, 237, 228, 0.35)',
       borderRadius: '50%',
       scale: isMouseDown ? 0.85 : 1,
       padding: '0px',
@@ -252,8 +375,8 @@ export default function CustomCursor() {
       width: 44,
       minWidth: 44,
       height: 44,
-      backgroundColor: '#14100E',
-      border: '1.5px solid rgba(244, 237, 228, 0.35)',
+      backgroundColor: isDark ? '#FFFFFF' : '#14100E',
+      border: isDark ? '1.5px solid rgba(20, 16, 14, 0.15)' : '1.5px solid rgba(244, 237, 228, 0.35)',
       borderRadius: '50%',
       scale: isMouseDown ? 0.85 : 1,
       padding: '0px',
@@ -262,8 +385,8 @@ export default function CustomCursor() {
       width: 'auto',
       minWidth: 48,
       height: 38,
-      backgroundColor: '#14100E',
-      border: '1.5px solid rgba(244, 237, 228, 0.35)',
+      backgroundColor: isDark ? '#FFFFFF' : '#14100E',
+      border: isDark ? '1.5px solid rgba(20, 16, 14, 0.15)' : '1.5px solid rgba(244, 237, 228, 0.35)',
       borderRadius: '20px',
       scale: isMouseDown ? 0.92 : 1,
       padding: '0 12px',
@@ -272,8 +395,8 @@ export default function CustomCursor() {
       width: 84,
       minWidth: 84,
       height: 84,
-      backgroundColor: '#14100E',
-      border: '0px solid #14100E',
+      backgroundColor: isDark ? '#FFFFFF' : '#14100E',
+      border: isDark ? '0px solid #FFFFFF' : '0px solid #14100E',
       borderRadius: '50%',
       scale: isMouseDown ? 0.8 : 1,
       padding: '0px',
@@ -282,8 +405,8 @@ export default function CustomCursor() {
       width: 2,
       minWidth: 2,
       height: 24,
-      backgroundColor: '#14100E',
-      border: '0px solid #14100E',
+      backgroundColor: isDark ? '#FFFFFF' : '#14100E',
+      border: '0px solid transparent',
       borderRadius: '0%',
       scale: 1,
       padding: '0px',
@@ -291,7 +414,7 @@ export default function CustomCursor() {
   };
 
   return (
-    <div className="fixed inset-0 pointer-events-none z-[9999]" style={{ opacity: isVisible ? 1 : 0, transition: 'opacity 0.25s ease' }}>
+    <div className="fixed inset-0 pointer-events-none z-[9999999]" style={{ opacity: isVisible ? 1 : 0, transition: 'opacity 0.25s ease', zIndex: 9999999 }}>
       <motion.div
         className="absolute top-0 left-0 flex items-center justify-center -translate-x-1/2 -translate-y-1/2"
         style={{
@@ -306,7 +429,11 @@ export default function CustomCursor() {
           variants={ringVariants}
           animate={hoverType || 'default'}
           transition={{ type: 'spring', stiffness: 350, damping: 26 }}
-          className="flex items-center justify-center overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.22)]"
+          className={`flex items-center justify-center overflow-hidden ${
+            isDark
+              ? 'shadow-[0_0_20px_rgba(255,255,255,0.35)]'
+              : 'shadow-[0_4px_20px_rgba(0,0,0,0.22)]'
+          } transition-shadow duration-200`}
         >
           {/* Pointer Hand (👆) for clickable items */}
           {(hoverType === 'pointer' || hoverType === 'link') && (
@@ -314,7 +441,7 @@ export default function CustomCursor() {
               initial={{ scale: 0.5, opacity: 0 }}
               animate={{ scale: isMouseDown ? 0.85 : 1, opacity: 1 }}
               transition={{ duration: 0.15 }}
-              className="text-[#F4EDE4] flex items-center justify-center"
+              className={`${isDark ? 'text-[#14100E]' : 'text-[#F4EDE4]'} flex items-center justify-center`}
             >
               <PointerHandIcon className="w-5 h-5 drop-shadow-sm" />
             </motion.div>
@@ -326,12 +453,12 @@ export default function CustomCursor() {
               initial={{ opacity: 0, scale: 0.85 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.15 }}
-              className="flex items-center gap-1.5 text-[#F4EDE4] whitespace-nowrap"
+              className={`flex items-center gap-1.5 ${isDark ? 'text-[#14100E]' : 'text-[#F4EDE4]'} whitespace-nowrap`}
             >
               {isMouseDown ? (
-                <ClosedHandIcon className="w-4 h-4 text-[#F4EDE4] shrink-0" />
+                <ClosedHandIcon className={`w-4 h-4 ${isDark ? 'text-[#14100E]' : 'text-[#F4EDE4]'} shrink-0`} />
               ) : (
-                <OpenHandIcon className="w-4 h-4 text-[#F4EDE4] shrink-0" />
+                <OpenHandIcon className={`w-4 h-4 ${isDark ? 'text-[#14100E]' : 'text-[#F4EDE4]'} shrink-0`} />
               )}
               {hoverLabel && (
                 <span className="text-[9.5px] uppercase tracking-widest font-mono font-medium pl-0.5">
@@ -347,7 +474,7 @@ export default function CustomCursor() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.1 }}
-              className="text-[#F4EDE4] text-[9px] uppercase tracking-widest font-medium whitespace-nowrap font-sans"
+              className={`${isDark ? 'text-[#14100E]' : 'text-[#F4EDE4]'} text-[9px] uppercase tracking-widest font-medium whitespace-nowrap font-sans`}
             >
               Showreel
             </motion.span>
@@ -357,9 +484,12 @@ export default function CustomCursor() {
 
       {/* Center dot (only visible in default ring state) */}
       <motion.div
-        className="absolute top-0 left-0 w-1.5 h-1.5 bg-[#14100E] rounded-full -translate-x-1/2 -translate-y-1/2"
+        className="absolute top-0 left-0 w-1.5 h-1.5 rounded-full -translate-x-1/2 -translate-y-1/2"
         style={{ x: mouseX, y: mouseY }}
-        animate={{ opacity: (hoverType === null && !isMouseDown) ? 1 : 0 }}
+        animate={{
+          opacity: (hoverType === null && !isMouseDown) ? 1 : 0,
+          backgroundColor: isDark ? '#FFFFFF' : '#14100E',
+        }}
         transition={{ duration: 0.15 }}
       />
     </div>

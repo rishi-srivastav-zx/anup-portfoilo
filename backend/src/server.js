@@ -9,6 +9,11 @@ import { pool } from "./config/db.js";
 import authRoutes from "./routes/auth.routes.js";
 import userRoutes from "./routes/user.routes.js";
 import adminRoutes from "./routes/admin.routes.js";
+import blogRoutes from "./routes/blog.routes.js";
+import enquiryRoutes from "./routes/enquiry.routes.js";
+import sketchbookRoutes from "./routes/sketchbook.routes.js";
+import workProjectRoutes from "./routes/workProject.routes.js";
+import chatRoutes from "./routes/chat.routes.js";
 
 // Error Handlers
 import {
@@ -27,18 +32,19 @@ app.use(
 
 // Secure CORS configuration with credentials support
 const allowedOrigins = [
-    env.FRONTEND_URL,
+    env.FRONTEND_URL?.replace(/\/+$/, ""),
     "http://localhost:3000",
     "http://localhost:3001",
     "http://127.0.0.1:3000",
     "http://127.0.0.1:3001",
-];
+].filter(Boolean);
 
 app.use(
     cors({
         origin: (origin, callback) => {
             // Allow requests with no origin (e.g. mobile apps, curl, server-to-server)
-            if (!origin || allowedOrigins.includes(origin)) {
+            const cleanOrigin = origin?.replace(/\/+$/, "");
+            if (!cleanOrigin || allowedOrigins.includes(cleanOrigin)) {
                 callback(null, true);
             } else {
                 callback(new Error(`Origin ${origin} not allowed by CORS`));
@@ -90,6 +96,13 @@ app.get("/api/health", async (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/blogs", blogRoutes);
+app.use("/api/enquiries", enquiryRoutes);
+app.use("/api/leads", enquiryRoutes);
+app.use("/api/sketchbook", sketchbookRoutes);
+app.use("/api/sketchbook-images", sketchbookRoutes);
+app.use("/api/work-projects", workProjectRoutes);
+app.use("/api/chat", chatRoutes);
 
 // Catch-all 404 handler
 app.use(notFoundHandler);

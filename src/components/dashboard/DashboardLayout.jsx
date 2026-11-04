@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import Sidebar from "./Sidebar";
-import DashboardHeader from "./DashboardHeader";
+import DashboardSidebar from "@/components/sidebar/DashboardSidebar";
+import DashboardHeader from "@/components/header/DashboardHeader";
 import CommandPalette from "./CommandPalette";
 import QuickCreateModal from "./QuickCreateModal";
 import ScreeningRoomModal from "./ScreeningRoomModal";
@@ -45,8 +45,8 @@ export default function DashboardLayout({
 
     return (
         <div className="min-h-screen bg-[#E6DDD2] text-[#14100E] font-sans flex antialiased selection:bg-[#14100E] selection:text-[#F4EDE4]">
-            {/* Sidebar */}
-            <Sidebar
+            {/* Dashboard Sidebar */}
+            <DashboardSidebar
                 activeView={activeView}
                 onSelectView={onSelectView}
                 isCollapsed={isCollapsed}

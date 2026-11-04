@@ -89,7 +89,7 @@ export const CinematicVideoDisplay: React.FC<CinematicVideoDisplayProps> = ({
     if (!videoWebm && !videoMov) {
         return (
             <div className={`w-full h-full flex items-center justify-center bg-[#14100E] ${className}`}>
-                <h3 className="font-['Schoolbell'] text-[32px] md:text-[50px] text-white/90 text-center">
+                <h3 className="font-sans text-[32px] md:text-[50px] text-white/90 text-center">
                     {title}
                 </h3>
             </div>
@@ -110,9 +110,11 @@ export const CinematicVideoDisplay: React.FC<CinematicVideoDisplayProps> = ({
                     loop
                     muted={isMuted}
                     playsInline
+                    src={videoWebm || videoMov}
                     className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-500 ease-out"
                 >
                     {videoWebm && <source src={videoWebm} type="video/webm" />}
+                    {videoWebm && <source src={videoWebm} type="video/mp4" />}
                     {videoMov && <source src={videoMov} type="video/quicktime" />}
                 </video>
 
@@ -176,7 +178,7 @@ export const CinematicVideoDisplay: React.FC<CinematicVideoDisplayProps> = ({
                         {/* Cinema Header */}
                         <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between p-4 bg-gradient-to-b from-black/90 to-transparent">
                             <div className="flex flex-col">
-                                <span className="font-['Schoolbell'] text-xl text-white font-bold leading-none drop-shadow">
+                                <span className="font-sans text-xl text-white font-bold leading-none drop-shadow">
                                     {title}
                                 </span>
                                 <span className="font-['DM_Mono'] text-[10px] text-[#D4A017] tracking-widest uppercase mt-1">
@@ -202,9 +204,11 @@ export const CinematicVideoDisplay: React.FC<CinematicVideoDisplayProps> = ({
                                 loop
                                 controls
                                 playsInline
+                                src={videoWebm || videoMov}
                                 className="w-full h-full object-contain"
                             >
                                 {videoWebm && <source src={videoWebm} type="video/webm" />}
+                                {videoWebm && <source src={videoWebm} type="video/mp4" />}
                                 {videoMov && <source src={videoMov} type="video/quicktime" />}
                             </video>
                         </div>

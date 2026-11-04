@@ -1,24 +1,25 @@
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Caveat:wght@400;600;700&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Dr+Sugiyama&family=Gloria+Hallelujah&family=Homemade+Apple&family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600;700;800;900&family=Kalam:wght@400;700&family=Patrick+Hand&family=Permanent+Marker&family=Plus+Jakarta+Sans:wght@400;600;800;900&family=Schoolbell&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Jost:wght@400;500;600&family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600&family=Bebas+Neue&family=Caveat:wght@400;600;700&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Dr+Sugiyama&family=Gloria+Hallelujah&family=Homemade+Apple&family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600;700;800;900&family=Kalam:wght@400;700&family=Patrick+Hand&family=Permanent+Marker&family=Plus+Jakarta+Sans:wght@400;600;800;900&family=Schoolbell&display=swap');
 @import "tailwindcss";
+@config "../tailwind.config.js";
 
 :root {
   --background: #ffffff;
   --foreground: #171717;
 }
 
-.font-bebas { font-family: 'Bebas Neue', sans-serif; }
-.font-caveat { font-family: 'Caveat', cursive; }
-.font-gloria { font-family: 'Gloria Hallelujah', cursive; }
-.font-signature { font-family: 'Homemade Apple', cursive; }
+.font-bebas { font-family: 'Montserrat', sans-serif; }
+.font-caveat { font-family: 'Montserrat', sans-serif; }
+.font-gloria { font-family: 'Montserrat', sans-serif; }
+.font-signature { font-family: 'Montserrat', sans-serif; }
 .font-dm-mono { font-family: 'DM Mono', monospace; }
-.font-dm-sans { font-family: 'DM Sans', sans-serif; }
-.font-inter { font-family: 'Inter', sans-serif; }
+.font-dm-sans { font-family: 'Montserrat', sans-serif; }
+.font-inter { font-family: 'Montserrat', sans-serif; }
 .font-serif-italic { font-family: 'Instrument Serif', Georgia, serif; }
-.font-schoolbell { font-family: 'Schoolbell', cursive; }
-.font-sugiyama { font-family: 'Dr Sugiyama', cursive; }
-.font-kalam { font-family: 'Kalam', cursive; }
-.font-patrick { font-family: 'Patrick Hand', cursive; }
-.font-marker { font-family: 'Permanent Marker', cursive; }
+.font-schoolbell { font-family: 'Montserrat', sans-serif; }
+.font-sugiyama { font-family: 'Montserrat', sans-serif; }
+.font-kalam { font-family: 'Montserrat', sans-serif; }
+.font-patrick { font-family: 'Montserrat', sans-serif; }
+.font-marker { font-family: 'Montserrat', sans-serif; }
 
 /* 01 — ORIGIN / THE BEGINNING STYLES */
 .book-viewport {
@@ -101,11 +102,38 @@
 
 
 
-@theme inline {
+@theme {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --color-ink: #0c0a08;
+  --color-panel: #14110d;
+  --color-line: #2c241a;
+  --color-gold: #d6ae67;
+  --color-goldsoft: #f0d9a4;
+  --color-bone: #efe6d6;
+  --color-mute: #9a8f7d;
+
+  --font-sans: 'Montserrat', var(--font-geist-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-mono: var(--font-geist-mono);
+  --font-display: "Cormorant Garamond", Georgia, serif;
+  --font-body: Jost, system-ui, sans-serif;
+
+  --animate-ping2: ping2 2.6s cubic-bezier(0, 0, .2, 1) infinite;
+  --animate-rise: rise .32s cubic-bezier(.2, .8, .2, 1) both;
+  --animate-msg: msg .25s ease-out both;
+
+  @keyframes ping2 {
+    0% { transform: scale(1); opacity: .55; }
+    80%, 100% { transform: scale(1.7); opacity: 0; }
+  }
+  @keyframes rise {
+    0% { transform: translateY(14px) scale(.97); opacity: 0; }
+    100% { transform: none; opacity: 1; }
+  }
+  @keyframes msg {
+    0% { transform: translateY(6px); opacity: 0; }
+    100% { transform: none; opacity: 1; }
+  }
 }
 
 @media (prefers-color-scheme: dark) {
@@ -118,7 +146,7 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Montserrat', var(--font-geist-sans), -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 /* Lenis recommended CSS */
@@ -158,25 +186,25 @@ body.lenis-scrolling iframe,
   }
 
   html {
-    overflow-x: hidden;
+    overflow-x: clip;
   }
 
   body {
     background-color: #010204;
     color: var(--beige);
-    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-    overflow-x: hidden;
+    font-family: 'Montserrat', var(--font-geist-sans), -apple-system, BlinkMacSystemFont, sans-serif;
+    overflow-x: clip;
   }
 }
 
 /* --- Font Utility Classes --- */
-.font-schoolbell { font-family: 'Schoolbell', cursive, sans-serif; }
-.font-gloria { font-family: 'Gloria Hallelujah', cursive, sans-serif; }
-.font-sugiyama { font-family: 'Dr Sugiyama', cursive, sans-serif; }
-.font-bebas { font-family: 'Bebas Neue', sans-serif; }
+.font-schoolbell { font-family: 'Montserrat', sans-serif; }
+.font-gloria { font-family: 'Montserrat', sans-serif; }
+.font-sugiyama { font-family: 'Montserrat', sans-serif; }
+.font-bebas { font-family: 'Montserrat', sans-serif; }
 .font-dm-mono { font-family: 'DM Mono', monospace; }
-.font-dm-sans { font-family: 'DM Sans', sans-serif; }
-.font-inter { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
+.font-dm-sans { font-family: 'Montserrat', sans-serif; }
+.font-inter { font-family: 'Montserrat', sans-serif; }
 
 /* --- 3D Book Viewport & Container --- */
 .book-viewport {
@@ -309,11 +337,34 @@ body.lenis-scrolling iframe,
 }
 
 /* --- Footer Section Cinematic Utilities --- */
-.font-brush { font-family: 'Kaushan Script', 'Caveat', cursive; }
-.font-signature { font-family: 'Caveat', cursive; }
-.font-marker { font-family: 'Rock Salt', cursive; }
+.font-brush { font-family: 'Montserrat', sans-serif; }
+.font-signature { font-family: 'Montserrat', sans-serif; }
+.font-marker { font-family: 'Montserrat', sans-serif; }
 .font-mono-slate { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
 .studio-film-grain {
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.045'/%3E%3C/svg%3E");
 }
 
+
+/* Chat Assistant Custom Scrollbar & Containment */
+.chat-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(214, 174, 103, 0.45) rgba(20, 17, 13, 0.6);
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+.chat-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.chat-scrollbar::-webkit-scrollbar-track {
+  background: rgba(20, 17, 13, 0.6);
+  border-radius: 6px;
+}
+.chat-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(214, 174, 103, 0.38);
+  border-radius: 6px;
+  border: 1px solid rgba(214, 174, 103, 0.2);
+}
+.chat-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(214, 174, 103, 0.7);
+}

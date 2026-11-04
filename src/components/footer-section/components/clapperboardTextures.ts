@@ -54,11 +54,11 @@ export function createSlateFaceTextures(
 
   // Engraved text & lines are smoother (darker in roughness map = shinier specular reflection)
   rCtx.fillStyle = '#262626';
-  rCtx.font = '700 142px "Plus Jakarta Sans", -apple-system, sans-serif';
+  rCtx.font = '700 142px "Montserrat", -apple-system, sans-serif';
   rCtx.letterSpacing = '14px';
   rCtx.textAlign = 'center';
   rCtx.fillText('ANUP RAWAT', centerX, centerY - 22);
-  rCtx.font = '600 44px "Plus Jakarta Sans", -apple-system, sans-serif';
+  rCtx.font = '600 44px "Montserrat", -apple-system, sans-serif';
   rCtx.letterSpacing = '18px';
   rCtx.fillText('CINEMATOGRAPHER', centerX, centerY + 86);
 
@@ -73,7 +73,7 @@ export function createSlateFaceTextures(
   bCtx.lineWidth = 4;
   bCtx.strokeRect(pad, pad, width - pad * 2, height - pad * 2);
   bCtx.fillStyle = '#a8a8a8';
-  bCtx.font = '700 142px "Plus Jakarta Sans", -apple-system, sans-serif';
+  bCtx.font = '700 142px "Montserrat", -apple-system, sans-serif';
   bCtx.letterSpacing = '14px';
   bCtx.textAlign = 'center';
   bCtx.fillText('ANUP RAWAT', centerX, centerY - 22);
@@ -179,7 +179,7 @@ function drawSlateFaceAlbedo(
 
   // Subtle top bay engraved labels
   ctx.fillStyle = 'rgba(245, 240, 230, 0.38)';
-  ctx.font = '600 28px "Plus Jakarta Sans", sans-serif';
+  ctx.font = '600 28px "Montserrat", sans-serif';
   ctx.letterSpacing = '6px';
   ctx.textAlign = 'center';
   ctx.fillText('ROLL', (pad + col1) / 2, pad + 64);
@@ -201,14 +201,14 @@ function drawSlateFaceAlbedo(
   const centerY = (topBayBottom + centerBayBottom) / 2;
 
   ctx.fillStyle = '#f5f0e6';
-  ctx.font = '700 142px "Plus Jakarta Sans", -apple-system, sans-serif';
+  ctx.font = '700 142px "Montserrat", -apple-system, sans-serif';
   ctx.letterSpacing = '14px';
   ctx.textAlign = 'center';
   ctx.fillText('ANUP RAWAT', centerX, centerY - 22);
 
   // Subtitle: CINEMATOGRAPHER
   ctx.fillStyle = '#3b82f6';
-  ctx.font = '600 44px "Plus Jakarta Sans", -apple-system, sans-serif';
+  ctx.font = '600 44px "Montserrat", -apple-system, sans-serif';
   ctx.letterSpacing = '18px';
   ctx.fillText('CINEMATOGRAPHER', centerX, centerY + 86);
 
@@ -238,17 +238,17 @@ function drawSlateFaceAlbedo(
 
   ctx.textAlign = 'left';
   ctx.fillStyle = 'rgba(245, 240, 230, 0.36)';
-  ctx.font = '600 26px "Plus Jakarta Sans", sans-serif';
+  ctx.font = '600 26px "Montserrat", sans-serif';
   ctx.letterSpacing = '5px';
   ctx.fillText('UNIT / VISUAL DIRECTION', pad + 48, centerBayBottom + 64);
 
   ctx.fillStyle = 'rgba(245, 240, 230, 0.85)';
-  ctx.font = '600 54px "Plus Jakarta Sans", sans-serif';
+  ctx.font = '600 54px "Montserrat", sans-serif';
   ctx.letterSpacing = '4px';
   ctx.fillText('BAAZ CINEMA', pad + 48, centerBayBottom + 185);
 
   ctx.fillStyle = 'rgba(245, 240, 230, 0.36)';
-  ctx.font = '600 26px "Plus Jakarta Sans", sans-serif';
+  ctx.font = '600 26px "Montserrat", sans-serif';
   ctx.letterSpacing = '5px';
   ctx.fillText('RATE / OPTICS', bottomSplit + 48, centerBayBottom + 64);
 

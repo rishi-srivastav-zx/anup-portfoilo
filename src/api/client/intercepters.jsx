@@ -61,12 +61,16 @@ export const setupInterceptors = (axiosInstance) => {
     // -------------------------------------------------------------------------
     axiosInstance.interceptors.request.use(
         (config) => {
-            // Anti-caching: attach _t timestamp on all GET requests
-            if (config.method?.toLowerCase() === "get") {
+            // Only attach cache-busting timestamp if caller explicitly requests it (e.g. manual refresh)
+            if (
+                config.method?.toLowerCase() === "get" &&
+                (config.noCache || config.params?.noCache)
+            ) {
                 config.params = {
                     ...config.params,
                     _t: Date.now(),
                 };
+                delete config.params.noCache;
             }
 
             // Always send credentials with cross-origin requests
@@ -129,26 +133,36 @@ export const setupInterceptors = (axiosInstance) => {
                             },
                         );
 
-                        if (!refreshResponse.ok) {
-                            throw new Error(
-                                "Session expired. Please log in again.",
-                            );
+                        if (refreshResponse.ok) {
+                            isRefreshing = false;
+                            onRefreshed();
+                            // Retry original request — browser will automatically include updated cookie
+                            return axiosInstance(originalRequest);
                         }
 
-                        // Express sets the new accessToken cookie automatically in response
-                        isRefreshing = false;
-                        onRefreshed();
+                        // Only confirmed 401 means the refresh token is genuinely dead
+                        if (refreshResponse.status === 401) {
+                            isRefreshing = false;
+                            const authErr = new Error("Session expired. Please log in again.");
+                            onRefreshFailed(authErr);
+                            if (onUnauthorizedCallback) {
+                                onUnauthorizedCallback(authErr);
+                            }
+                            return Promise.reject(authErr);
+                        }
 
-                        // Retry original request — browser will automatically include updated cookie
-                        return axiosInstance(originalRequest);
+                        // Temporary server error (5xx) or rate limit (429) during refresh:
+                        // Do NOT logout user!
+                        isRefreshing = false;
+                        const temporaryErr = new Error("Server temporarily unavailable during session refresh.");
+                        onRefreshFailed(temporaryErr);
+                        broadcastNetworkError(temporaryErr);
+                        return Promise.reject(temporaryErr);
                     } catch (refreshError) {
+                        // Network drop or timeout during refresh: DO NOT call onUnauthorizedCallback!
                         isRefreshing = false;
                         onRefreshFailed(refreshError);
-
-                        if (onUnauthorizedCallback) {
-                            onUnauthorizedCallback(refreshError);
-                        }
-
+                        broadcastNetworkError(refreshError);
                         return Promise.reject(refreshError);
                     }
                 }

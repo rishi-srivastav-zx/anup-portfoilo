@@ -109,12 +109,12 @@ export const MetroDoorsOverlay: React.FC = () => {
           ANUP RAWAT // CINEMA TRANSIT
         </span>
 
-        <h2 className="font-['Bebas_Neue'] text-3xl sm:text-5xl md:text-6xl lg:text-7xl text-[#14100E] leading-[0.92] tracking-tight text-center uppercase">
+        <h2 className="font-sans text-3xl sm:text-5xl md:text-6xl lg:text-7xl text-[#14100E] leading-[0.92] tracking-tight text-center uppercase">
           <span className="block whitespace-nowrap">{welcomeDoors.hindiHeadingLine1}</span>
           <span className="block whitespace-nowrap text-[#14100E]/85">{welcomeDoors.hindiHeadingLine2}</span>
         </h2>
 
-        <p className="font-['Schoolbell'] font-bold text-xs sm:text-sm md:text-base text-[#6B625A] mt-2 mb-4 sm:mb-6 whitespace-nowrap">
+        <p className="font-sans font-bold text-xs sm:text-sm md:text-base text-[#6B625A] mt-2 mb-4 sm:mb-6 whitespace-nowrap">
           {welcomeDoors.englishSubtitle}
         </p>
 

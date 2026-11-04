@@ -19,7 +19,7 @@ export const MetroTrain: React.FC = () => {
                         {/* Fun Graffiti */}
                         <div
                             aria-hidden="true"
-                            className="absolute top-[20%] md:top-[16%] left-[45%] -translate-x-1/2 font-['Schoolbell'] text-[10px] md:text-[14px] text-[#14100E]/70 z-20 whitespace-nowrap"
+                            className="absolute top-[20%] md:top-[16%] left-[45%] -translate-x-1/2 font-sans text-[10px] md:text-[14px] text-[#14100E]/70 z-20 whitespace-nowrap"
                         >
                             {train.graffitiText}
                         </div>

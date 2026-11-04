@@ -13,10 +13,13 @@ import {
     X,
     Shield,
     Plus,
+    Sparkles,
 } from "lucide-react";
 
 export const commandItems = [
     { id: "overview", label: "Dashboard Overview", category: "Navigation", icon: ArrowRight },
+    { id: "leads", label: "Chatbot Leads & Enquiries", category: "AI Assistant", icon: Mail },
+    { id: "knowledge", label: "Portfolio Knowledge Base", category: "AI Assistant", icon: Sparkles },
     { id: "projects", label: "View Production Projects", category: "Navigation", icon: Film },
     { id: "enquiries", label: "Review Client Enquiries", category: "Navigation", icon: Mail },
     { id: "showreel", label: "Launch Screening Room", category: "Cinematography", icon: PlaySquare },

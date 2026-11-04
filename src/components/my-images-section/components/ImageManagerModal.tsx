@@ -132,10 +132,10 @@ export function ImageManagerModal() {
                             <FileImage className="w-4 h-4" />
                         </div>
                         <div>
-                            <h2 className="text-lg font-serif font-semibold tracking-wide text-[#2b2721]">
+                            <h2 className="text-lg font-sans font-semibold tracking-wide text-[#2b2721]">
                                 Sketchbook Plates & Image Manager
                             </h2>
-                            <p className="text-xs text-[#2b2721]/60 font-serif">
+                            <p className="text-xs text-[#2b2721]/60 font-sans">
                                 Add your own images, reorder spreads, or curate
                                 Singapore illustrated plates.
                             </p>
@@ -154,7 +154,7 @@ export function ImageManagerModal() {
                     {/* Section 1: Add New Image Form */}
                     <div className="bg-white/70 border border-[#2b2721]/12 rounded-xl p-5 shadow-xs">
                         <div className="flex items-center justify-between mb-4">
-                            <h3 className="text-sm font-serif font-semibold uppercase tracking-wider text-[#2b2721] flex items-center gap-2">
+                            <h3 className="text-sm font-sans font-semibold uppercase tracking-wider text-[#2b2721] flex items-center gap-2">
                                 <Plus className="w-4 h-4 text-[#9a6a3e]" />
                                 Add Image To Book
                             </h3>
@@ -162,7 +162,7 @@ export function ImageManagerModal() {
                                 <button
                                     type="button"
                                     onClick={() => setImageSourceType("upload")}
-                                    className={`px-3 py-1 rounded-md transition-all font-serif ${
+                                    className={`px-3 py-1 rounded-md transition-all font-sans ${
                                         imageSourceType === "upload"
                                             ? "bg-[#2b2721] text-[#ece7dc] shadow-xs"
                                             : "text-[#2b2721]/70 hover:text-[#2b2721]"
@@ -173,7 +173,7 @@ export function ImageManagerModal() {
                                 <button
                                     type="button"
                                     onClick={() => setImageSourceType("url")}
-                                    className={`px-3 py-1 rounded-md transition-all font-serif ${
+                                    className={`px-3 py-1 rounded-md transition-all font-sans ${
                                         imageSourceType === "url"
                                             ? "bg-[#2b2721] text-[#ece7dc] shadow-xs"
                                             : "text-[#2b2721]/70 hover:text-[#2b2721]"
@@ -228,7 +228,7 @@ export function ImageManagerModal() {
                                                     alt="Preview"
                                                     className="max-h-36 object-contain rounded border border-[#2b2721]/15 shadow-sm"
                                                 />
-                                                <span className="text-xs font-serif text-[#9a6a3e] font-medium">
+                                                <span className="text-xs font-sans text-[#9a6a3e] font-medium">
                                                     Click or drag another image
                                                     to replace
                                                 </span>
@@ -238,11 +238,11 @@ export function ImageManagerModal() {
                                                 <div className="w-10 h-10 rounded-full bg-[#ece7dc] flex items-center justify-center text-[#2b2721]/60">
                                                     <UploadCloud className="w-5 h-5" />
                                                 </div>
-                                                <p className="text-xs font-serif font-medium text-[#2b2721]">
+                                                <p className="text-xs font-sans font-medium text-[#2b2721]">
                                                     Click to browse or drag &
                                                     drop your image here
                                                 </p>
-                                                <p className="text-[11px] text-[#2b2721]/50 font-serif">
+                                                <p className="text-[11px] text-[#2b2721]/50 font-sans">
                                                     PNG, JPG, WebP with
                                                     transparent or botanical
                                                     background works best
@@ -253,7 +253,7 @@ export function ImageManagerModal() {
                                 </div>
                             ) : (
                                 <div>
-                                    <label className="block text-xs font-serif uppercase tracking-wider text-[#2b2721]/70 mb-1">
+                                    <label className="block text-xs font-sans uppercase tracking-wider text-[#2b2721]/70 mb-1">
                                         Image URL or local asset path
                                     </label>
                                     <input
@@ -263,7 +263,7 @@ export function ImageManagerModal() {
                                             setImageUrl(e.target.value)
                                         }
                                         placeholder="e.g. https://example.com/art.png or DSC06133.webp"
-                                        className="w-full px-3 py-2 text-xs font-serif bg-[#f9f8f4] border border-[#2b2721]/20 rounded-lg focus:outline-hidden focus:border-[#2b2721] text-[#2b2721]"
+                                        className="w-full px-3 py-2 text-xs font-sans bg-[#f9f8f4] border border-[#2b2721]/20 rounded-lg focus:outline-hidden focus:border-[#2b2721] text-[#2b2721]"
                                     />
                                 </div>
                             )}
@@ -271,7 +271,7 @@ export function ImageManagerModal() {
                             {/* Title & Place Fields */}
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div>
-                                    <label className="block text-xs font-serif uppercase tracking-wider text-[#2b2721]/70 mb-1">
+                                    <label className="block text-xs font-sans uppercase tracking-wider text-[#2b2721]/70 mb-1">
                                         Plate Title *
                                     </label>
                                     <input
@@ -282,11 +282,11 @@ export function ImageManagerModal() {
                                             setTitle(e.target.value)
                                         }
                                         placeholder="e.g. Victorian Shophouses"
-                                        className="w-full px-3 py-2 text-xs font-serif bg-[#f9f8f4] border border-[#2b2721]/20 rounded-lg focus:outline-hidden focus:border-[#2b2721] text-[#2b2721]"
+                                        className="w-full px-3 py-2 text-xs font-sans bg-[#f9f8f4] border border-[#2b2721]/20 rounded-lg focus:outline-hidden focus:border-[#2b2721] text-[#2b2721]"
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-serif uppercase tracking-wider text-[#2b2721]/70 mb-1">
+                                    <label className="block text-xs font-sans uppercase tracking-wider text-[#2b2721]/70 mb-1">
                                         Location / Place Subtitle
                                     </label>
                                     <input
@@ -296,7 +296,7 @@ export function ImageManagerModal() {
                                             setPlace(e.target.value)
                                         }
                                         placeholder="e.g. Emerald Hill"
-                                        className="w-full px-3 py-2 text-xs font-serif bg-[#f9f8f4] border border-[#2b2721]/20 rounded-lg focus:outline-hidden focus:border-[#2b2721] text-[#2b2721]"
+                                        className="w-full px-3 py-2 text-xs font-sans bg-[#f9f8f4] border border-[#2b2721]/20 rounded-lg focus:outline-hidden focus:border-[#2b2721] text-[#2b2721]"
                                     />
                                 </div>
                             </div>
@@ -308,13 +308,13 @@ export function ImageManagerModal() {
                             )}
 
                             <div className="flex items-center justify-between pt-1">
-                                <span className="text-[11px] text-[#2b2721]/50 font-serif italic">
+                                <span className="text-[11px] text-[#2b2721]/50 font-sans italic">
                                     New plates are immediately bound into the 3D
                                     curled-page sketchbook.
                                 </span>
                                 <button
                                     type="submit"
-                                    className="px-4 py-2 rounded-lg bg-[#2b2721] text-[#ece7dc] text-xs font-serif font-medium tracking-wide hover:bg-[#3d372e] transition-all flex items-center gap-1.5 shadow-sm"
+                                    className="px-4 py-2 rounded-lg bg-[#2b2721] text-[#ece7dc] text-xs font-sans font-medium tracking-wide hover:bg-[#3d372e] transition-all flex items-center gap-1.5 shadow-sm"
                                 >
                                     <Plus className="w-3.5 h-3.5" />
                                     Insert Into Sketchbook
@@ -327,10 +327,10 @@ export function ImageManagerModal() {
                     <div className="bg-white/50 border border-[#2b2721]/10 rounded-xl p-4">
                         <div className="flex items-center gap-2 mb-3">
                             <Sparkles className="w-4 h-4 text-[#9a6a3e]" />
-                            <h3 className="text-xs font-serif font-semibold uppercase tracking-wider text-[#2b2721]">
+                            <h3 className="text-xs font-sans font-semibold uppercase tracking-wider text-[#2b2721]">
                                 Quick Sample Plates
                             </h3>
-                            <span className="text-[11px] text-[#2b2721]/50 font-serif">
+                            <span className="text-[11px] text-[#2b2721]/50 font-sans">
                                 (Click any plate to add it instantly)
                             </span>
                         </div>
@@ -350,7 +350,7 @@ export function ImageManagerModal() {
                                         />
                                         <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors" />
                                     </div>
-                                    <span className="text-[11px] font-serif font-medium text-[#2b2721] truncate w-full">
+                                    <span className="text-[11px] font-sans font-medium text-[#2b2721] truncate w-full">
                                         {sample.title}
                                     </span>
                                     <span className="text-[10px] text-[#9a6a3e] font-mono">
@@ -366,7 +366,7 @@ export function ImageManagerModal() {
                         <div className="flex items-center justify-between mb-3">
                             <div className="flex items-center gap-2">
                                 <ImageIcon className="w-4 h-4 text-[#2b2721]/70" />
-                                <h3 className="text-xs font-serif font-semibold uppercase tracking-wider text-[#2b2721]">
+                                <h3 className="text-xs font-sans font-semibold uppercase tracking-wider text-[#2b2721]">
                                     Current Plates in Sketchbook ({pages.length}
                                     )
                                 </h3>
@@ -374,7 +374,7 @@ export function ImageManagerModal() {
                             <button
                                 type="button"
                                 onClick={resetToDefaults}
-                                className="text-xs font-serif text-[#2b2721]/60 hover:text-[#2b2721] flex items-center gap-1 transition-colors"
+                                className="text-xs font-sans text-[#2b2721]/60 hover:text-[#2b2721] flex items-center gap-1 transition-colors"
                                 title="Restore initial 9 Meng To Singapore plates"
                             >
                                 <RotateCcw className="w-3 h-3" />
@@ -434,7 +434,7 @@ export function ImageManagerModal() {
                                             {/* Plate Details */}
                                             <div className="min-w-0">
                                                 <div className="flex items-center gap-2">
-                                                    <h4 className="text-xs font-serif font-semibold text-[#2b2721] truncate">
+                                                    <h4 className="text-xs font-sans font-semibold text-[#2b2721] truncate">
                                                         {plate.title}
                                                     </h4>
                                                     {plate.isCustom && (
@@ -516,19 +516,19 @@ export function ImageManagerModal() {
                 {/* Modal Footer */}
                 <div className="flex items-center justify-between px-6 py-3.5 border-t border-[#2b2721]/10 bg-[#ece7dc]/90 backdrop-blur-xs">
                     {isSuccessToast ? (
-                        <div className="flex items-center gap-1.5 text-xs font-serif text-emerald-800 bg-emerald-100/80 px-2.5 py-1 rounded">
+                        <div className="flex items-center gap-1.5 text-xs font-sans text-emerald-800 bg-emerald-100/80 px-2.5 py-1 rounded">
                             <Check className="w-3.5 h-3.5" />
                             Sketchbook pages updated!
                         </div>
                     ) : (
-                        <div className="text-xs text-[#2b2721]/50 font-serif">
+                        <div className="text-xs text-[#2b2721]/50 font-sans">
                             Total {pages.length} spreads active in the tactile
                             3D viewer.
                         </div>
                     )}
                     <button
                         onClick={() => setIsImageManagerOpen(false)}
-                        className="px-4 py-1.5 rounded-lg bg-[#2b2721] text-[#ece7dc] text-xs font-serif font-medium hover:bg-[#3d372e] transition-colors"
+                        className="px-4 py-1.5 rounded-lg bg-[#2b2721] text-[#ece7dc] text-xs font-sans font-medium hover:bg-[#3d372e] transition-colors"
                     >
                         Done
                     </button>

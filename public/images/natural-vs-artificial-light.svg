@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900">
+  <defs>
+    <linearGradient id="splitLightBg" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#0e1726" />
+      <stop offset="50%" stop-color="#14100e" />
+      <stop offset="100%" stop-color="#24130a" />
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="900" fill="url(#splitLightBg)" />
+
+  <!-- Split Divider -->
+  <line x1="800" y1="120" x2="800" y2="760" stroke="#f4efe6" stroke-opacity="0.3" stroke-dasharray="8 8" />
+
+  <!-- Left: 5600K Daylight Natural -->
+  <g transform="translate(400, 440)">
+    <circle cx="0" cy="0" r="100" fill="#4488ff" fill-opacity="0.2" stroke="#4488ff" stroke-width="2" />
+    <text x="0" y="5" font-family="monospace" font-size="16" fill="#f4efe6" text-anchor="middle" font-weight="bold">5600K DAYLIGHT</text>
+    <text x="0" y="30" font-family="monospace" font-size="12" fill="#4488ff" text-anchor="middle">NATURAL OVERCAST</text>
+  </g>
+
+  <!-- Right: 3200K Tungsten Practical -->
+  <g transform="translate(1200, 440)">
+    <circle cx="0" cy="0" r="100" fill="#ff7b25" fill-opacity="0.2" stroke="#ff7b25" stroke-width="2" />
+    <text x="0" y="5" font-family="monospace" font-size="16" fill="#f4efe6" text-anchor="middle" font-weight="bold">3200K TUNGSTEN</text>
+    <text x="0" y="30" font-family="monospace" font-size="12" fill="#ff7b25" text-anchor="middle">ARTIFICIAL PRACTICAL</text>
+  </g>
+
+  <g font-family="monospace" font-size="13" fill="#f4efe6" fill-opacity="0.6" letter-spacing="2">
+    <text x="100" y="100">CCT BALANCE // MIXED LIGHTING INTEGRATION</text>
+    <text x="1500" y="100" text-anchor="end">CRI 98+ &amp; TLCI SPECTRUM CONSISTENCY</text>
+  </g>
+
+  <g transform="translate(100, 780)">
+    <rect x="0" y="0" width="380" height="34" rx="4" fill="#012ceb" fill-opacity="0.25" stroke="#012ceb" stroke-width="1" />
+    <text x="15" y="22" font-family="monospace" font-size="12" fill="#f4efe6" letter-spacing="3" font-weight="bold">NATURAL VS ARTIFICIAL LIGHT</text>
+  </g>
+</svg>

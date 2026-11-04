@@ -11,14 +11,17 @@ import RecentProjectsSection, {
     initialProjects,
 } from "@/components/dashboard/RecentProjectsSection";
 import EnquiriesSection from "@/components/dashboard/EnquiriesSection";
+import SketchbookSection from "@/components/dashboard/SketchbookSection";
+import WorkProjectsSection from "@/components/dashboard/WorkProjectsSection";
 import WebsitePerformanceSection from "@/components/dashboard/WebsitePerformanceSection";
 import ActivityTimeline from "@/components/dashboard/ActivityTimeline";
 import RegisteredUsersTable from "@/components/dashboard/RegisteredUsersTable";
+import BlogDashboardView from "./blogs/blog/components/BlogDashboardView";
+import ChatbotLeadsSection from "@/components/dashboard/chatbot/ChatbotLeadsSection";
+import PortfolioKnowledgeSection from "@/components/dashboard/chatbot/PortfolioKnowledgeSection";
 import {
     Film,
     Play,
-    Plus,
-    Mail,
     Shield,
     Sparkles,
     Loader2,
@@ -33,13 +36,24 @@ export default function DashboardPage() {
     const { user, loading, logout, authFetch, refreshAccessToken } = useAuth();
     const router = useRouter();
 
-    const [activeView, setActiveView] = useState("overview");
+    const [activeView, setActiveView] = useState("blog");
     const [dashboardData, setDashboardData] = useState(null);
     const [adminData, setAdminData] = useState(null);
     const [fetching, setFetching] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
     const [actionMsg, setActionMsg] = useState("");
     const [projectsList, setProjectsList] = useState(initialProjects);
+
+    // Sync view with URL query param if present
+    useEffect(() => {
+        if (typeof window !== "undefined") {
+            const params = new URLSearchParams(window.location.search);
+            const v = params.get("view");
+            if (v) {
+                setActiveView(v);
+            }
+        }
+    }, []);
 
     // Data fetching once authenticated user is resolved
     const fetchDashboardMetrics = async () => {
@@ -98,26 +112,6 @@ export default function DashboardPage() {
         setActionMsg(`Project "${newProj.title}" slated successfully.`);
     };
 
-    if (loading || (!user && fetching)) {
-        return (
-            <div className="min-h-screen bg-[#E6DDD2] flex items-center justify-center text-[#6B625A] font-mono text-xs">
-                <div className="flex flex-col items-center gap-3">
-                    <Loader2 className="w-6 h-6 animate-spin text-[#14100E]" />
-                    <span>SYNCING CINEMATIC ARCHIVES...</span>
-                </div>
-            </div>
-        );
-    }
-
-    // Format current date in editorial cinematography style
-    const now = new Date();
-    const formattedDate = now.toLocaleDateString("en-US", {
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-    });
-
     return (
         <DashboardLayout
             activeView={activeView}
@@ -125,59 +119,11 @@ export default function DashboardPage() {
             user={user}
             onLogout={logout}
             onRefreshSession={handleManualRefresh}
-            refreshing={refreshing}
+            refreshing={refreshing || fetching}
             onAddProject={handleAddProject}
         >
             {({ onOpenScreening, onOpenQuickCreate }) => (
                 <div className="space-y-10 pb-16">
-                    {/* Editorial Welcome Header */}
-                    <div className="border-b border-[#D6CDC2] pb-6 flex flex-col md:flex-row md:items-end justify-between gap-6">
-                        <div>
-                            <div className="flex items-center gap-2 mb-2">
-                                <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse" />
-                                <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#6B625A]">
-                                    {formattedDate} &bull; TC 01:24:08:16
-                                </span>
-                            </div>
-
-                            <h1 className="font-sans font-bold text-3xl sm:text-4xl lg:text-5xl tracking-tight text-[#14100E]">
-                                Your creative space.
-                            </h1>
-
-                            <p className="font-sans text-sm sm:text-base text-[#6B625A] mt-1.5 max-w-xl">
-                                An overview of your projects, enquiries, and
-                                digital presence.
-                            </p>
-                        </div>
-
-                        {/* Quick Action Shortcuts */}
-                        <div className="flex items-center gap-2.5 flex-wrap">
-                            <button
-                                onClick={onOpenQuickCreate}
-                                className="px-3.5 py-2 rounded-lg bg-[#14100E] hover:bg-[#2A2420] text-[#F4EDE4] text-xs font-sans font-medium flex items-center gap-1.5 transition-colors shadow-sm"
-                            >
-                                <Plus className="w-3.5 h-3.5" />
-                                <span>Add Project</span>
-                            </button>
-
-                            <button
-                                onClick={() => onOpenScreening(null)}
-                                className="px-3.5 py-2 rounded-lg border border-[#D6CDC2] bg-[#F4EDE4] hover:bg-[#EAE2D7] text-[#14100E] text-xs font-sans font-medium flex items-center gap-1.5 transition-colors"
-                            >
-                                <Play className="w-3.5 h-3.5 fill-current" />
-                                <span>Screening Room</span>
-                            </button>
-
-                            <button
-                                onClick={() => setActiveView("enquiries")}
-                                className="px-3.5 py-2 rounded-lg border border-[#D6CDC2] bg-[#F4EDE4] hover:bg-[#EAE2D7] text-[#14100E] text-xs font-sans font-medium flex items-center gap-1.5 transition-colors"
-                            >
-                                <Mail className="w-3.5 h-3.5" />
-                                <span>Enquiries</span>
-                            </button>
-                        </div>
-                    </div>
-
                     {/* Notification Banner */}
                     {actionMsg && (
                         <div className="p-4 rounded-xl bg-[#F4EDE4] border border-[#D6CDC2] text-xs font-mono text-[#14100E] flex items-center justify-between">
@@ -191,16 +137,16 @@ export default function DashboardPage() {
                         </div>
                     )}
 
-                    {/* Section 1: Refined Performance Overview (Metrics) */}
-                    <MetricsSection
-                        stats={adminData?.stats}
-                        userRole={user?.role || "user"}
-                        activeSessions={dashboardData?.activeSessionsCount ?? 1}
-                    />
-
                     {/* Active View Filtering */}
                     {activeView === "overview" && (
                         <>
+                            {/* Section 1: Refined Performance Overview (Metrics) */}
+                            <MetricsSection
+                                stats={adminData?.stats}
+                                userRole={user?.role || "user"}
+                                activeSessions={dashboardData?.activeSessionsCount ?? 1}
+                            />
+
                             {/* Section 2: Recent Projects */}
                             <RecentProjectsSection
                                 projects={projectsList}
@@ -238,10 +184,36 @@ export default function DashboardPage() {
                         />
                     )}
 
-                    {activeView === "enquiries" && <EnquiriesSection />}
+                    {(activeView === "enquiries" || activeView === "leads") && (
+                        <ChatbotLeadsSection />
+                    )}
+
+                    {activeView === "knowledge" && (
+                        <PortfolioKnowledgeSection />
+                    )}
+
+                    {(activeView === "sketchbook" || activeView === "plates") && (
+                        <SketchbookSection />
+                    )}
+
+                    {(activeView === "work" || activeView === "work-projects") && (
+                        <WorkProjectsSection />
+                    )}
 
                     {activeView === "analytics" && (
                         <WebsitePerformanceSection />
+                    )}
+
+                    {activeView === "blog" && (
+                        <React.Suspense
+                            fallback={
+                                <div className="flex items-center justify-center min-h-[300px]">
+                                    <Loader2 className="w-8 h-8 animate-spin text-[#012CEB]" />
+                                </div>
+                            }
+                        >
+                            <BlogDashboardView />
+                        </React.Suspense>
                     )}
 
                     {activeView === "showreel" && (

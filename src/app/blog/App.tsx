@@ -33,23 +33,48 @@ export default function App() {
 
   const handleNavigate = useCallback((targetUrl: string) => {
     // If target is a main portfolio anchor section, redirect to home page with hash
-    if (targetUrl === '/home' || targetUrl === '/' || targetUrl === '#home') {
+    if (
+      targetUrl === '/home' ||
+      targetUrl === '/' ||
+      targetUrl === '#home' ||
+      targetUrl === '/#home'
+    ) {
       window.location.href = '/#home';
       return;
     }
-    if (targetUrl === '/work' || targetUrl === '#work') {
+    if (
+      targetUrl === '/work' ||
+      targetUrl === '#work' ||
+      targetUrl === '/#work' ||
+      targetUrl.includes('#work')
+    ) {
       window.location.href = '/#work';
       return;
     }
-    if (targetUrl === '/about' || targetUrl === '#about') {
+    if (
+      targetUrl === '/about' ||
+      targetUrl === '#about' ||
+      targetUrl === '/#about' ||
+      targetUrl.includes('#about')
+    ) {
       window.location.href = '/#about';
       return;
     }
-    if (targetUrl === '/visuals' || targetUrl === '#visuals') {
+    if (
+      targetUrl === '/visuals' ||
+      targetUrl === '#visuals' ||
+      targetUrl === '/#visuals' ||
+      targetUrl.includes('#visuals')
+    ) {
       window.location.href = '/#visuals';
       return;
     }
-    if (targetUrl === '/contact' || targetUrl === '#contact') {
+    if (
+      targetUrl === '/contact' ||
+      targetUrl === '#contact' ||
+      targetUrl === '/#contact' ||
+      targetUrl.includes('#contact')
+    ) {
       window.location.href = '/#contact';
       return;
     }

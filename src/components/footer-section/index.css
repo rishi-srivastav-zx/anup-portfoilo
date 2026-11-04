@@ -2,10 +2,10 @@
 
 @layer base {
   :root {
-    --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-    --font-brush: 'Kaushan Script', 'Caveat', cursive;
-    --font-signature: 'Caveat', cursive;
-    --font-marker: 'Rock Salt', cursive;
+    --font-sans: 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-brush: 'Montserrat', sans-serif;
+    --font-signature: 'Montserrat', sans-serif;
+    --font-marker: 'Montserrat', sans-serif;
     --font-mono: 'JetBrains Mono', monospace;
   }
 
