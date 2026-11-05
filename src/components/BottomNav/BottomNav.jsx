@@ -149,51 +149,51 @@ export default function BottomNav() {
             return;
         }
 
-        // Temporarily pause scroll spy updates during smooth scroll transition
+        // Temporarily pause scroll spy updates during instant navigation
         isProgrammaticScrollRef.current = true;
         if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
 
-        const targetId = href.replace("#", "");
+        const targetId = href.replace(/^#\/?/, '').replace('#', '');
 
-        if (typeof window !== "undefined" && window.lenis) {
-            const lenis = window.lenis;
-            if (targetId === "home") {
-                lenis.scrollTo(0, {
-                    duration: 1.4,
-                    easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-                });
-            } else {
-                const el = document.getElementById(targetId);
-                if (el) {
-                    lenis.scrollTo(el, {
-                        duration: 1.4,
-                        offset: 0,
-                        easing: (t) =>
-                            Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-                    });
-                }
+        // Find target element with fallback alias matching
+        let el = null;
+        if (targetId !== 'home') {
+            el =
+                document.getElementById(targetId) ||
+                (targetId === 'origin' ? (document.getElementById('origin') || document.getElementById('about')) : null) ||
+                (targetId === 'about' ? (document.getElementById('about') || document.getElementById('origin')) : null) ||
+                (targetId === 'work' || targetId === 'featured' || targetId === 'featured-work' || targetId === 'services'
+                    ? (document.getElementById('work') || document.getElementById('featured-work') || document.getElementById('work-inner'))
+                    : null) ||
+                (targetId === 'contact' ? document.getElementById('contact') : null);
+        }
+
+        if (targetId === 'home' || !el) {
+            if (typeof window !== 'undefined' && window.lenis) {
+                window.lenis.scrollTo(0, { offset: 0, immediate: true });
             }
+            window.scrollTo({ top: 0, behavior: 'instant' });
         } else {
-            if (targetId === "home") {
-                window.scrollTo({ top: 0, behavior: "smooth" });
-            } else {
-                const el = document.getElementById(targetId);
-                if (el) {
-                    el.scrollIntoView({ behavior: "smooth" });
-                }
+            // Direct section positioning using scrollIntoView
+            el.scrollIntoView({ behavior: 'instant', block: 'start' });
+
+            // Synchronize Lenis virtual scroll position immediately if present
+            if (typeof window !== 'undefined' && window.lenis) {
+                window.lenis.scrollTo(el, { offset: 0, immediate: true });
             }
         }
 
         try {
-            window.history.replaceState(null, "", href);
+            window.history.replaceState(null, '', href);
         } catch {
             // Ignore if history state update not allowed in iframe
         }
 
+        // Re-enable scroll spy after instant navigation settles
         scrollTimeoutRef.current = setTimeout(() => {
             isProgrammaticScrollRef.current = false;
             updateActiveSection();
-        }, 1400);
+        }, 50);
     };
 
     if (

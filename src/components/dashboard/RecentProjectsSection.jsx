@@ -158,7 +158,7 @@ export default function RecentProjectsSection({
                             </div>
 
                             <div className="mt-4 pt-3 border-t border-[#D6CDC2]/60 flex items-center justify-between text-xs font-mono text-[#6B625A]">
-                                <span className="truncate max-w-[200px]">
+                                <span className="truncate max-w-[130px] sm:max-w-[180px] lg:max-w-[220px]">
                                     {proj.lens}
                                 </span>
                                 <button

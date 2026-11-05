@@ -25,6 +25,16 @@ export default function DashboardLayout({
     const [screeningOpen, setScreeningOpen] = useState(false);
     const [activeScreeningProject, setActiveScreeningProject] = useState(null);
 
+    // Initial responsive sidebar sizing for Tablet (768px - 1023px) vs Laptop (1024px+)
+    useEffect(() => {
+        if (typeof window !== "undefined") {
+            const width = window.innerWidth;
+            if (width >= 768 && width < 1024) {
+                setIsCollapsed(true);
+            }
+        }
+    }, []);
+
     // Global keyboard shortcut for Cmd+K / Ctrl+K
     useEffect(() => {
         const handleKeyDown = (e) => {
@@ -81,8 +91,8 @@ export default function DashboardLayout({
                     onOpenScreening={() => handleOpenScreening(null)}
                 />
 
-                {/* Page Content Viewport */}
-                <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full">
+                {/* Page Content Viewport - Optimized for Tablet & Laptop */}
+                <main className="flex-1 p-4 md:p-5 lg:p-6 xl:p-8 w-full max-w-7xl 2xl:max-w-[1600px] mx-auto min-w-0">
                     {typeof children === "function"
                         ? children({
                               onOpenScreening: handleOpenScreening,

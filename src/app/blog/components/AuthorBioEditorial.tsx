@@ -108,9 +108,6 @@ export default function AuthorBioEditorial({
           <span className="font-signature text-3xl sm:text-4xl text-[#14100E]/85 transform -rotate-2">
             Anup Rawat
           </span>
-          <span className="font-signature text-xl text-[#012CEB] transform -rotate-1">
-            (Baaz)
-          </span>
         </div>
 
         {/* Portfolio CTA */}

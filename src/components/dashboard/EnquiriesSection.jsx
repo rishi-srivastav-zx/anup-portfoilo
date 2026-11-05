@@ -265,7 +265,7 @@ export default function EnquiriesSection() {
                     </div>
                 ) : (
                     <div className="overflow-x-auto">
-                        <table className="w-full text-left text-xs font-sans">
+                        <table className="w-full min-w-[720px] text-left text-xs font-sans">
                             <thead className="bg-[#EAE2D7] text-[#6B625A] font-mono text-[10px] uppercase tracking-wider border-b border-[#D6CDC2]">
                                 <tr>
                                     <th className="px-5 py-3.5">Lead Name</th>
@@ -418,7 +418,7 @@ export default function EnquiriesSection() {
                     onClick={() => setSelectedLead(null)}
                 >
                     <div
-                        className="w-full max-w-lg bg-[#F4EDE4] border border-[#D6CDC2] rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95"
+                        className="w-full max-w-lg max-h-[92vh] overflow-y-auto bg-[#F4EDE4] border border-[#D6CDC2] rounded-2xl shadow-2xl animate-in fade-in zoom-in-95"
                         onClick={(e) => e.stopPropagation()}
                     >
                         <div className="p-5 border-b border-[#D6CDC2] bg-[#EAE2D7] flex items-center justify-between">

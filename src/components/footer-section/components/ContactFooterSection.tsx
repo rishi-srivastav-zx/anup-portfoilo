@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Clapperboard3D } from './Clapperboard3D';
 import {
   CinematographyTakeStill,
@@ -12,7 +13,8 @@ import {
  * CONFIGURATION CONSTANT — PORTFOLIO OWNER EMAIL
  * Replace this address with Anup Rawat's primary production/booking email if needed.
  */
-export const PORTFOLIO_OWNER_EMAIL = 'anuprawat.baaz@gmail.com';
+export const PORTFOLIO_OWNER_EMAIL =
+  process.env.NEXT_PUBLIC_PORTFOLIO_EMAIL || 'anuprawat@gmail.com';
 
 interface FormValues {
   name: string;
@@ -87,6 +89,7 @@ export const ContactFooterSection: React.FC = () => {
   const [activeTakeStill, setActiveTakeStill] =
     useState<CinematographyTakeStill | null>(null);
   const [isShutterFlash, setIsShutterFlash] = useState(false);
+  const router = useRouter();
 
   const triggerSlateClap = () => {
     const nextCount = clapCount + 1;
@@ -464,8 +467,8 @@ export const ContactFooterSection: React.FC = () => {
                   </div>
                 )}
 
-                {/* Submit Button & Login Link */}
-                <div className="pt-1 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                {/* Submit Button */}
+                <div className="pt-1">
                   <button
                     type="submit"
                     disabled={isSubmitting}
@@ -479,17 +482,6 @@ export const ContactFooterSection: React.FC = () => {
                       ↗
                     </span>
                   </button>
-
-                  <Link
-                    href="/login-page"
-                    className="inline-flex items-center gap-1.5 text-xs font-medium text-[#6B625A] hover:text-[#012CEB] transition-colors group"
-                  >
-                    <span>Client Portal</span>
-                    <span className="underline underline-offset-2 font-semibold text-[#14100E] group-hover:text-[#012CEB]">
-                      Login Page
-                    </span>
-                    <span className="transition-transform group-hover:translate-x-0.5">→</span>
-                  </Link>
                 </div>
               </form>
             </div>
@@ -503,33 +495,37 @@ export const ContactFooterSection: React.FC = () => {
         className="w-full bg-[#DDD3C5] text-[#14100E] border-t border-[#14100E]/15 px-6 sm:px-10 lg:px-16 xl:px-24 py-10 sm:py-12"
       >
         <div className="max-w-[1440px] mx-auto flex flex-col sm:flex-row items-start sm:items-end justify-between gap-8">
-          {/* Left Side: Editorial Sign-Off, Copyright & Login Redirect */}
+          {/* Left Side: Editorial Sign-Off & Copyright */}
           <div className="space-y-4">
             <div className="text-lg sm:text-xl font-medium tracking-tight text-[#14100E] leading-snug">
               <p>Thanks for stopping by.</p>
               <p className="text-[#6B625A]">Keep creating.</p>
             </div>
             <div className="flex flex-wrap items-center gap-3 text-xs sm:text-sm text-[#6B625A] font-normal">
-              <span>© 2026 Anup Rawat. All rights reserved.</span>
-              <span className="opacity-40">•</span>
-              <Link
-                href="/login-page"
-                className="inline-flex items-center gap-1.5 text-[#14100E] font-medium hover:text-[#012CEB] transition-colors underline underline-offset-4 decoration-[#14100E]/30 hover:decoration-[#012CEB]"
-              >
-                <span>Client Portal / Login</span>
-                <span className="text-xs">↗</span>
-              </Link>
+              <span>
+                <Link
+                  href="/login-page"
+                  className="cursor-default select-none text-[#6B625A] hover:text-[#6B625A] focus:outline-none"
+                  tabIndex={-1}
+                  aria-hidden="true"
+                >
+                  ©
+                </Link>{' '}
+                2026 Anup Rawat. All rights reserved.
+              </span>
             </div>
           </div>
 
-          {/* Right Side: Handwritten Signature-Style Brand (Anup Rawat / (Baaz)) */}
-          <div className="flex flex-col items-start sm:items-end select-none">
-            <span className="font-signature text-4xl sm:text-5xl font-bold text-[#14100E] leading-none tracking-tight transform -rotate-2">
-              Anup Rawat
-            </span>
-            <span className="font-signature text-2xl sm:text-3xl font-bold text-[#012CEB] leading-none mt-1 sm:mr-2 transform -rotate-1">
-              (Baaz)
-            </span>
+          {/* Right Side: Brand Logo */}
+          <div
+            className="flex flex-col items-start sm:items-end select-none"
+            onDoubleClick={() => router.push('/login-page')}
+          >
+            <img
+              src="/images/ar-logo.webp"
+              alt="Anup Rawat Cinematographer"
+              className="h-10 sm:h-12 w-auto object-contain cursor-default"
+            />
           </div>
         </div>
       </footer>

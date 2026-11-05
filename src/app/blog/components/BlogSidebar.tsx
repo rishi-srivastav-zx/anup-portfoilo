@@ -13,7 +13,7 @@ import {
 import { SELECTED_WORKS } from '../data/portfolio';
 import ProjectInquiryModal from './ProjectInquiryModal';
 
-const PORTFOLIO_EMAIL = 'anuprawat.baaz@gmail.com';
+const PORTFOLIO_EMAIL = process.env.NEXT_PUBLIC_PORTFOLIO_EMAIL || 'anuprawat@gmail.com';
 const WHATSAPP_URL =
   'https://wa.me/?text=Hi%20Anup%2C%20I%20am%20reaching%20out%20from%20your%20cinematography%20portfolio%20regarding%20a%20project';
 

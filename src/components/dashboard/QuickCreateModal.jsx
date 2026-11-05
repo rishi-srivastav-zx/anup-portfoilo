@@ -49,7 +49,7 @@ export default function QuickCreateModal({ isOpen, onClose, onAddProject }) {
             onClick={onClose}
         >
             <div
-                className="w-full max-w-lg bg-[#F4EDE4] border border-[#D6CDC2] rounded-xl shadow-2xl overflow-hidden"
+                className="w-full max-w-lg bg-[#F4EDE4] border border-[#D6CDC2] rounded-xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Header */}
@@ -86,7 +86,7 @@ export default function QuickCreateModal({ isOpen, onClose, onAddProject }) {
                         </p>
                     </div>
                 ) : (
-                    <form onSubmit={handleSubmit} className="p-5 space-y-4 text-xs font-sans">
+                    <form onSubmit={handleSubmit} className="p-5 space-y-4 text-xs font-sans overflow-y-auto max-h-[calc(90vh-80px)]">
                         <div>
                             <label className="block text-[#4A423B] font-mono uppercase text-[10px] tracking-wider mb-1">
                                 Film / Project Title *

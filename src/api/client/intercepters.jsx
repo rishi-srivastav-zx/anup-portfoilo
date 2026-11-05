@@ -82,6 +82,9 @@ export const setupInterceptors = (axiosInstance) => {
             // Strip any accidental manual Authorization header — auth is 100% cookie-driven
             delete config.headers.Authorization;
 
+            // Track request start time for latency/slow network monitoring
+            config.metadata = { startTime: Date.now() };
+
             return config;
         },
         (error) => Promise.reject(error),
@@ -91,20 +94,57 @@ export const setupInterceptors = (axiosInstance) => {
     // 2. RESPONSE INTERCEPTOR
     // -------------------------------------------------------------------------
     axiosInstance.interceptors.response.use(
-        (response) => response,
+        (response) => {
+            if (typeof window !== "undefined") {
+                const startTime = response.config?.metadata?.startTime;
+                if (startTime) {
+                    const duration = Date.now() - startTime;
+                    if (duration >= 3500) {
+                        window.dispatchEvent(
+                            new CustomEvent("network-slow-response", {
+                                detail: { duration, url: response.config?.url },
+                            })
+                        );
+                    }
+                }
+                window.dispatchEvent(
+                    new CustomEvent("universal-backend-success", {
+                        detail: { timestamp: Date.now() },
+                    })
+                );
+            }
+            return response;
+        },
         async (error) => {
             const originalRequest = error.config;
 
-            // Handle network drops, CORS failures, or 502/503/504 server crashes
-            if (
-                !error.response ||
-                [502, 503, 504].includes(error.response?.status)
-            ) {
+            if (typeof window !== "undefined") {
+                const startTime = originalRequest?.metadata?.startTime;
+                if (startTime) {
+                    const duration = Date.now() - startTime;
+                    if (duration >= 3500) {
+                        window.dispatchEvent(
+                            new CustomEvent("network-slow-response", {
+                                detail: { duration, url: originalRequest?.url },
+                            })
+                        );
+                    }
+                }
+            }
+
+            const status = error.response?.status;
+            const isTimeout =
+                error.code === "ECONNABORTED" ||
+                Boolean(error.message?.toLowerCase().includes("timeout"));
+            const isNetworkFailure = !error.response;
+            const isServerCrash = status !== undefined && [500, 502, 503, 504].includes(status);
+
+            // Handle network drops, timeouts, or 500/502/503/504 server crashes
+            if (isNetworkFailure || isTimeout || isServerCrash) {
                 broadcastNetworkError(error);
                 return Promise.reject(error);
             }
 
-            const status = error.response?.status;
             const requestUrl = originalRequest?.url || "";
 
             const isAuthRoute =

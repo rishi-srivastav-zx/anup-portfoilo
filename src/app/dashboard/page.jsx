@@ -11,14 +11,14 @@ import RecentProjectsSection, {
     initialProjects,
 } from "@/components/dashboard/RecentProjectsSection";
 import EnquiriesSection from "@/components/dashboard/EnquiriesSection";
-import SketchbookSection from "@/components/dashboard/SketchbookSection";
-import WorkProjectsSection from "@/components/dashboard/WorkProjectsSection";
 import WebsitePerformanceSection from "@/components/dashboard/WebsitePerformanceSection";
 import ActivityTimeline from "@/components/dashboard/ActivityTimeline";
 import RegisteredUsersTable from "@/components/dashboard/RegisteredUsersTable";
 import BlogDashboardView from "./blogs/blog/components/BlogDashboardView";
-import ChatbotLeadsSection from "@/components/dashboard/chatbot/ChatbotLeadsSection";
-import PortfolioKnowledgeSection from "@/components/dashboard/chatbot/PortfolioKnowledgeSection";
+import ChatbotLeadsView from "./chatbot-leads/ChatbotLeadsView";
+import PortfolioKnowledgeView from "./portfolio-knowledege/PortfolioKnowledgeView";
+import CuratedWorksView from "./curated-works/CuratedWorksView";
+import WorkProjectsView from "./workpojects/WorkProjectsView";
 import {
     Film,
     Play,
@@ -185,19 +185,19 @@ export default function DashboardPage() {
                     )}
 
                     {(activeView === "enquiries" || activeView === "leads") && (
-                        <ChatbotLeadsSection />
+                        <ChatbotLeadsView />
                     )}
 
                     {activeView === "knowledge" && (
-                        <PortfolioKnowledgeSection />
+                        <PortfolioKnowledgeView />
                     )}
 
                     {(activeView === "sketchbook" || activeView === "plates") && (
-                        <SketchbookSection />
+                        <CuratedWorksView />
                     )}
 
                     {(activeView === "work" || activeView === "work-projects") && (
-                        <WorkProjectsSection />
+                        <WorkProjectsView />
                     )}
 
                     {activeView === "analytics" && (

@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 
 /**
- * Generates high-resolution procedural PBR textures for the Anup Rawat (Baaz)
+ * Generates high-resolution procedural PBR textures for the Anup Rawat
  * 3D Film Director's Clapperboard. Zero external image dependencies.
  */
 export function createSlateFaceTextures(
@@ -245,7 +245,7 @@ function drawSlateFaceAlbedo(
   ctx.fillStyle = 'rgba(245, 240, 230, 0.85)';
   ctx.font = '600 54px "Montserrat", sans-serif';
   ctx.letterSpacing = '4px';
-  ctx.fillText('BAAZ CINEMA', pad + 48, centerBayBottom + 185);
+  ctx.fillText('AR CINEMA', pad + 48, centerBayBottom + 185);
 
   ctx.fillStyle = 'rgba(245, 240, 230, 0.36)';
   ctx.font = '600 26px "Montserrat", sans-serif';

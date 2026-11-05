@@ -44,10 +44,10 @@ export const metadata: Metadata = {
     type: 'website',
     images: [
       {
-        url: `${siteUrl}/images/hero-cinematic-set.svg`,
-        width: 1600,
-        height: 900,
-        alt: 'The Cinematic Journal — Cinematography and Visual Craft by Anup Rawat',
+        url: `${siteUrl}/images/ar-logo.png`,
+        width: 1024,
+        height: 682,
+        alt: 'Anup Rawat — Cinematographer & Visual Storyteller',
       },
     ],
   },
@@ -56,7 +56,7 @@ export const metadata: Metadata = {
     title: 'The Cinematic Journal — Anup Rawat',
     description:
       'Essays on cinematography, visual grammar, light architecture, and camera choreography by Anup Rawat.',
-    images: [`${siteUrl}/images/hero-cinematic-set.svg`],
+    images: [`${siteUrl}/images/ar-logo.png`],
     creator: '@anuprawat',
   },
 };

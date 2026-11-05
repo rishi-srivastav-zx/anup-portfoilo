@@ -101,13 +101,15 @@ export default function Header({ onNavigate }: HeaderProps) {
         <a
           href="/"
           onClick={(e) => handleLinkClick(e, '/')}
-          className="flex items-center gap-2 select-none group shrink-0"
+          className="flex items-center gap-2.5 select-none group shrink-0"
         >
+          <img
+            src="/ar-monogram.webp"
+            alt="AR"
+            className="w-7 h-7 sm:w-8 sm:h-8 object-contain transition-transform duration-300 group-hover:scale-105"
+          />
           <span className="font-signature text-2xl sm:text-3xl font-bold text-[#14100E] leading-none transform -rotate-1 group-hover:text-[#012CEB] transition-colors">
             Anup Rawat
-          </span>
-          <span className="font-signature text-lg sm:text-xl font-bold text-[#012CEB] leading-none transform -rotate-1">
-            (Baaz)
           </span>
         </a>
 

@@ -1,7 +1,7 @@
 export const ASSISTANT_CONFIG = {
   name: 'Anup Rawat',
   status: 'AI assistant · Online',
-  logo: '/ar-monogram.png',
+  logo: '/ar-monogram.webp',
   apiUrl: process.env.NEXT_PUBLIC_CHAT_API_URL || 'http://localhost:5000/api/chat',
   teaser: 'Namaste! Shoot ya booking ke baare mein kuch poochna hai?',
   welcome:

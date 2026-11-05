@@ -219,7 +219,7 @@ export default function BlogLanding({
         description="Field notes and deep-dive essays by cinematographer Anup Rawat exploring film lighting ratios, camera movement psychology, cinema optics, exposure latitude, and visual storytelling."
         canonicalPath="/blog"
         ogType="website"
-        ogImage="/images/hero-cinematic-set.svg"
+        ogImage="/images/ar-logo.png"
         breadcrumbs={[
           { name: 'Home', path: '/' },
           { name: 'The Cinematic Journal', path: '/blog' },

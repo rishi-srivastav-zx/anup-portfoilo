@@ -128,6 +128,11 @@ export default function Navbar() {
                     style={{ letterSpacing: "0.08em" }}
                     aria-label="Back to top"
                 >
+                    <img
+                        src="/ar-monogram.webp"
+                        alt="AR"
+                        className="w-7 h-7 sm:w-8 sm:h-8 object-contain mr-2.5 transition-transform duration-300 group-hover:scale-105"
+                    />
                     <span className="font-light transition-opacity group-hover:opacity-75">
                         {navbar.firstName}
                     </span>

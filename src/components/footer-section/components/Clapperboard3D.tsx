@@ -643,7 +643,7 @@ export const Clapperboard3D: React.FC<Clapperboard3DProps> = ({
             </p>
           </div>
           <div className="flex justify-between text-[11px] font-mono-slate text-[#f5f0e6]/60 tracking-widest">
-            <span>BAAZ CINEMA</span>
+            <span>AR CINEMA</span>
             <span>24.00 FPS · S35</span>
           </div>
         </div>

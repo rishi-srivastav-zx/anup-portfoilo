@@ -27,9 +27,10 @@ export const CinematicHeader: React.FC<CinematicHeaderProps> = ({
         <div className="flex items-center">
           <Link
             href="/"
-            className="px-4 py-2.5 bg-[#121212] text-[#FAF8F3] font-mono-tech text-[11px] sm:text-xs font-bold tracking-wider uppercase rounded-xl shadow-[2px_3px_0px_rgba(0,0,0,0.22)] hover:bg-[#262626] active:translate-y-[1px] transition-all cursor-pointer whitespace-nowrap inline-flex items-center"
+            className="px-3.5 py-2 bg-[#121212] text-[#FAF8F3] font-mono-tech text-[11px] sm:text-xs font-bold tracking-wider uppercase rounded-xl shadow-[2px_3px_0px_rgba(0,0,0,0.22)] hover:bg-[#262626] active:translate-y-[1px] transition-all cursor-pointer whitespace-nowrap inline-flex items-center gap-2"
           >
-            RETURN TO PORTFOLIO
+            <img src="/ar-monogram.webp" alt="AR" className="w-4 h-4 object-contain" />
+            <span>RETURN TO PORTFOLIO</span>
           </Link>
         </div>
 
@@ -49,6 +50,11 @@ export const CinematicHeader: React.FC<CinematicHeaderProps> = ({
 
         {/* Top-Right: Handwritten portfolio identity + outlined terminal status element */}
         <div className="flex items-center gap-3 sm:gap-3.5">
+          <img
+            src="/ar-monogram.webp"
+            alt="AR"
+            className="w-7 h-7 object-contain"
+          />
           <span className="font-signature text-2xl sm:text-[27px] font-bold tracking-tight text-[#141414] whitespace-nowrap">
             Anup Rawat
           </span>

@@ -41,7 +41,7 @@ export default function SEOHead({
   canonicalPath = '',
   canonicalUrl,
   ogType = 'website',
-  ogImage = '/images/hero-cinematic-set.svg',
+  ogImage = '/images/ar-logo.png',
   noindex = false,
   article,
   breadcrumbs,

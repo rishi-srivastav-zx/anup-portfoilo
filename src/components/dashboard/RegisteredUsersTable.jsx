@@ -88,7 +88,7 @@ export default function RegisteredUsersTable({ usersList = [], stats = {} }) {
             {/* Users Table */}
             <div className="border border-[#D6CDC2] rounded-xl overflow-hidden bg-[#F4EDE4] shadow-xs">
                 <div className="overflow-x-auto">
-                    <table className="w-full text-left text-xs font-sans">
+                    <table className="w-full min-w-[640px] text-left text-xs font-sans">
                         <thead className="bg-[#EAE2D7] text-[#6B625A] font-mono text-[10px] uppercase tracking-wider border-b border-[#D6CDC2]">
                             <tr>
                                 <th className="px-5 py-3">Account Identity</th>

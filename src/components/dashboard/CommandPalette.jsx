@@ -82,7 +82,7 @@ export default function CommandPalette({ isOpen, onClose, onSelectAction }) {
 
     return (
         <div
-            className="fixed inset-0 z-50 bg-[#14100E]/50 backdrop-blur-sm flex items-start justify-center pt-20 px-4"
+            className="fixed inset-0 z-50 bg-[#14100E]/50 backdrop-blur-sm flex items-start justify-center pt-12 sm:pt-16 md:pt-20 px-4"
             onClick={onClose}
         >
             <div

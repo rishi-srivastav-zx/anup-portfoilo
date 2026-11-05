@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { BLOG_CATEGORIES, BlogCategory } from '../data/articles';
 
@@ -48,12 +49,11 @@ export default function Footer({ onNavigate, onSelectCategory }: FooterProps) {
           {/* Column 1: Identity & Signature */}
           <div className="md:col-span-5 space-y-4">
             <div className="flex flex-col items-start select-none">
-              <span className="font-signature text-3xl sm:text-4xl font-bold text-[#14100E] leading-none tracking-tight transform -rotate-1">
-                Anup Rawat
-              </span>
-              <span className="font-signature text-xl sm:text-2xl font-bold text-[#012CEB] leading-none mt-1 transform -rotate-1">
-                (Baaz)
-              </span>
+              <img
+                src="/images/ar-logo.webp"
+                alt="Anup Rawat Cinematographer"
+                className="h-10 w-auto object-contain mb-2"
+              />
             </div>
             <p className="text-sm text-[#6B625A] max-w-md leading-relaxed">
               Cinematographer &amp; Visual Storyteller crafting narrative drama, commercial films,
@@ -120,15 +120,6 @@ export default function Footer({ onNavigate, onSelectCategory }: FooterProps) {
                   Project Enquiry
                 </a>
               </li>
-              <li className="pt-1">
-                <a
-                  href="/login-page"
-                  className="inline-flex items-center gap-1.5 text-xs font-medium text-[#14100E] hover:text-[#012CEB] underline underline-offset-4 decoration-[#14100E]/30 hover:decoration-[#012CEB] transition-colors"
-                >
-                  <span>Client Portal / Login</span>
-                  <span className="text-xs">↗</span>
-                </a>
-              </li>
             </ul>
           </div>
 
@@ -155,16 +146,19 @@ export default function Footer({ onNavigate, onSelectCategory }: FooterProps) {
 
         {/* Bottom Bar */}
         <div className="pt-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-xs text-[#6B625A]">
-          <p>© {new Date().getFullYear()} Anup Rawat. All rights reserved.</p>
+          <p>
+            <Link
+              href="/login-page"
+              className="cursor-default select-none text-[#6B625A] hover:text-[#6B625A] focus:outline-none"
+              tabIndex={-1}
+              aria-hidden="true"
+            >
+              ©
+            </Link>{' '}
+            {new Date().getFullYear()} Anup Rawat. All rights reserved.
+          </p>
           <div className="flex items-center gap-4">
             <span className="text-[#14100E] font-medium">Keep creating.</span>
-            <span aria-hidden="true">·</span>
-            <a
-              href="/login-page"
-              className="hover:text-[#012CEB] transition-colors"
-            >
-              Client Login
-            </a>
           </div>
         </div>
       </div>

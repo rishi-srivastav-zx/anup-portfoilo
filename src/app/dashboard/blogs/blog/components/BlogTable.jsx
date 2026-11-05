@@ -22,7 +22,7 @@ export default function BlogTable({
   return (
     <div className="border-2 border-[#14100E] bg-[#F4EFE6] rounded-2xl shadow-[3px_3px_0_#14100E] overflow-hidden">
       <div className="overflow-x-auto">
-        <table className="w-full text-left border-collapse text-xs">
+        <table className="w-full min-w-[850px] text-left border-collapse text-xs">
           <thead>
             <tr className="border-b-2 border-[#14100E] bg-[#E6DDD2] text-[#14100E] font-mono-tech uppercase">
               <th className="py-3 px-4 min-w-[280px]">Article &amp; Taxonomy</th>

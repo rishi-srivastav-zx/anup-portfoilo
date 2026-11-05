@@ -26,7 +26,7 @@ export default function ScreeningRoomModal({ isOpen, onClose, project }) {
             onClick={onClose}
         >
             <div
-                className="w-full max-w-4xl bg-[#14100E] border border-[#3E3832] rounded-2xl shadow-2xl overflow-hidden text-[#E6DDD2] flex flex-col"
+                className="w-full max-w-4xl max-h-[92vh] bg-[#14100E] border border-[#3E3832] rounded-2xl shadow-2xl overflow-y-auto text-[#E6DDD2] flex flex-col"
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Top Viewfinder Bar */}

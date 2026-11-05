@@ -185,28 +185,37 @@ function SidebarInner({
                 >
                     {!isCollapsed ? (
                         <div className="overflow-hidden">
-                            <div className="flex items-center gap-2 mb-1">
+                            <div className="flex items-center gap-2 mb-1.5">
                                 <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse" />
                                 <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-[#6B625A]">
                                     REC [24.00 FPS]
                                 </span>
                             </div>
-                            <Link href="/" className="group block">
-                                <h1 className="font-sans font-bold text-lg tracking-tight text-[#14100E] group-hover:opacity-80 transition-opacity">
-                                    ANUP RAWAT
-                                </h1>
-                                <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-[#8C8278]">
-                                    CINEMATOGRAPHER / STUDIO
-                                </p>
+                            <Link href="/" className="group flex items-center gap-2.5">
+                                <img
+                                    src="/ar-monogram.webp"
+                                    alt="AR"
+                                    className="w-8 h-8 object-contain shrink-0 transition-transform group-hover:scale-105"
+                                />
+                                <div className="min-w-0">
+                                    <h1 className="font-sans font-bold text-sm tracking-tight text-[#14100E] leading-tight group-hover:opacity-80 transition-opacity truncate">
+                                        ANUP RAWAT
+                                    </h1>
+                                    <p className="font-mono text-[8px] uppercase tracking-[0.16em] text-[#8C8278] truncate">
+                                        CINEMATOGRAPHER
+                                    </p>
+                                </div>
                             </Link>
                         </div>
                     ) : (
-                        <div className="flex flex-col items-center">
-                            <span className="w-2 h-2 rounded-full bg-red-600 mb-1 animate-pulse" />
-                            <span className="font-bold font-sans text-xs text-[#14100E] tracking-tighter">
-                                AR
-                            </span>
-                        </div>
+                        <Link href="/" className="flex flex-col items-center group">
+                            <span className="w-1.5 h-1.5 rounded-full bg-red-600 mb-1 animate-pulse" />
+                            <img
+                                src="/ar-monogram.webp"
+                                alt="AR"
+                                className="w-7 h-7 object-contain transition-transform group-hover:scale-110"
+                            />
+                        </Link>
                     )}
 
                     {/* Mobile close button */}
