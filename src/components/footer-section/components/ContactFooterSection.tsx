@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Clapperboard3D } from './Clapperboard3D';
+import CinematicFooter from '@/components/legal/CinematicFooter';
 import {
   CinematographyTakeStill,
   getCinematographyTakeStill,
@@ -489,46 +490,8 @@ export const ContactFooterSection: React.FC = () => {
         </div>
       </section>
 
-      {/* BOTTOM FOOTER — ELEGANT THEMED STRIP */}
-      <footer
-        aria-label="Site footer"
-        className="w-full bg-[#DDD3C5] text-[#14100E] border-t border-[#14100E]/15 px-6 sm:px-10 lg:px-16 xl:px-24 py-10 sm:py-12"
-      >
-        <div className="max-w-[1440px] mx-auto flex flex-col sm:flex-row items-start sm:items-end justify-between gap-8">
-          {/* Left Side: Editorial Sign-Off & Copyright */}
-          <div className="space-y-4">
-            <div className="text-lg sm:text-xl font-medium tracking-tight text-[#14100E] leading-snug">
-              <p>Thanks for stopping by.</p>
-              <p className="text-[#6B625A]">Keep creating.</p>
-            </div>
-            <div className="flex flex-wrap items-center gap-3 text-xs sm:text-sm text-[#6B625A] font-normal">
-              <span>
-                <Link
-                  href="/login-page"
-                  className="cursor-default select-none text-[#6B625A] hover:text-[#6B625A] focus:outline-none"
-                  tabIndex={-1}
-                  aria-hidden="true"
-                >
-                  ©
-                </Link>{' '}
-                2026 Anup Rawat. All rights reserved.
-              </span>
-            </div>
-          </div>
-
-          {/* Right Side: Brand Logo */}
-          <div
-            className="flex flex-col items-start sm:items-end select-none"
-            onDoubleClick={() => router.push('/login-page')}
-          >
-            <img
-              src="/images/ar-logo.webp"
-              alt="Anup Rawat Cinematographer"
-              className="h-10 sm:h-12 w-auto object-contain cursor-default"
-            />
-          </div>
-        </div>
-      </footer>
+      {/* BOTTOM FOOTER — ELEGANT THEMED STRIP (CINEMATIC FOOTER) */}
+      <CinematicFooter onSecretClick={() => router.push('/login-page')} />
     </div>
   );
 };

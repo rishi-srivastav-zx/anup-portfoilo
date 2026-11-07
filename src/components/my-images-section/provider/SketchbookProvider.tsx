@@ -139,17 +139,44 @@ export function SketchbookProvider({
             try {
                 const res = await sketchbookService.getImages();
                 if (isCancelled) return;
-                if (res?.data && Array.isArray(res.data) && res.data.length > 0) {
-                    const mapped = res.data.map((item, idx) => ({
-                        id: item.id || ("custom-plate-" + idx),
-                        file: item.image_url,
-                        title: item.title || ("Plate " + (idx + 1)),
-                        place: item.place || "",
-                        description: item.description || "",
-                        thumbnailUrl: item.thumbnail_url || item.image_url,
-                        isCustom: true,
-                    }));
+                const rawList = Array.isArray(res)
+                    ? res
+                    : Array.isArray(res?.data)
+                      ? res.data
+                      : [];
+                if (rawList.length > 0) {
+                    const mapped = rawList.map((item: any, idx: number) => {
+                        const fileUrl =
+                            item.image_url ||
+                            item.imageUrl ||
+                            item.file ||
+                            item.url ||
+                            "";
+                        const thumb =
+                            item.thumbnail_url ||
+                            item.thumbnailUrl ||
+                            fileUrl;
+                        return {
+                            id: item.id || `custom-plate-${idx}`,
+                            file: fileUrl,
+                            title: item.title || `Plate ${idx + 1}`,
+                            place: item.place || "",
+                            description: item.description || "",
+                            thumbnailUrl: thumb,
+                            isCustom: true,
+                        };
+                    });
                     setPages(mapped);
+
+                    // Push directly to live iframe if already mounted
+                    try {
+                        const win = frameRef.current?.contentWindow as any;
+                        if (win && typeof win.setPages === "function") {
+                            win.setPages(mapped);
+                        }
+                    } catch {
+                        // ignore
+                    }
                 }
             } catch (err) {
                 console.log("Using initial fallback plates:", err);
@@ -243,47 +270,31 @@ export function SketchbookProvider({
         });
     }, [pages]);
 
-    // Generate dynamic srcDoc if user added/modified pages
-    const generatedSrcDoc = useMemo(() => {
-        if (!isCustomizedPages || !baseHtml) return undefined;
+    // Generated srcDoc disabled in favor of native live window.setPages sync
+    const generatedSrcDoc = undefined;
 
-        let html = baseHtml;
-
-        // Inject base tag so relative assets resolve properly
-        if (!html.includes("<base ")) {
-            html = html.replace(
-                "<head>",
-                '<head><base href="/landing-pages/">',
-            );
+    // Keep live iframe synchronized when pages change
+    useEffect(() => {
+        try {
+            const win = frameRef.current?.contentWindow as any;
+            if (win && typeof win.setPages === "function" && pages.length > 0) {
+                win.setPages(pages);
+            }
+        } catch {
+            // ignore
         }
+    }, [pages]);
 
-        // Build replacement PAGES array with robust URL resolution (handles data URLs, full URLs, and local files)
-        const formattedPages = pages.map((p) => ({
-            file: p.file,
-            title: p.title,
-            place: p.place || "",
-        }));
-
-        const pagesCode = `const PAGES=${JSON.stringify(formattedPages)};\nPAGES.forEach(p=>p.url=(p.file.startsWith('http')||p.file.startsWith('/')||p.file.startsWith('data:'))?p.file:(DIR+p.file));`;
-
-        const regex =
-            /const PAGES=\[\s*[\s\S]*?\];\s*PAGES\.forEach\(p=>p\.url=DIR\+p\.file\);/;
-        if (regex.test(html)) {
-            html = html.replace(regex, pagesCode);
-        }
-
-        // Clean out any arrow SVGs or chevrons from generatedSrcDoc
-        html = html.replace(
-            /<polyline[^>]*points=["'](?:11,3 3,22 11,41|3,3 11,22 3,41)["'][^>]*>/gi,
-            "",
-        );
-        html = html.replace(
-            /<button[^>]*class=["'][^"']*sb-arrow[^"']*["'][^>]*>[\s\S]*?<\/button>/gi,
-            '<button class="sb-arrow" style="display:none!important;visibility:hidden!important;width:0!important;height:0!important;"></button>',
-        );
-
-        return html;
-    }, [isCustomizedPages, baseHtml, pages]);
+    // Listen for page changes from inside the iframe (clicks, taps, flips)
+    useEffect(() => {
+        const handlePageMsg = (e: MessageEvent) => {
+            if (e.data?.type === "SKETCHBOOK_PAGE_CHANGED" && typeof e.data.pageIndex === "number") {
+                setCurrentPageIndex(e.data.pageIndex);
+            }
+        };
+        window.addEventListener("message", handlePageMsg);
+        return () => window.removeEventListener("message", handlePageMsg);
+    }, []);
 
     // Frame registration
     const registerFrame = useCallback((frame: HTMLIFrameElement | null) => {

@@ -1,12 +1,30 @@
 import { useCallback, useEffect, useRef } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { MengToSketchbookLandingPage } from "../shaders/landing-pages/LandingPages";
 import "../shaders/threeui.css";
 import { useSketchbook } from "../provider/SketchbookProvider";
 
 export function Scene() {
-    const { typography, generatedSrcDoc, registerFrame, currentPageIndex } =
+    const { typography, registerFrame, currentPageIndex, pages, prevPage, nextPage } =
         useSketchbook();
     const containerRef = useRef<HTMLDivElement>(null);
+    const pagesRef = useRef(pages);
+    pagesRef.current = pages;
+    const currentPageIndexRef = useRef(currentPageIndex);
+    currentPageIndexRef.current = currentPageIndex;
+
+    // Keep live iframe synchronized when dynamic pages change
+    useEffect(() => {
+        try {
+            const frame = containerRef.current?.querySelector("iframe");
+            const win = frame?.contentWindow as any;
+            if (win && typeof win.setPages === "function" && Array.isArray(pages) && pages.length > 0) {
+                win.setPages(pages);
+            }
+        } catch {
+            // guard
+        }
+    }, [pages]);
 
     // Forward wheel events from inside the iframe to parent window via native WheelEvent
     // so Lenis smooth scrolling receives and animates it with standard inertia and lerp
@@ -232,14 +250,18 @@ export function Scene() {
                     }
                 }
 
-                if (win && typeof win.goTo === "function") {
-                    win.goTo(currentPageIndex);
+                // Initial page and dynamic plates sync on mount
+                if (win && typeof win.setPages === "function" && Array.isArray(pagesRef.current) && pagesRef.current.length > 0) {
+                    win.setPages(pagesRef.current);
+                }
+                if (win && typeof win.goTo === "function" && currentPageIndexRef.current > 0) {
+                    win.goTo(currentPageIndexRef.current);
                 }
             } catch {
                 // guard
             }
         },
-        [currentPageIndex, registerFrame],
+        [registerFrame],
     );
 
     return (
@@ -257,8 +279,34 @@ export function Scene() {
                 bodySize={typography.bodySize}
                 headingLetterSpacing={typography.headingLetterSpacing}
                 applyScene={handleApplyScene}
-                {...(generatedSrcDoc ? { srcDoc: generatedSrcDoc } : {})}
             />
+
+            {/* Floating Side Flip Arrows */}
+            <button
+                type="button"
+                onClick={(e) => {
+                    e.stopPropagation();
+                    prevPage();
+                }}
+                aria-label="Previous plate"
+                className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 z-30 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-[#14100E]/75 hover:bg-[#14100E] text-[#F4EFE6] backdrop-blur-md border border-white/10 shadow-[0_4px_20px_rgba(0,0,0,0.2)] hover:scale-105 active:scale-95 transition-all flex items-center justify-center cursor-pointer group"
+                title="Previous plate"
+            >
+                <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6 transition-transform group-hover:-translate-x-0.5" />
+            </button>
+
+            <button
+                type="button"
+                onClick={(e) => {
+                    e.stopPropagation();
+                    nextPage();
+                }}
+                aria-label="Next plate"
+                className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 z-30 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-[#14100E]/75 hover:bg-[#14100E] text-[#F4EFE6] backdrop-blur-md border border-white/10 shadow-[0_4px_20px_rgba(0,0,0,0.2)] hover:scale-105 active:scale-95 transition-all flex items-center justify-center cursor-pointer group"
+                title="Next plate"
+            >
+                <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6 transition-transform group-hover:translate-x-0.5" />
+            </button>
         </div>
     );
 }

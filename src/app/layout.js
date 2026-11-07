@@ -11,9 +11,30 @@ const geistMono = Geist_Mono({
     subsets: ["latin"],
 });
 
+const siteUrl = (
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    process.env.NEXT_PUBLIC_BASE_URL ||
+    "https://anuprawat.com"
+).replace(/\/+$/, "");
+
 export const metadata = {
-    title: "Anup Rawat | Cinematographer & Director of Photography",
-    description: "Official portfolio of Anup Rawat — Contemporary Cinematographer specializing in feature films, commercials, music videos, and visual storytelling.",
+    metadataBase: new URL(siteUrl),
+    title: {
+        default: "Anup Rawat | Cinematographer & Director of Photography",
+        template: "%s | Anup Rawat",
+    },
+    description: "Official portfolio of Anup Rawat — Contemporary Cinematographer & Director of Photography specializing in feature films, commercials, and visual storytelling.",
+    keywords: [
+        "Anup Rawat",
+        "Cinematographer",
+        "Director of Photography",
+        "DP Portfolio",
+        "Film Lighting",
+        "Camera Operator",
+        "Visual Storyteller",
+    ],
+    authors: [{ name: "Anup Rawat", url: siteUrl }],
+    creator: "Anup Rawat",
     icons: {
         icon: [
             { url: "/favicon.ico" },
@@ -25,6 +46,7 @@ export const metadata = {
             { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
         ],
     },
+    manifest: "/manifest.json",
 };
 
 import CustomCursor from "@/components/CustomCursor/CustomCursor";
@@ -33,6 +55,8 @@ import SmoothScroll from "@/components/SmoothScroll";
 import { AuthProvider } from "@/context/AuthContext";
 import ChatAssistant from "@/components/chat-assistant/ChatAssistant";
 import ConnectionProvider from "@/components/global/ConnectionProvider";
+import { CookieConsentProvider } from "@/context/CookieConsentContext";
+import CookieConsentBanner from "@/components/legal/CookieConsentBanner";
 
 export default function RootLayout({ children }) {
     return (
@@ -57,14 +81,17 @@ export default function RootLayout({ children }) {
                 />
             </head>
             <body className="min-h-full flex flex-col font-sans">
-                <AuthProvider>
-                    <ConnectionProvider>
-                        <SmoothScroll>{children}</SmoothScroll>
-                        <CustomCursor />
-                        <BottomNav />
-                        <ChatAssistant />
-                    </ConnectionProvider>
-                </AuthProvider>
+                <CookieConsentProvider>
+                    <AuthProvider>
+                        <ConnectionProvider>
+                            <SmoothScroll>{children}</SmoothScroll>
+                            <CustomCursor />
+                            <BottomNav />
+                            <ChatAssistant />
+                            <CookieConsentBanner />
+                        </ConnectionProvider>
+                    </AuthProvider>
+                </CookieConsentProvider>
             </body>
         </html>
     );

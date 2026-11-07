@@ -158,6 +158,18 @@ export default function Footer({ onNavigate, onSelectCategory }: FooterProps) {
             {new Date().getFullYear()} Anup Rawat. All rights reserved.
           </p>
           <div className="flex items-center gap-4">
+            <Link
+              href="/privacy-policy"
+              className="text-[#6B625A] hover:text-[#14100E] underline underline-offset-4 transition-colors"
+            >
+              Privacy Policy
+            </Link>
+            <Link
+              href="/terms-and-conditions"
+              className="text-[#6B625A] hover:text-[#14100E] underline underline-offset-4 transition-colors"
+            >
+              Terms
+            </Link>
             <span className="text-[#14100E] font-medium">Keep creating.</span>
           </div>
         </div>

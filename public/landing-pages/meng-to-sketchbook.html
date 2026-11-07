@@ -1607,9 +1607,9 @@
                     place: "Riverside Bank",
                 },
             ];
-            PAGES.forEach((p) => (p.url = DIR + p.file));
-            const M = PAGES.length,
-                LAND = 6;
+            PAGES.forEach((p) => (p.url = (p.file.startsWith("http") || p.file.startsWith("/") || p.file.startsWith("data:")) ? p.file : (DIR + p.file)));
+            let M = PAGES.length;
+            const LAND = 6;
 
             const wrap = document.getElementById("sbWrap");
             const stage = document.getElementById("sbStage");
@@ -1634,14 +1634,20 @@
                 if (c) e.className = c;
                 return e;
             }
+            function getPage(i) {
+                if (!PAGES || PAGES.length === 0) return { url: "", title: "", place: "" };
+                const safeIdx = ((i % PAGES.length) + PAGES.length) % PAGES.length;
+                return PAGES[safeIdx] || { url: "", title: "", place: "" };
+            }
             function imgEl(i, side) {
                 const im = new Image();
                 im.className = "sb-half-img " + side;
                 im.draggable = false;
                 im.alt = "";
-                im.src = PAGES[i].url;
+                const page = getPage(i);
+                im.src = page.url;
                 im.onerror = function () {
-                    const fallback = (PAGES[i] && PAGES[i].fallbackUrl) ? PAGES[i].fallbackUrl : (DIR + "1956C3DE-266A-4B87-95D6-B5705F71403D_1_201_a.webp");
+                    const fallback = (page && page.fallbackUrl) ? page.fallbackUrl : (DIR + "1956C3DE-266A-4B87-95D6-B5705F71403D_1_201_a.webp");
                     if (this.src !== fallback) {
                         this.src = fallback;
                     }
@@ -1687,11 +1693,11 @@
                     const f = el("div", "face front"),
                         b = el("div", "face back");
                     const dress = (e, url, px) => {
-                        e.style.backgroundImage = "url(" + url + ")";
+                        e.style.backgroundImage = 'url("' + url + '")';
                         e.style.backgroundPositionX = px;
                     };
-                    dress(f, PAGES[from].url, dir === "next" ? A : B);
-                    dress(b, PAGES[to].url, dir === "next" ? B : A);
+                    dress(f, getPage(from).url, dir === "next" ? A : B);
+                    dress(b, getPage(to).url, dir === "next" ? B : A);
                     f.appendChild(el("div", "sh"));
                     f.appendChild(el("div", "gl"));
                     b.appendChild(el("div", "sh"));
@@ -1738,9 +1744,16 @@
                 if (!turn) {
                     const f = el("div", "sb-full");
                     const im = new Image();
-                    im.src = PAGES[idx].url;
-                    im.alt = PAGES[idx].title;
+                    const page = getPage(idx);
+                    im.src = page.url;
+                    im.alt = page.title;
                     im.draggable = false;
+                    im.onerror = function () {
+                        const fallback = (page && page.fallbackUrl) ? page.fallbackUrl : (DIR + "1956C3DE-266A-4B87-95D6-B5705F71403D_1_201_a.webp");
+                        if (this.src !== fallback) {
+                            this.src = fallback;
+                        }
+                    };
                     f.appendChild(im);
                     book.appendChild(f);
                     sb3d.style.setProperty("--shade", "0");
@@ -1759,6 +1772,16 @@
                     b = el("button", "sb-zone sb-next");
                 a.setAttribute("aria-label", "previous page");
                 b.setAttribute("aria-label", "next page");
+                a.onclick = function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    step("prev");
+                };
+                b.onclick = function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    step("next");
+                };
                 book.appendChild(a);
                 book.appendChild(b);
                 layout();
@@ -1780,15 +1803,15 @@
                 }
                 if (turn) {
                     capOut = el("p", "sb-caption live");
-                    capOut.textContent = PAGES[turn.from].title;
+                    capOut.textContent = getPage(turn.from).title;
                     capBox.appendChild(capOut);
                     capIn = el("p", "sb-caption live");
-                    capIn.textContent = PAGES[turn.to].title;
+                    capIn.textContent = getPage(turn.to).title;
                     capBox.appendChild(capIn);
                     fadeCaption(turn.t);
                 } else {
                     const p = el("p", "sb-caption");
-                    p.textContent = PAGES[idx].title;
+                    p.textContent = getPage(idx).title;
                     capBox.appendChild(p);
                 }
             }
@@ -1973,68 +1996,81 @@
                 hint.classList.add("gone");
             }
 
+            let pendingPointer = null;
+
             stage.addEventListener("pointerdown", (e) => {
                 if (e.button !== 0) return;
+                const onBook = e.target.closest(".sb-zone, #sbBook, .sb-full, .sb-half, .curl");
+                if (!onBook) return;
+                if (introOn) endIntro();
                 if (e.pointerType !== "touch") {
-                    e.preventDefault(); /* no text selection, no image drag */
-                }
-                const onBook = e.target.closest(".sb-zone");
-                if (e.pointerType !== "touch" || onBook) {
-                    try { stage.setPointerCapture(e.pointerId); } catch (_) {}
+                    e.preventDefault();
                 }
                 hideHint();
-                if (!onBook || introOn) return;
+                try {
+                    stage.setPointerCapture(e.pointerId);
+                } catch (_) {}
                 const r = bookRect();
-                const dir =
-                    (e.clientX - r.left) / r.width > 0.5 ? "next" : "prev";
-                startTurn(dir, 0);
-                drag = {
+                const dir = (e.clientX - r.left) / r.width > 0.5 ? "next" : "prev";
+                pendingPointer = {
                     dir: dir,
                     x0: e.clientX,
                     y0: e.clientY,
                     w: r.width,
                     moved: 0,
-                    vel: 0,
+                    started: false,
                     tPrev: performance.now(),
                 };
             });
+
             stage.addEventListener("pointermove", (e) => {
-                if (!drag) return;
-                if (e.pointerType === "touch") {
-                    const totalDy = Math.abs(e.clientY - drag.y0);
-                    const totalDx = Math.abs(e.clientX - drag.x0);
-                    if (totalDy > 8 && totalDy > totalDx) {
-                        endDrag(e);
-                        return;
-                    }
+                if (!pendingPointer) return;
+                const dx = e.clientX - pendingPointer.x0;
+                const dy = e.clientY - pendingPointer.y0;
+                pendingPointer.moved = Math.max(pendingPointer.moved, Math.hypot(dx, dy));
+
+                if (!pendingPointer.started && pendingPointer.moved > 8) {
+                    if (M <= 1) return;
+                    pendingPointer.started = true;
+                    startTurn(pendingPointer.dir, 0);
+                    drag = pendingPointer;
                 }
-                const dx = e.clientX - drag.x0;
-                drag.moved = Math.max(drag.moved, Math.abs(dx));
-                const raw = (drag.dir === "next" ? -dx : dx) / (drag.w * 0.62);
-                const t = Math.max(0, Math.min(1, raw));
-                const now = performance.now();
-                drag.vel =
-                    (t - (turn ? turn.t : 0)) /
-                    Math.max(0.001, (now - drag.tPrev) / 1000);
-                drag.tPrev = now;
-                if (turn) {
+
+                if (drag && turn) {
+                    const raw = (drag.dir === "next" ? -dx : dx) / (drag.w * 0.62);
+                    const t = Math.max(0, Math.min(1, raw));
+                    const now = performance.now();
+                    drag.vel =
+                        (t - (turn ? turn.t : 0)) /
+                        Math.max(0.001, (now - drag.tPrev) / 1000);
+                    drag.tPrev = now;
                     turn.t = t;
                     applyTurn(t);
                 }
             });
+
             function endDrag(e) {
-                if (!drag) return;
-                const d = drag;
+                if (!pendingPointer) return;
+                const p = pendingPointer;
+                try {
+                    if (e && e.pointerId != null) {
+                        stage.releasePointerCapture(e.pointerId);
+                    }
+                } catch (_) {}
+                pendingPointer = null;
                 drag = null;
-                if (!turn) return;
-                if (d.moved < 6) {
-                    /* a tap, not a drag */
-                    commit();
+
+                // Simple click or tap (not dragged)
+                if (!p.started || p.moved <= 8) {
+                    step(p.dir);
                     return;
                 }
-                const go = turn.t > 0.42 || d.vel > 1.1;
-                if (go) commit();
-                else cancel();
+
+                if (turn) {
+                    const go = turn.t > 0.38 || (p.vel && p.vel > 0.9);
+                    if (go) commit();
+                    else cancel();
+                }
             }
             stage.addEventListener("dragstart", (e) => e.preventDefault());
             stage.addEventListener("selectstart", (e) => e.preventDefault());
@@ -2058,12 +2094,23 @@
                 };
                 paint();
             }
+            function notifyParentPageChanged(newIdx) {
+                try {
+                    if (window.parent && window.parent !== window) {
+                        window.parent.postMessage({
+                            type: "SKETCHBOOK_PAGE_CHANGED",
+                            pageIndex: newIdx
+                        }, "*");
+                    }
+                } catch (_) {}
+            }
             function commit() {
                 if (!turn) return;
                 if (REDUCED) {
                     idx = turn.to;
                     turn = null;
                     paint();
+                    notifyParentPageChanged(idx);
                     return;
                 }
                 tweenTo(
@@ -2073,6 +2120,7 @@
                         idx = turn.to;
                         turn = null;
                         paint();
+                        notifyParentPageChanged(idx);
                     }
                 );
             }
@@ -2087,10 +2135,15 @@
                     }
                 );
             }
+            let lastStepTime = 0;
             function step(dir) {
+                if (M <= 1) return;
+                const now = performance.now();
+                if (now - lastStepTime < 320) return;
+                lastStepTime = now;
                 if (introOn) endIntro();
                 if (turn) {
-                    /* finish whatever is in flight first */ idx = turn.to;
+                    idx = turn.to;
                     turn = null;
                 }
                 startTurn(dir, 0);
@@ -2112,6 +2165,46 @@
                 idx = i;
                 paint();
             }
+            window.goTo = goTo;
+            window.setPages = function (newPages) {
+                if (!Array.isArray(newPages) || newPages.length === 0) return;
+                PAGES.length = 0;
+                newPages.forEach(function (p) {
+                    PAGES.push({
+                        file: p.file,
+                        title: p.title || "",
+                        place: p.place || "",
+                        url: (p.file && (p.file.startsWith("http") || p.file.startsWith("/") || p.file.startsWith("data:"))) ? p.file : (DIR + p.file)
+                    });
+                });
+                M = PAGES.length;
+                idx = Math.min(idx, Math.max(0, M - 1));
+                if (introOn) endIntro();
+                turn = null;
+                paint();
+                const pl = document.getElementById("plateList");
+                if (pl) {
+                    pl.innerHTML = "";
+                    PAGES.forEach((p, i) => {
+                        const li = el("li");
+                        const b = el("button", "plate");
+                        b.innerHTML =
+                            '<span class="n">' +
+                            String(i + 1).padStart(2, "0") +
+                            "</span>" +
+                            '<span class="t"></span><span class="p"></span>';
+                        b.querySelector(".t").textContent = p.title;
+                        b.querySelector(".p").textContent = p.place;
+                        b.onclick = () => {
+                            goTo(i);
+                            const sb = document.getElementById("sketchbook");
+                            if (sb) sb.scrollIntoView({ behavior: "smooth", block: "center" });
+                        };
+                        li.appendChild(b);
+                        pl.appendChild(li);
+                    });
+                }
+            };
             document.getElementById("sbLeft").onclick = () => step("prev");
             document.getElementById("sbRight").onclick = () => step("next");
             const cueBtn = document.getElementById("sbTurnCue");
@@ -2434,12 +2527,13 @@
                 const coarse = matchMedia(
                     "(max-width: 640px), (pointer: coarse)",
                 ).matches;
-                if (coarse || REDUCED || Q.has("nointro")) {
-                    idx = LAND;
+                const safeLand = Math.min(LAND, Math.max(0, M - 1));
+                if (coarse || REDUCED || Q.has("nointro") || M <= 2) {
+                    idx = safeLand;
                     paint();
                     return;
                 }
-                const steps = M + LAND;
+                const steps = M + safeLand;
                 riffle = [];
                 for (let r = 0; r < steps; r++) {
                     const bell = Math.sin(Math.PI * (r / (steps - 1)));

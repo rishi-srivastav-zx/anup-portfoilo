@@ -53,7 +53,7 @@ export const ProjectStation: React.FC<{
                 <div className="block absolute top-[30%] left-[15%] w-[28px] sm:w-[40px] md:w-[50px] h-[14px] md:h-[20px] bg-[#080808] -translate-x-1/2 rounded-sm z-[46] border-[2px] border-[#222]" />
                 <div className="block absolute top-[30%] right-[15%] w-[28px] sm:w-[40px] md:w-[50px] h-[14px] md:h-[20px] bg-[#080808] translate-x-1/2 rounded-sm z-[46] border-[2px] border-[#222]" />
 
-                {/* Billboard Frame (Flatter, Cinematic Proportions) */}
+                {/* Billboard Frame (Original Proportions) */}
                 <div className="w-full h-auto md:h-[240px] bg-[#14100E] border-[4px] sm:border-[6px] md:border-[8px] border-[#14100E] flex flex-col md:flex-row items-stretch shadow-[6px_6px_0_rgba(20,16,14,0.25)] md:shadow-[16px_16px_0_rgba(20,16,14,0.25)] transition-transform duration-500 relative z-[50]">
                     {/* Left Panel (Cinematic Video Display) */}
                     <div className="w-full md:w-[45%] h-[180px] sm:h-[200px] md:h-auto min-h-[170px] border-b-[4px] md:border-b-0 md:border-r-[8px] border-[#14100E] relative overflow-hidden bg-[#0A0A0A]">
@@ -82,17 +82,17 @@ export const ProjectStation: React.FC<{
                         <div className="absolute bottom-2 right-2 md:bottom-3 md:right-3 w-[18px] md:w-[24px] h-[3px] md:h-[4px] bg-[#D4A017] shadow-[2px_-2px_0_rgba(20,16,14,0.9)] opacity-80 group-hover/panel:opacity-100 group-hover/panel:-translate-y-[2px] transition-all duration-75 z-10" />
 
                         {/* Top: Campaign Description & Key Points */}
-                        <div className="flex flex-col gap-1 sm:gap-1.5 md:gap-2 relative z-10">
-                            <p className="font-sans font-bold text-[10px] sm:text-[12px] md:text-[15px] leading-[1.3] md:leading-[1.4] text-[#F4EFE6] w-[95%] uppercase tracking-[-0.02em]">
+                        <div className="flex flex-col gap-1 sm:gap-1.5 md:gap-2 relative z-10 min-w-0">
+                            <p className="font-sans font-bold text-[10px] sm:text-[12px] md:text-[15px] leading-[1.3] md:leading-[1.4] text-[#F4EFE6] w-[95%] uppercase tracking-[-0.02em] truncate">
                                 {project.summary}
                             </p>
 
-                            <ul className="flex flex-col gap-0.5 sm:gap-1 md:gap-1.5 mt-0.5 sm:mt-1 md:mt-2 ml-0.5 md:ml-1">
+                            <ul className="flex flex-col gap-0.5 sm:gap-1 md:gap-1.5 mt-0.5 sm:mt-1 md:mt-2 ml-0.5 md:ml-1 min-w-0">
                                 {project.points.map((p, idx) => (
                                     <li
                                         key={idx}
                                         aria-hidden="true"
-                                        className="flex items-start gap-1.5 sm:gap-2"
+                                        className="flex items-start gap-1.5 sm:gap-2 min-w-0"
                                     >
                                         <svg
                                             className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-[#D4A017] mt-0.5 shrink-0"
@@ -107,7 +107,7 @@ export const ProjectStation: React.FC<{
                                                 d="M9 5l7 7-7 7"
                                             />
                                         </svg>
-                                        <span className="text-[#D1D1D1] font-sans text-[8.5px] sm:text-[10px] md:text-[12px] font-medium leading-snug tracking-tight">
+                                        <span className="text-[#D1D1D1] font-sans text-[8.5px] sm:text-[10px] md:text-[12px] font-medium leading-snug tracking-tight truncate">
                                             {p}
                                         </span>
                                     </li>
@@ -115,39 +115,39 @@ export const ProjectStation: React.FC<{
                             </ul>
                         </div>
 
-                        {/* Bottom: Oversized Impact Metrics */}
-                        <div className="flex justify-between items-end w-full border-t border-white/40 pt-1.5 sm:pt-2 md:pt-3 mt-auto">
-                            <div className="flex flex-col">
+                        {/* Bottom: Technical Specifications / Metrics (Fixed size & leading so text is never cut) */}
+                        <div className="flex justify-between items-end w-full border-t border-white/40 pt-1.5 sm:pt-2 md:pt-3 mt-auto min-w-0 gap-2">
+                            <div className="flex flex-col min-w-0 flex-1">
                                 <span
                                     aria-hidden="true"
-                                    className="font-['DM_Mono'] font-bold text-white text-[7.5px] sm:text-[9px] md:text-[11px] tracking-widest uppercase mb-0.5 sm:mb-1"
+                                    className="font-['DM_Mono'] font-bold text-white text-[7.5px] sm:text-[9px] md:text-[11px] tracking-widest uppercase mb-0.5 sm:mb-1 truncate"
                                 >
-                                    {project.metricLabels?.[0] || "METRIC 1"}
+                                    {project.metricLabels?.[0] || "CAMERA"}
                                 </span>
-                                <div className="font-sans text-[22px] sm:text-[30px] md:text-[50px] leading-[0.8] tracking-tight text-white">
+                                <div className="font-sans font-bold text-[13px] sm:text-[16px] md:text-[20px] leading-tight tracking-tight text-white truncate">
                                     {project.metrics?.[0] || project.stat}
                                 </div>
                             </div>
-                            <div className="flex flex-col">
+                            <div className="flex flex-col min-w-0 flex-1 px-1">
                                 <span
                                     aria-hidden="true"
-                                    className="font-['DM_Mono'] font-bold text-white text-[7.5px] sm:text-[9px] md:text-[11px] tracking-widest uppercase mb-0.5 sm:mb-1"
+                                    className="font-['DM_Mono'] font-bold text-white text-[7.5px] sm:text-[9px] md:text-[11px] tracking-widest uppercase mb-0.5 sm:mb-1 truncate"
                                 >
-                                    {project.metricLabels?.[1] || "METRIC 2"}
+                                    {project.metricLabels?.[1] || "LENS"}
                                 </span>
-                                <div className="font-sans text-[22px] sm:text-[30px] md:text-[50px] leading-[0.8] tracking-tight text-white">
-                                    {project.metrics?.[1] || "80%"}
+                                <div className="font-sans font-bold text-[13px] sm:text-[16px] md:text-[20px] leading-tight tracking-tight text-white truncate">
+                                    {project.metrics?.[1] || "ANAMORPHIC"}
                                 </div>
                             </div>
-                            <div className="flex flex-col text-right">
+                            <div className="flex flex-col text-right min-w-0 flex-1 pl-1">
                                 <span
                                     aria-hidden="true"
-                                    className="font-['DM_Mono'] font-bold text-white text-[7.5px] sm:text-[9px] md:text-[11px] tracking-widest uppercase mb-0.5 sm:mb-1"
+                                    className="font-['DM_Mono'] font-bold text-white text-[7.5px] sm:text-[9px] md:text-[11px] tracking-widest uppercase mb-0.5 sm:mb-1 truncate"
                                 >
-                                    {project.metricLabels?.[2] || "METRIC 3"}
+                                    {project.metricLabels?.[2] || "FORMAT"}
                                 </span>
-                                <div className="font-sans text-[22px] sm:text-[30px] md:text-[50px] leading-[0.8] tracking-tight text-white">
-                                    {project.metrics?.[2] || "24H"}
+                                <div className="font-sans font-bold text-[13px] sm:text-[16px] md:text-[20px] leading-tight tracking-tight text-white truncate">
+                                    {project.metrics?.[2] || "2.39:1"}
                                 </div>
                             </div>
                         </div>

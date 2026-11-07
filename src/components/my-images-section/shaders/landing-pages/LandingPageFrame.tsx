@@ -184,6 +184,7 @@ export function LandingPageFrame({
             }}
         >
             <iframe
+                key={srcDoc ? `srcdoc-${srcDoc.length}` : "src-static"}
                 ref={frameRef}
                 title={title}
                 {...(srcDoc ? { srcDoc } : { src: sourceUrl })}
