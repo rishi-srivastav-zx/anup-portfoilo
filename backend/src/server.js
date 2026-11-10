@@ -20,6 +20,7 @@ import {
     errorHandler,
     notFoundHandler,
 } from "./middleware/errorHandler.js";
+import { schedulerWorker } from "./workers/blogSchedulerWorker.js";
 
 const app = express();
 
@@ -114,6 +115,9 @@ const PORT = env.PORT || 5000;
 
 app.listen(PORT, () => {
     console.log(`Backend running on http://localhost:${PORT}`);
+    if (env.NODE_ENV !== "test") {
+        schedulerWorker.start({ intervalMs: 60000 });
+    }
 });
 
 export default app;

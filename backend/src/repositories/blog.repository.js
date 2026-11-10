@@ -30,6 +30,9 @@ const BASE_COLUMNS = `
     b.created_at AS "createdAt",
     b.updated_at AS "updatedAt"`;
 
+// RETURNING ke liye alias-free columns (ek baar compute, har call pe nahi)
+const RETURNING_COLUMNS = BASE_COLUMNS.replaceAll("b.", "");
+
 // list/cards ke liye heavy content (introduction, sections, content, gallery_images) nahi
 const LIST_COLUMNS = `
     b.id,
@@ -89,7 +92,12 @@ const FIELD_MAPPING = {
     publishedAt: "published_at",
 };
 
-const JSON_FIELDS = new Set(["author", "introduction", "sections", "galleryImages"]);
+const JSON_FIELDS = new Set([
+    "author",
+    "introduction",
+    "sections",
+    "galleryImages",
+]);
 
 const SORT_COLUMNS = {
     publishedAt: "COALESCE(b.published_at, b.created_at)",
@@ -99,6 +107,24 @@ const SORT_COLUMNS = {
 };
 
 const escapeLike = (s) => s.replace(/[\\%_]/g, "\\$&");
+
+const ADJ_COLS = `b.title, b.slug, b.featured_image AS "featuredImage"`;
+const ADJACENT_SQL = `
+    (
+        SELECT 'prev' AS direction, ${ADJ_COLS}
+        FROM blogs b
+        WHERE b.status = 'published' AND b.published_at < $1
+        ORDER BY b.published_at DESC
+        LIMIT 1
+    )
+    UNION ALL
+    (
+        SELECT 'next' AS direction, ${ADJ_COLS}
+        FROM blogs b
+        WHERE b.status = 'published' AND b.published_at > $1
+        ORDER BY b.published_at ASC
+        LIMIT 1
+    )`;
 
 export const blogRepository = {
     /**
@@ -225,43 +251,18 @@ export const blogRepository = {
     async getAdjacent(publishedAt, client = pool) {
         if (!publishedAt) return { prev: null, next: null };
 
-        const cols = `b.title, b.slug, b.featured_image AS "featuredImage"`;
-        const query = `
-            (
-                SELECT 'prev' AS direction, ${cols}
-                FROM blogs b
-                WHERE b.status = 'published' AND b.published_at < $1
-                ORDER BY b.published_at DESC
-                LIMIT 1
-            )
-            UNION ALL
-            (
-                SELECT 'next' AS direction, ${cols}
-                FROM blogs b
-                WHERE b.status = 'published' AND b.published_at > $1
-                ORDER BY b.published_at ASC
-                LIMIT 1
-            );
-        `;
-
-        const res = await client.query(query, [publishedAt]);
+        const res = await client.query(ADJACENT_SQL, [publishedAt]);
         let prev = null;
         let next = null;
 
         for (const row of res.rows) {
-            if (row.direction === "prev") {
-                prev = {
-                    title: row.title,
-                    slug: row.slug,
-                    featuredImage: row.featuredImage,
-                };
-            } else if (row.direction === "next") {
-                next = {
-                    title: row.title,
-                    slug: row.slug,
-                    featuredImage: row.featuredImage,
-                };
-            }
+            const item = {
+                title: row.title,
+                slug: row.slug,
+                featuredImage: row.featuredImage,
+            };
+            if (row.direction === "prev") prev = item;
+            else if (row.direction === "next") next = item;
         }
 
         return { prev, next };
@@ -313,8 +314,11 @@ export const blogRepository = {
             (status === "published" ? new Date().toISOString() : null);
 
         // Ensure only one blog can be featured at a time
+        // (sirf wahi rows touch hoti hain jo featured hain -> poori table rewrite nahi)
         if (data.isFeatured) {
-            await client.query("UPDATE blogs SET is_featured = false");
+            await client.query(
+                "UPDATE blogs SET is_featured = false WHERE is_featured = true",
+            );
         }
 
         const query = `
@@ -330,7 +334,7 @@ export const blogRepository = {
                 $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23,
                 $24::timestamptz
             )
-            RETURNING ${BASE_COLUMNS.replaceAll("b.", "")};
+            RETURNING ${RETURNING_COLUMNS};
         `;
 
         const values = [
@@ -370,7 +374,10 @@ export const blogRepository = {
     async update(id, data, client = pool) {
         // Ensure only one blog can be featured at a time
         if (data.isFeatured) {
-            await client.query("UPDATE blogs SET is_featured = false WHERE id != $1", [id]);
+            await client.query(
+                "UPDATE blogs SET is_featured = false WHERE id != $1 AND is_featured = true",
+                [id],
+            );
         }
 
         const updates = [];
@@ -391,7 +398,7 @@ export const blogRepository = {
             `UPDATE blogs
              SET ${updates.join(", ")}, updated_at = NOW()
              WHERE id = $${values.length}
-             RETURNING ${BASE_COLUMNS.replaceAll("b.", "")}`,
+             RETURNING ${RETURNING_COLUMNS}`,
             values,
         );
         return res.rows[0] || null;
@@ -399,18 +406,25 @@ export const blogRepository = {
 
     /**
      * Atomically set featured state ensuring ONLY ONE blog can be featured
+     * (ek hi statement -> ek round-trip, aur atomic)
      */
     async setFeatured(id, isFeatured, client = pool) {
-        if (isFeatured) {
-            // Unfeature all other blogs first
-            await client.query("UPDATE blogs SET is_featured = false WHERE id != $1", [id]);
-        }
+        const on = Boolean(isFeatured);
         const res = await client.query(
-            `UPDATE blogs
-             SET is_featured = $2, updated_at = NOW()
-             WHERE id = $1
-             RETURNING ${BASE_COLUMNS.replaceAll("b.", "")}`,
-            [id, Boolean(isFeatured)],
+            on
+                ? `WITH unfeature AS (
+                       UPDATE blogs SET is_featured = false
+                       WHERE id <> $1 AND is_featured = true
+                   )
+                   UPDATE blogs
+                   SET is_featured = $2, updated_at = NOW()
+                   WHERE id = $1
+                   RETURNING ${RETURNING_COLUMNS}`
+                : `UPDATE blogs
+                   SET is_featured = $2, updated_at = NOW()
+                   WHERE id = $1
+                   RETURNING ${RETURNING_COLUMNS}`,
+            [id, on],
         );
         return res.rows[0] || null;
     },

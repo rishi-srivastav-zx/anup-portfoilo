@@ -30,6 +30,7 @@ const envSchema = z.object({
         .default(7),
     ACCESS_TOKEN_ISSUER: z.string().default("cinematographer-portfolio"),
     ACCESS_TOKEN_AUDIENCE: z.string().default("cinematographer-portfolio-client"),
+    CRON_SECRET: z.string().optional().default("cinematographer_scheduler_cron_secret_production"),
 });
 
 const parsed = envSchema.safeParse(process.env);

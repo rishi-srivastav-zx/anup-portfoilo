@@ -59,6 +59,15 @@ export const errorHandler = (err, req, res, next) => {
         });
     }
 
+    // Multer file upload errors (e.g. LIMIT_FILE_SIZE, invalid extension/MIME)
+    if (err.code === "LIMIT_FILE_SIZE" || err.status === 415) {
+        return res.status(err.status || 413).json({
+            success: false,
+            message: err.code === "LIMIT_FILE_SIZE" ? "File size exceeds allowed limit." : err.message,
+            code: err.code || "FILE_UPLOAD_ERROR",
+        });
+    }
+
     // CORS errors
     if (err.message && err.message.includes("CORS")) {
         return res.status(403).json({

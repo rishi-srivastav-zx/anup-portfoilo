@@ -131,6 +131,99 @@ export const BlogServices = {
         });
         return response.data;
     },
+
+    // -------------------------------------------------------------
+    // Bulk Blog Scheduler & Automated Queue APIs (Phases 1-5)
+    // -------------------------------------------------------------
+    previewImport: async (formData, params = {}, onUploadProgress) => {
+        const response = await axiosClient.post(ENDPOINTS.BLOGS.IMPORT_PREVIEW, formData, {
+            headers: { "Content-Type": "multipart/form-data" },
+            params,
+            onUploadProgress,
+        });
+        return response.data;
+    },
+
+    executeImport: async (formData, idempotencyKey = null, onUploadProgress) => {
+        const headers = { "Content-Type": "multipart/form-data" };
+        if (idempotencyKey) {
+            headers["Idempotency-Key"] = idempotencyKey;
+        }
+        const response = await axiosClient.post(ENDPOINTS.BLOGS.IMPORT_EXECUTE, formData, {
+            headers,
+            onUploadProgress,
+        });
+        return response.data;
+    },
+
+    getQueue: async (params = {}) => {
+        const response = await axiosClient.get(ENDPOINTS.BLOGS.QUEUE_LIST, { params });
+        return response.data;
+    },
+
+    getQueueStats: async () => {
+        const response = await axiosClient.get(ENDPOINTS.BLOGS.QUEUE_STATS);
+        return response.data;
+    },
+
+    reorderQueue: async (orderedIds) => {
+        const response = await axiosClient.post(ENDPOINTS.BLOGS.QUEUE_REORDER, { orderedIds });
+        return response.data;
+    },
+
+    cancelQueueItem: async (id) => {
+        const url = ENDPOINTS.BLOGS.QUEUE_CANCEL.replace(":id", encodeURIComponent(id));
+        const response = await axiosClient.post(url);
+        return response.data;
+    },
+
+    retryQueueItem: async (id, data = {}) => {
+        const url = ENDPOINTS.BLOGS.QUEUE_RETRY.replace(":id", encodeURIComponent(id));
+        const response = await axiosClient.post(url, data);
+        return response.data;
+    },
+
+    manualPublishQueueItem: async (id) => {
+        const url = ENDPOINTS.BLOGS.QUEUE_PUBLISH.replace(":id", encodeURIComponent(id));
+        const response = await axiosClient.post(url);
+        return response.data;
+    },
+
+    getPublishLogs: async (params = {}) => {
+        const response = await axiosClient.get(ENDPOINTS.BLOGS.QUEUE_LOGS, { params });
+        return response.data;
+    },
+
+    getSchedulerSettings: async () => {
+        const response = await axiosClient.get(ENDPOINTS.BLOGS.SETTINGS);
+        return response.data;
+    },
+
+    updateSchedulerSettings: async (data) => {
+        const response = await axiosClient.patch(ENDPOINTS.BLOGS.SETTINGS, data);
+        return response.data;
+    },
+
+    getWorkerHealth: async () => {
+        const response = await axiosClient.get(ENDPOINTS.BLOGS.WORKER_HEALTH);
+        return response.data;
+    },
+
+    triggerCronTick: async () => {
+        const response = await axiosClient.post(ENDPOINTS.BLOGS.CRON_TRIGGER);
+        return response.data;
+    },
+
+    revalidateBlogCache: async (slug) => {
+        const response = await axiosClient.post(ENDPOINTS.BLOGS.REVALIDATE, { slug });
+        return response.data;
+    },
+
+    getBlogPublishingHistory: async (blogId) => {
+        const url = ENDPOINTS.BLOGS.BLOG_HISTORY.replace(":id", encodeURIComponent(blogId));
+        const response = await axiosClient.get(url);
+        return response.data;
+    },
 };
 
 // Convenience named method exports
@@ -152,6 +245,21 @@ export const {
     bulkDelete,
     bulkDeleteBlogs,
     uploadMedia,
+    previewImport,
+    executeImport,
+    getQueue,
+    getQueueStats,
+    reorderQueue,
+    cancelQueueItem,
+    retryQueueItem,
+    manualPublishQueueItem,
+    getPublishLogs,
+    getSchedulerSettings,
+    updateSchedulerSettings,
+    getWorkerHealth,
+    triggerCronTick,
+    revalidateBlogCache,
+    getBlogPublishingHistory,
 } = BlogServices;
 
 export default BlogServices;

@@ -1,13 +1,19 @@
 import { Router } from "express";
 import { blogController } from "../controllers/blog.controller.js";
+import { blogImportController } from "../controllers/blogImport.controller.js";
+import { blogQueueController } from "../controllers/blogQueue.controller.js";
 import { authenticate } from "../middleware/authenticate.js";
 import { authorizeRoles } from "../middleware/authorize.js";
-import { uploadImage, uploadFile } from "../middleware/uploadMiddleware.js";
+import { uploadImage, uploadFile, uploadBulkImport } from "../middleware/uploadMiddleware.js";
 import { verifyAccessToken } from "../utils/tokens.js";
 import { sessionRepository } from "../repositories/session.repository.js";
 import { ACCESS_COOKIE_NAME } from "../utils/cookies.js";
+import { performanceMiddleware } from "../utils/performanceTracker.js";
 
 const router = Router();
+
+// Track API lifecycle, connection checkout, SQL queries, and response size
+router.use(performanceMiddleware);
 
 // Optional authentication middleware for public endpoints to detect logged-in admin
 // using a single SQL JOIN without failing when unauthenticated or token is expired
@@ -112,6 +118,135 @@ router.post(
     authenticate,
     authorizeRoles("admin"),
     blogController.bulkDelete
+);
+
+// ==========================================
+// Phase 2 & 3: Bulk Blog Scheduler & Queue Management Routes
+// ==========================================
+// POST /api/blogs/import/preview (Validate & preview JSON or CSV)
+router.post(
+    "/import/preview",
+    authenticate,
+    authorizeRoles("admin"),
+    uploadBulkImport,
+    blogImportController.previewImport
+);
+
+// POST /api/blogs/import (Execute bulk import & enqueue for scheduled publishing)
+router.post(
+    "/import",
+    authenticate,
+    authorizeRoles("admin"),
+    uploadBulkImport,
+    blogImportController.bulkImport
+);
+
+// GET /api/blogs/scheduler/stats (Queue metrics and scheduler overview)
+router.get(
+    "/scheduler/stats",
+    authenticate,
+    authorizeRoles("admin"),
+    blogQueueController.getQueueStats
+);
+
+// GET /api/blogs/scheduler/settings (Get current scheduler configuration)
+router.get(
+    "/scheduler/settings",
+    authenticate,
+    authorizeRoles("admin"),
+    blogQueueController.getSettings
+);
+
+// PATCH /api/blogs/scheduler/settings (Update interval, daily limit, timezone, enabled)
+router.patch(
+    "/scheduler/settings",
+    authenticate,
+    authorizeRoles("admin"),
+    blogQueueController.updateSettings
+);
+
+// GET /api/blogs/scheduler/queue (List queued blogs with search, status filtering, pagination)
+router.get(
+    "/scheduler/queue",
+    authenticate,
+    authorizeRoles("admin"),
+    blogQueueController.getQueue
+);
+
+// POST /api/blogs/scheduler/queue/reorder (Sequentially reorder pending queue jobs)
+router.post(
+    "/scheduler/queue/reorder",
+    authenticate,
+    authorizeRoles("admin"),
+    blogQueueController.reorderQueue
+);
+
+// POST /api/blogs/scheduler/queue/:id/cancel (Cancel pending queue job)
+router.post(
+    "/scheduler/queue/:id/cancel",
+    authenticate,
+    authorizeRoles("admin"),
+    blogQueueController.cancelQueueItem
+);
+
+// POST /api/blogs/scheduler/queue/:id/retry (Reset and retry failed queue job)
+router.post(
+    "/scheduler/queue/:id/retry",
+    authenticate,
+    authorizeRoles("admin"),
+    blogQueueController.retryQueueItem
+);
+
+// POST /api/blogs/scheduler/queue/:id/publish (Real transactional manual publishing)
+router.post(
+    "/scheduler/queue/:id/publish",
+    authenticate,
+    authorizeRoles("admin"),
+    blogQueueController.manualPublish
+);
+
+// GET /api/blogs/scheduler/logs (Paginated audit logs of all scheduler operations)
+router.get(
+    "/scheduler/logs",
+    authenticate,
+    authorizeRoles("admin"),
+    blogQueueController.getPublishLogs
+);
+
+// GET /api/blogs/scheduler/worker/health (Worker daemon health & queue diagnostics)
+router.get(
+    "/scheduler/worker/health",
+    optionalAuth,
+    blogQueueController.getWorkerHealth
+);
+
+// POST /api/blogs/scheduler/cron-trigger AND /api/blogs/scheduler/worker/tick
+// (External cron webhook for serverless/cron setups and internal ticks)
+router.post(
+    "/scheduler/cron-trigger",
+    optionalAuth,
+    blogQueueController.triggerCron
+);
+router.post(
+    "/scheduler/worker/tick",
+    optionalAuth,
+    blogQueueController.triggerCron
+);
+
+// POST /api/blogs/scheduler/revalidate (On-demand cache revalidation for published blog)
+router.post(
+    "/scheduler/revalidate",
+    authenticate,
+    authorizeRoles("admin"),
+    blogQueueController.revalidateBlog
+);
+
+// GET /api/blogs/:id/publishing-history (Audit history and queue status for single blog)
+router.get(
+    "/:id/publishing-history",
+    authenticate,
+    authorizeRoles("admin"),
+    blogQueueController.getBlogHistory
 );
 
 // POST /api/blogs (create blog with optional multipart featured image upload)

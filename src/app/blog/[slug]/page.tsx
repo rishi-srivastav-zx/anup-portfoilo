@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { cache } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import ArticleDetail from '../components/ArticleDetail';
@@ -8,6 +9,11 @@ import {
   fetchDynamicArticles,
   fetchDynamicArticleBySlug,
 } from '../data/articles';
+
+// Request-scoped memoization: prevents duplicate fetch between generateMetadata and BlogPostPage
+const getArticleBySlug = cache(async (slug: string) => {
+  return fetchDynamicArticleBySlug(slug);
+});
 
 interface BlogPostPageProps {
   params: Promise<{ slug: string }>;
@@ -27,7 +33,7 @@ export async function generateMetadata({
 }: BlogPostPageProps): Promise<Metadata> {
   const { slug } = await params;
   const decodedSlug = decodeURIComponent(slug);
-  const article = await fetchDynamicArticleBySlug(decodedSlug);
+  const article = await getArticleBySlug(decodedSlug);
 
   const siteUrl = (
     process.env.NEXT_PUBLIC_SITE_URL ||
@@ -113,7 +119,7 @@ export async function generateMetadata({
 export default async function BlogPostPage({ params }: BlogPostPageProps) {
   const { slug } = await params;
   const decodedSlug = decodeURIComponent(slug);
-  const article = await fetchDynamicArticleBySlug(decodedSlug);
+  const article = await getArticleBySlug(decodedSlug);
 
   const siteUrl = (
     process.env.NEXT_PUBLIC_SITE_URL ||
@@ -225,7 +231,11 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
       <Header currentPath={`/blog/${decodedSlug}`} />
 
       <main id="main-content" className="flex-1">
-        <ArticleDetail slug={decodedSlug} initialArticle={article} />
+        <ArticleDetail
+          slug={decodedSlug}
+          initialArticle={article}
+          initialRelatedArticles={article?.relatedArticles}
+        />
       </main>
 
       <Footer />

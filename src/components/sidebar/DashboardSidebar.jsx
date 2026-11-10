@@ -15,6 +15,7 @@ import {
     Layers,
     Video,
     Sparkles,
+    CalendarClock,
 } from "lucide-react";
 
 export const navSections = [
@@ -73,6 +74,13 @@ export const navSections = [
                 badge: "New",
                 href: "/dashboard/blogs/blogs-form",
             },
+            {
+                id: "blog-scheduler",
+                label: "Scheduler & Queue",
+                icon: CalendarClock,
+                badge: "Auto",
+                href: "/dashboard/blogs/scheduler",
+            },
         ],
     },
     {
@@ -104,6 +112,11 @@ function useActiveNavId(activeView) {
     // 2. Create/edit article routes
     if (pathname && (pathname.includes("/blogs-form") || pathname.includes("/blog-form"))) {
         return "blog-create";
+    }
+
+    // 2b. Blog Scheduler route
+    if (pathname && pathname.includes("/blogs/scheduler")) {
+        return "blog-scheduler";
     }
 
     // 3. Leads & Knowledge views

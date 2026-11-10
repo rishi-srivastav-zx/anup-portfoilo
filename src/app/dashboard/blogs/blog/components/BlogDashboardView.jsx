@@ -14,6 +14,17 @@ import BlogServices from "@/api/services/blog.services";
 
 const PAGE_SIZE = 10;
 
+const broadcastBlogChange = () => {
+  if (typeof window !== "undefined") {
+    try {
+      localStorage.setItem("blog_published_at", String(Date.now()));
+    } catch {
+      // ignore
+    }
+    window.dispatchEvent(new Event("studio_articles_updated"));
+  }
+};
+
 export default function BlogDashboardView() {
   const searchParams = useSearchParams();
   const statusParam = searchParams ? searchParams.get("status") : null;
@@ -206,6 +217,7 @@ export default function BlogDashboardView() {
 
       try {
         await BlogServices.updateStatus(id, nextStatus);
+        broadcastBlogChange();
         showFeedback(`Article status updated to ${nextStatus.toUpperCase()} via API.`, "success");
         // Refresh stats
         const sRes = await BlogServices.getStats().catch(() => null);
@@ -264,6 +276,7 @@ export default function BlogDashboardView() {
 
       try {
         await BlogServices.toggleFeatured(id);
+        broadcastBlogChange();
         setFeaturedTarget(null);
         showFeedback(
           nextFeatured
@@ -299,6 +312,7 @@ export default function BlogDashboardView() {
 
       try {
         await BlogServices.deleteBlog(id);
+        broadcastBlogChange();
         setDeleteTarget(null);
         showFeedback("Article deleted successfully from server.", "success");
         loadArticles(true);

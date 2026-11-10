@@ -4,6 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCookieConsent } from "@/context/CookieConsentContext";
+import DeveloperCredit from "@/components/common/DeveloperCredit";
 
 export interface CinematicFooterProps {
   onSecretClick?: () => void;
@@ -40,7 +41,7 @@ export default function CinematicFooter({ onSecretClick }: CinematicFooterProps 
 
             <div className="pt-1 text-xs text-[#6B625A] space-y-1 font-['DM_Mono']">
               <div>Base: Dehradun & Rishikesh, Uttarakhand, India</div>
-              <div>Direct: <a href="mailto:anuprawat@gmail.com" className="text-[#14100E] underline hover:text-[#012CEB]">anuprawat@gmail.com</a></div>
+              <div className="whitespace-nowrap">Direct: <a href="mailto:Anooprawat123123@gmail.com" className="text-[11px] text-[#14100E] underline hover:text-[#012CEB]">Anooprawat123123@gmail.com</a></div>
             </div>
           </div>
 
@@ -112,6 +113,10 @@ export default function CinematicFooter({ onSecretClick }: CinematicFooterProps 
               </span>{' '}
               {currentYear} Anup Rawat. All rights reserved.
             </span>
+
+            <span>·</span>
+
+            <DeveloperCredit className="hover:text-[#14100E]" />
 
             <span>·</span>
 

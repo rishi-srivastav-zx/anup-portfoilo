@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowRight, ArrowDown, Search, X, SlidersHorizontal } from 'lucide-react';
 import {
@@ -70,6 +70,23 @@ export function formatPublishedWithTime(isoDate: string): string {
 
 const INITIAL_VISIBLE_COUNT = 6;
 
+function haveArticlesChanged(current: BlogArticle[], fresh: BlogArticle[]): boolean {
+  if (current.length !== fresh.length) return true;
+  for (let i = 0; i < current.length; i++) {
+    if (
+      current[i].id !== fresh[i].id ||
+      current[i].slug !== fresh[i].slug ||
+      current[i].status !== fresh[i].status ||
+      current[i].updatedAt !== fresh[i].updatedAt ||
+      current[i].isFeatured !== fresh[i].isFeatured ||
+      current[i].title !== fresh[i].title
+    ) {
+      return true;
+    }
+  }
+  return false;
+}
+
 export default function BlogLanding({
   initialCategory = 'All',
   initialQuery = '',
@@ -83,8 +100,24 @@ export default function BlogLanding({
     return getPublishedArticles();
   });
 
-  // Dynamic fetch to merge any newly created articles from DB
+  const refreshLatestArticles = useCallback(async () => {
+    try {
+      const fresh = await fetchDynamicArticles();
+      if (Array.isArray(fresh) && fresh.length > 0) {
+        setAllPublished((prev) => (haveArticlesChanged(prev, fresh) ? fresh : prev));
+      }
+    } catch {
+      // Non-blocking background sync
+    }
+  }, []);
+
+  // Sync articles: reuse server-provided initialArticles; only fetch on client if initialArticles is empty
   useEffect(() => {
+    if (initialArticles && initialArticles.length > 0) {
+      setAllPublished((prev) => (prev === initialArticles ? prev : initialArticles));
+      return;
+    }
+
     let isCancelled = false;
     fetchDynamicArticles().then((articles) => {
       if (!isCancelled && articles && articles.length > 0) {
@@ -94,7 +127,63 @@ export default function BlogLanding({
     return () => {
       isCancelled = true;
     };
-  }, []);
+  }, [initialArticles]);
+
+  // Automatic live refresh: visibilitychange, focus, storage event, and periodic 30s background check (only when visible)
+  useEffect(() => {
+    let lastRefresh = Date.now();
+
+    const triggerRefreshIfStale = () => {
+      const now = Date.now();
+      if (now - lastRefresh >= 8000) {
+        lastRefresh = now;
+        refreshLatestArticles();
+      }
+    };
+
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'blog_published_at' || e.key === 'studio_articles_updated') {
+        lastRefresh = Date.now();
+        refreshLatestArticles();
+      }
+    };
+
+    const handleLocalUpdate = () => {
+      lastRefresh = Date.now();
+      refreshLatestArticles();
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        triggerRefreshIfStale();
+      }
+    };
+
+    const handleFocus = () => {
+      triggerRefreshIfStale();
+    };
+
+    // Periodic check every 30s, strictly when tab is in foreground
+    const interval = window.setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        lastRefresh = Date.now();
+        refreshLatestArticles();
+      }
+    }, 30000);
+
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('studio_articles_updated', handleLocalUpdate);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleFocus);
+
+    return () => {
+      window.clearInterval(interval);
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('studio_articles_updated', handleLocalUpdate);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, [refreshLatestArticles]);
 
   const [selectedCategory, setSelectedCategory] = useState<string>(initialCategory || 'All');
   const [searchInput, setSearchInput] = useState<string>(initialQuery || '');

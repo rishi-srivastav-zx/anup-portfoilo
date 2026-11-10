@@ -1,5 +1,6 @@
 import { blogRepository } from "../repositories/blog.repository.js";
 import imageService from "../modules/image.service.js";
+import { recordCacheStatus } from "../utils/performanceTracker.js";
 
 const { uploadMedia, deleteMedia, MediaUploadError } = imageService;
 
@@ -11,6 +12,38 @@ const LAYOUTS = ["wide", "standard"];
 const BLOG_FOLDER = "/blogs";
 const SLUG_TAKEN =
     "An article with this URL slug already exists. Please choose a unique slug.";
+
+const CC_PRIVATE = "private, no-cache, no-store, must-revalidate";
+const CC_PUBLIC_SHORT = "public, no-cache";
+const CC_PUBLIC_LONG = "public, max-age=120, stale-while-revalidate=600";
+
+// ---------- in-memory cache (sirf public/published reads ke liye) ----------
+// Har write (create/update/delete/status/featured/bulk) pe poora cache clear hota hai,
+// isliye response data same rehta hai, bas DB hit kam hota hai.
+const CACHE_TTL = 30_000;
+const CACHE_MAX = 500;
+const cache = new Map();
+
+const cached = (key, loader) => {
+    const hit = cache.get(key);
+    if (hit && hit.exp > Date.now()) {
+        recordCacheStatus("HIT (In-Memory)");
+        return hit.promise;
+    }
+
+    recordCacheStatus("MISS (Database)");
+    const promise = loader();
+    if (cache.size >= CACHE_MAX) cache.delete(cache.keys().next().value);
+    cache.set(key, { promise, exp: Date.now() + CACHE_TTL });
+    // fail hua to cache me na rahe
+    promise.catch(() => {
+        if (cache.get(key)?.promise === promise) cache.delete(key);
+    });
+    return promise;
+};
+
+const invalidateCache = () => cache.clear();
+export const invalidateBlogCache = invalidateCache;
 
 // ---------- response helpers ----------
 const isAdmin = (req) => req.user?.role === "admin";
@@ -90,7 +123,10 @@ const normalizeBody = (b = {}) => {
         author: tryParseJson(b.author),
         featuredImage: pick("featuredImage", "featured_image"),
         featuredImageAlt: pick("featuredImageAlt", "featured_image_alt"),
-        featuredImageFileId: pick("featuredImageFileId", "featured_image_file_id"),
+        featuredImageFileId: pick(
+            "featuredImageFileId",
+            "featured_image_file_id",
+        ),
         galleryImages: tryParseJson(pick("galleryImages", "gallery_images")),
         readingTime: pick("readingTime", "reading_time"),
         status: b.status,
@@ -115,7 +151,13 @@ const normalizeBody = (b = {}) => {
     if (out.tags !== undefined) out.tags = normalizeTags(out.tags);
     if (out.isFeatured !== undefined)
         out.isFeatured = out.isFeatured === true || out.isFeatured === "true";
-    for (const k of ["seoTitle", "seoDescription", "seoKeywords", "canonicalUrl", "technicalNote"])
+    for (const k of [
+        "seoTitle",
+        "seoDescription",
+        "seoKeywords",
+        "canonicalUrl",
+        "technicalNote",
+    ])
         if (out[k] === "") out[k] = null;
 
     if (out.author && typeof out.author === "object") {
@@ -192,6 +234,20 @@ const uniqueSlug = async (base, excludeId = null) => {
     return slug;
 };
 
+// slug se article + related + adjacent (published ho to) -- ek hi jagah
+const loadArticleBundle = async (slug) => {
+    const blog = await blogRepository.findBySlug(slug);
+    let related = [];
+    let adjacent = { prev: null, next: null };
+    if (blog && blog.status === "published") {
+        [related, adjacent] = await Promise.all([
+            blogRepository.findRelated(blog, 3),
+            blogRepository.getAdjacent(blog.publishedAt),
+        ]);
+    }
+    return { blog, related, adjacent };
+};
+
 // ---------- media helpers ----------
 // Cleanup best-effort hai: fail ho to request fail nahi hoti, bas log hota hai
 const safeDelete = async (fileId) => {
@@ -205,6 +261,12 @@ const safeDelete = async (fileId) => {
 
 const safeDeleteMany = (fileIds) =>
     Promise.all(fileIds.filter(Boolean).map(safeDelete));
+
+// Background cleanup: response ImageKit ka wait nahi karta (safeDelete kabhi throw nahi karta)
+const cleanupInBackground = (fileIds) => {
+    const ids = [].concat(fileIds).filter(Boolean);
+    if (ids.length) void safeDeleteMany(ids);
+};
 
 const uploadFeatured = async (file) => {
     if (!file.mimetype?.startsWith("image/"))
@@ -254,16 +316,13 @@ export const blogController = {
         if (status !== "all" && !STATUSES.includes(status))
             return fail(res, 400, "Invalid status");
 
-        const { items, total } = await blogRepository.findAll({
-            ...q,
-            status,
-        });
+        const isPublic = !isAdmin(req) && status === "published";
+        const run = () => blogRepository.findAll({ ...q, status });
+        const { items, total } = isPublic
+            ? await cached(`list:${JSON.stringify(q)}`, run)
+            : await run();
 
-        if (isAdmin(req) || status !== "published") {
-            res.setHeader("Cache-Control", "private, no-cache, no-store, must-revalidate");
-        } else {
-            res.setHeader("Cache-Control", "public, max-age=60, stale-while-revalidate=300");
-        }
+        res.setHeader("Cache-Control", isPublic ? CC_PUBLIC_SHORT : CC_PRIVATE);
 
         res.status(200).json({
             success: true,
@@ -274,9 +333,11 @@ export const blogController = {
 
     // GET /api/blogs/featured
     getFeaturedBlogs: handle(async (req, res) => {
-        const featured = await blogRepository.getFeatured();
+        const featured = await cached("featured", () =>
+            blogRepository.getFeatured(),
+        );
 
-        res.setHeader("Cache-Control", "public, max-age=60, stale-while-revalidate=300");
+        res.setHeader("Cache-Control", CC_PUBLIC_SHORT);
         res.status(200).json({
             success: true,
             data: featured ? [featured] : [],
@@ -288,52 +349,52 @@ export const blogController = {
     getCategories: handle(async (req, res) => {
         const scope =
             isAdmin(req) && req.query.status === "all" ? "all" : "published";
-        if (scope === "all") {
-            res.setHeader("Cache-Control", "private, no-cache, no-store, must-revalidate");
-        } else {
-            res.setHeader("Cache-Control", "public, max-age=120, stale-while-revalidate=600");
-        }
-        res.status(200).json({
-            success: true,
-            data: await blogRepository.getCategories(scope),
-        });
+        res.setHeader(
+            "Cache-Control",
+            scope === "all" ? CC_PRIVATE : CC_PUBLIC_LONG,
+        );
+        const data =
+            scope === "all"
+                ? await blogRepository.getCategories(scope)
+                : await cached("categories", () =>
+                      blogRepository.getCategories(scope),
+                  );
+        res.status(200).json({ success: true, data });
     }),
 
     // GET /api/blogs/tags
     getTags: handle(async (req, res) => {
         const scope =
             isAdmin(req) && req.query.status === "all" ? "all" : "published";
-        if (scope === "all") {
-            res.setHeader("Cache-Control", "private, no-cache, no-store, must-revalidate");
-        } else {
-            res.setHeader("Cache-Control", "public, max-age=120, stale-while-revalidate=600");
-        }
-        res.status(200).json({
-            success: true,
-            data: await blogRepository.getTags(scope),
-        });
+        res.setHeader(
+            "Cache-Control",
+            scope === "all" ? CC_PRIVATE : CC_PUBLIC_LONG,
+        );
+        const data =
+            scope === "all"
+                ? await blogRepository.getTags(scope)
+                : await cached("tags", () => blogRepository.getTags(scope));
+        res.status(200).json({ success: true, data });
     }),
 
     // GET /api/blogs/:slug
     getBlogBySlug: handle(async (req, res) => {
-        const blog = await blogRepository.findBySlug(req.params.slug);
-        if (!blog || (blog.status === "draft" && !isAdmin(req)))
+        const { slug } = req.params;
+        const admin = isAdmin(req);
+
+        const { blog, related, adjacent } = admin
+            ? await loadArticleBundle(slug)
+            : await cached(`slug:${slug}`, () => loadArticleBundle(slug));
+
+        if (!blog || (blog.status === "draft" && !admin))
             return fail(res, 404, "Article not found");
 
-        let related = [];
-        let adjacent = { prev: null, next: null };
-        if (blog.status === "published") {
-            [related, adjacent] = await Promise.all([
-                blogRepository.findRelated(blog, 3),
-                blogRepository.getAdjacent(blog.publishedAt),
-            ]);
-        }
-
-        if (blog.status === "published" && !isAdmin(req)) {
-            res.setHeader("Cache-Control", "public, max-age=60, stale-while-revalidate=300");
-        } else {
-            res.setHeader("Cache-Control", "private, no-cache, no-store, must-revalidate");
-        }
+        res.setHeader(
+            "Cache-Control",
+            blog.status === "published" && !admin
+                ? CC_PUBLIC_SHORT
+                : CC_PRIVATE,
+        );
 
         res.status(200).json({
             success: true,
@@ -345,14 +406,14 @@ export const blogController = {
 
     // GET /api/blogs/admin/:id
     getBlogById: handle(async (req, res) => {
-        res.setHeader("Cache-Control", "private, no-cache, no-store, must-revalidate");
+        res.setHeader("Cache-Control", CC_PRIVATE);
         const blog = await loadBlog(req, res);
         if (blog) res.status(200).json({ success: true, data: blog });
     }),
 
     // GET /api/blogs/admin/stats
     getStats: handle(async (req, res) => {
-        res.setHeader("Cache-Control", "private, no-cache, no-store, must-revalidate");
+        res.setHeader("Cache-Control", CC_PRIVATE);
         res.status(200).json({
             success: true,
             data: await blogRepository.getStats(),
@@ -392,7 +453,8 @@ export const blogController = {
             calcReadingTime(data.introduction, data.sections, data.content);
         if (data.status === "published" && !data.publishedAt)
             data.publishedAt = new Date();
-        if (!data.seoTitle) data.seoTitle = `${data.title} | Anup Rawat`.slice(0, 255);
+        if (!data.seoTitle)
+            data.seoTitle = `${data.title} | Anup Rawat`.slice(0, 255);
         if (!data.seoDescription)
             data.seoDescription = (data.excerpt || data.title).slice(0, 300);
         if (!data.canonicalUrl && data.slug)
@@ -413,13 +475,14 @@ export const blogController = {
                 ...data,
                 userId: req.user?.id || null,
             });
+            invalidateCache();
             res.status(201).json({
                 success: true,
                 message: "Article created successfully",
                 data: blog,
             });
         } catch (e) {
-            await safeDelete(uploaded?.fileId); // rollback: DB fail to image bhi hatao
+            cleanupInBackground(uploaded?.fileId); // rollback: DB fail to image bhi hatao
             throw e;
         }
     }),
@@ -445,7 +508,9 @@ export const blogController = {
         // content badla aur readingTime manually nahi diya -> recalc
         if (
             data.readingTime === undefined &&
-            (data.introduction !== undefined || data.sections !== undefined || data.content !== undefined)
+            (data.introduction !== undefined ||
+                data.sections !== undefined ||
+                data.content !== undefined)
         ) {
             data.readingTime = calcReadingTime(
                 data.introduction ?? existing.introduction,
@@ -482,12 +547,13 @@ export const blogController = {
         try {
             updated = await blogRepository.update(id, data);
         } catch (e) {
-            await safeDelete(uploaded?.fileId); // rollback
+            cleanupInBackground(uploaded?.fileId); // rollback
             throw e;
         }
+        invalidateCache();
 
-        // update success hone ke baad hi purani file delete
-        if (replacesOld) await safeDelete(existing.featuredImageFileId);
+        // update success hone ke baad hi purani file delete (background me)
+        if (replacesOld) cleanupInBackground(existing.featuredImageFileId);
 
         res.status(200).json({
             success: true,
@@ -510,6 +576,7 @@ export const blogController = {
             patch.publishedAt = new Date();
 
         const updated = await blogRepository.update(existing.id, patch);
+        invalidateCache();
         res.status(200).json({
             success: true,
             message: `Article ${status}`,
@@ -523,7 +590,11 @@ export const blogController = {
         if (!existing) return;
 
         const nextFeatured = !existing.isFeatured;
-        const updated = await blogRepository.setFeatured(existing.id, nextFeatured);
+        const updated = await blogRepository.setFeatured(
+            existing.id,
+            nextFeatured,
+        );
+        invalidateCache();
 
         res.status(200).json({
             success: true,
@@ -543,6 +614,7 @@ export const blogController = {
             return fail(res, 422, `status: ${STATUSES.join(" | ")}`);
 
         const count = await blogRepository.bulkUpdateStatus(ids, status);
+        invalidateCache();
         res.status(200).json({
             success: true,
             message: `${count} article(s) updated`,
@@ -558,7 +630,8 @@ export const blogController = {
 
         const blogs = await blogRepository.findByIds(ids); // fileIds ke liye pehle fetch
         const count = await blogRepository.bulkDelete(ids);
-        await safeDeleteMany(blogs.map((b) => b.featuredImageFileId));
+        invalidateCache();
+        cleanupInBackground(blogs.map((b) => b.featuredImageFileId));
 
         res.status(200).json({
             success: true,
@@ -573,7 +646,8 @@ export const blogController = {
         if (!existing) return;
 
         await blogRepository.delete(existing.id);
-        await safeDelete(existing.featuredImageFileId);
+        invalidateCache();
+        cleanupInBackground(existing.featuredImageFileId);
 
         res.status(200).json({
             success: true,

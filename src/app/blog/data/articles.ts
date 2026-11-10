@@ -65,6 +65,9 @@ export interface BlogArticle {
   introduction: string[];
   content?: string;
   sections: ArticleSection[];
+  relatedArticles?: BlogArticle[];
+  prev?: { title: string; slug: string; featuredImage?: string } | null;
+  next?: { title: string; slug: string; featuredImage?: string } | null;
 }
 
 export const BLOG_CATEGORIES: BlogCategory[] = [
@@ -229,14 +232,27 @@ export async function fetchDynamicArticleBySlug(slug: string): Promise<BlogArtic
     const res = await fetch(`${backendUrl}/api/blogs/${encodeURIComponent(cleanSlug)}`, {
       signal: controller.signal,
       cache: 'no-store',
-      headers: { Accept: 'application/json' },
+      headers: {
+        Accept: 'application/json',
+        'Cache-Control': 'no-cache, no-store',
+      },
     });
     clearTimeout(timeout);
 
     if (res.ok) {
       const json = await res.json();
       if (json && json.success && json.data) {
-        return normalizeApiBlog(json.data);
+        const article = normalizeApiBlog(json.data);
+        if (Array.isArray(json.related)) {
+          article.relatedArticles = json.related.map(normalizeApiBlog);
+        }
+        if (json.prev) {
+          article.prev = json.prev;
+        }
+        if (json.next) {
+          article.next = json.next;
+        }
+        return article;
       }
     }
   } catch {
@@ -246,7 +262,7 @@ export async function fetchDynamicArticleBySlug(slug: string): Promise<BlogArtic
   return null;
 }
 
-export async function fetchDynamicArticles(): Promise<BlogArticle[]> {
+export async function fetchDynamicArticles(limit = 50): Promise<BlogArticle[]> {
   const backendUrl =
     process.env.NEXT_PUBLIC_BACKEND_URL ||
     process.env.NEXT_PUBLIC_BASE_URL ||
@@ -255,10 +271,13 @@ export async function fetchDynamicArticles(): Promise<BlogArticle[]> {
   try {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 3500);
-    const res = await fetch(`${backendUrl}/api/blogs?limit=50&status=published`, {
+    const res = await fetch(`${backendUrl}/api/blogs?limit=${limit}&status=published`, {
       signal: controller.signal,
       cache: 'no-store',
-      headers: { Accept: 'application/json' },
+      headers: {
+        Accept: 'application/json',
+        'Cache-Control': 'no-cache, no-store',
+      },
     });
     clearTimeout(timeout);
 

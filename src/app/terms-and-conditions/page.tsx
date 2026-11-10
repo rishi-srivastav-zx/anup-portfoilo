@@ -411,10 +411,10 @@ export default function TermsAndConditionsPage() {
               <div>
                 Official Email:{' '}
                 <a
-                  href="mailto:anuprawat@gmail.com"
+                  href="mailto:Anooprawat123123@gmail.com"
                   className="text-[#D4A017] underline hover:text-white transition-colors"
                 >
-                  anuprawat@gmail.com
+                  Anooprawat123123@gmail.com
                 </a>
               </div>
               <div>Website: https://anuprawat.com</div>

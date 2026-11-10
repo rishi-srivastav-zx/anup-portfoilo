@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import DeveloperCredit from "@/components/common/DeveloperCredit";
 
 export const Footer: React.FC = () => {
     return (
@@ -47,15 +48,17 @@ export const Footer: React.FC = () => {
                     </a>
                     <span>·</span>
                     <a
-                        href="mailto:contact@adityarao.dev"
-                        className="text-[#012CEB] font-bold hover:underline"
+                        href="mailto:Anooprawat123123@gmail.com"
+                        className="text-[11px] text-[#012CEB] font-medium hover:underline"
                     >
-                        contact@adityarao.dev
+                        Anooprawat123123@gmail.com
                     </a>
                 </div>
 
-                <div className="text-[11px] font-dm-mono text-white/40">
-                    © {new Date().getFullYear()} ALL RIGHTS RESERVED
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] font-dm-mono text-white/40">
+                    <span>© {new Date().getFullYear()} ALL RIGHTS RESERVED</span>
+                    <span>·</span>
+                    <DeveloperCredit className="hover:text-white/80 transition-colors" />
                 </div>
             </div>
         </footer>

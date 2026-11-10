@@ -154,7 +154,7 @@ export default function PrivacyPolicyPage() {
             <div className="bg-[#E6DDD2] p-4 rounded-lg border border-[#14100E]/20 text-xs sm:text-sm space-y-1.5 font-['DM_Mono']">
               <div><strong>Data Fiduciary:</strong> Anup Rawat (Independent Cinematographer)</div>
               <div><strong>Primary Operating Locations:</strong> Dehradun & Rishikesh, Uttarakhand, India</div>
-              <div><strong>Official Contact Email:</strong> anuprawat@gmail.com</div>
+              <div><strong>Official Contact Email:</strong> Anooprawat123123@gmail.com</div>
               <div><strong>Website:</strong> https://anuprawat.com</div>
             </div>
           </section>
@@ -383,7 +383,7 @@ export default function PrivacyPolicyPage() {
               <li><strong>Right to Nominate:</strong> Nominate another individual to exercise your privacy rights in the event of death or incapacity.</li>
             </ul>
             <p className="text-xs text-[#6B625A]">
-              To exercise any of these rights, please contact us directly at <code>anuprawat@gmail.com</code>. We will verify and process valid requests within a reasonable timeframe.
+              To exercise any of these rights, please contact us directly at <code>Anooprawat123123@gmail.com</code>. We will verify and process valid requests within a reasonable timeframe.
             </p>
           </section>
 
@@ -432,10 +432,10 @@ export default function PrivacyPolicyPage() {
               <div>
                 Email:{' '}
                 <a
-                  href="mailto:anuprawat@gmail.com"
+                  href="mailto:Anooprawat123123@gmail.com"
                   className="text-[#D4A017] underline hover:text-white transition-colors"
                 >
-                  anuprawat@gmail.com
+                  Anooprawat123123@gmail.com
                 </a>
               </div>
               <div className="pt-2 text-xs text-[#E6DDD2]/70 font-sans">

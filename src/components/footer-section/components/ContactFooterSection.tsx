@@ -15,7 +15,7 @@ import {
  * Replace this address with Anup Rawat's primary production/booking email if needed.
  */
 export const PORTFOLIO_OWNER_EMAIL =
-  process.env.NEXT_PUBLIC_PORTFOLIO_EMAIL || 'anuprawat@gmail.com';
+  process.env.NEXT_PUBLIC_PORTFOLIO_EMAIL || 'Anooprawat123123@gmail.com';
 
 interface FormValues {
   name: string;

@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import DeveloperCredit from '@/components/common/DeveloperCredit';
 import { BLOG_CATEGORIES, BlogCategory } from '../data/articles';
 
 interface FooterProps {
@@ -146,17 +147,21 @@ export default function Footer({ onNavigate, onSelectCategory }: FooterProps) {
 
         {/* Bottom Bar */}
         <div className="pt-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-xs text-[#6B625A]">
-          <p>
-            <Link
-              href="/login-page"
-              className="cursor-default select-none text-[#6B625A] hover:text-[#6B625A] focus:outline-none"
-              tabIndex={-1}
-              aria-hidden="true"
-            >
-              ©
-            </Link>{' '}
-            {new Date().getFullYear()} Anup Rawat. All rights reserved.
-          </p>
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+            <p>
+              <Link
+                href="/login-page"
+                className="cursor-default select-none text-[#6B625A] hover:text-[#6B625A] focus:outline-none"
+                tabIndex={-1}
+                aria-hidden="true"
+              >
+                ©
+              </Link>{' '}
+              {new Date().getFullYear()} Anup Rawat. All rights reserved.
+            </p>
+            <span>·</span>
+            <DeveloperCredit className="hover:text-[#14100E]" />
+          </div>
           <div className="flex items-center gap-4">
             <Link
               href="/privacy-policy"

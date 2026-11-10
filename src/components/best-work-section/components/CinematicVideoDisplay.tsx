@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { Volume2, VolumeX, Maximize2, Play, Pause, X } from "lucide-react";
 
 interface CinematicVideoDisplayProps {
@@ -9,6 +10,14 @@ interface CinematicVideoDisplayProps {
     videoMov?: string;
     badgeLabel?: string;
     className?: string;
+}
+
+interface VideoMeta {
+    width: number;
+    height: number;
+    aspectRatio: number;
+    ratioString: string;
+    isPortrait: boolean;
 }
 
 export const CinematicVideoDisplay: React.FC<CinematicVideoDisplayProps> = ({
@@ -24,6 +33,39 @@ export const CinematicVideoDisplay: React.FC<CinematicVideoDisplayProps> = ({
     const [isMuted, setIsMuted] = useState(true);
     const [isPlaying, setIsPlaying] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isMounted, setIsMounted] = useState(false);
+    const [videoMeta, setVideoMeta] = useState<VideoMeta | null>(null);
+
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
+
+    const updateVideoMetadata = useCallback((videoElement: HTMLVideoElement) => {
+        if (!videoElement.videoWidth || !videoElement.videoHeight) return;
+        const w = videoElement.videoWidth;
+        const h = videoElement.videoHeight;
+        const ratio = w / h;
+        const isPortrait = h > w;
+
+        let ratioStr = `${ratio.toFixed(2)}:1`;
+        if (Math.abs(ratio - 16 / 9) < 0.05) ratioStr = "16:9 DCI";
+        else if (Math.abs(ratio - 9 / 16) < 0.05) ratioStr = "9:16 VERTICAL";
+        else if (Math.abs(ratio - 2.39) < 0.1 || Math.abs(ratio - 2.4) < 0.1) ratioStr = "2.39:1 SCOPE";
+        else if (Math.abs(ratio - 4 / 3) < 0.05) ratioStr = "4:3 ACADEMY";
+        else if (Math.abs(ratio - 1) < 0.05) ratioStr = "1:1 SQUARE";
+
+        setVideoMeta({
+            width: w,
+            height: h,
+            aspectRatio: ratio,
+            ratioString: ratioStr,
+            isPortrait,
+        });
+    }, []);
+
+    const handleLoadedMetadata = (e: React.SyntheticEvent<HTMLVideoElement>) => {
+        updateVideoMetadata(e.currentTarget);
+    };
 
     const togglePlay = (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -47,24 +89,52 @@ export const CinematicVideoDisplay: React.FC<CinematicVideoDisplayProps> = ({
 
     const openModal = (e: React.MouseEvent) => {
         e.stopPropagation();
+        if (videoRef.current) {
+            updateVideoMetadata(videoRef.current);
+        }
         setIsModalOpen(true);
     };
 
     const closeModal = (e?: React.MouseEvent) => {
         e?.stopPropagation();
+        if (modalVideoRef.current && videoRef.current) {
+            videoRef.current.currentTime = modalVideoRef.current.currentTime;
+            if (isPlaying) {
+                videoRef.current.play().catch(() => {});
+            }
+        }
         setIsModalOpen(false);
     };
 
+    // Synchronize playback position and unlock audio when modal opens
     useEffect(() => {
+        if (isModalOpen && modalVideoRef.current && videoRef.current) {
+            modalVideoRef.current.currentTime = videoRef.current.currentTime;
+            modalVideoRef.current.play().catch(() => {});
+        }
+    }, [isModalOpen]);
+
+    // Lock body scroll and listen for escape key
+    useEffect(() => {
+        if (!isModalOpen) return;
+
+        const originalOverflow = document.body.style.overflow;
+        document.body.style.overflow = "hidden";
+
         const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.key === "Escape" && isModalOpen) {
+            if (e.key === "Escape") {
                 closeModal();
             }
         };
+
         window.addEventListener("keydown", handleKeyDown);
-        return () => window.removeEventListener("keydown", handleKeyDown);
+        return () => {
+            document.body.style.overflow = originalOverflow;
+            window.removeEventListener("keydown", handleKeyDown);
+        };
     }, [isModalOpen]);
 
+    // Intersection observer for thumbnail video autoplay
     useEffect(() => {
         const video = videoRef.current;
         if (!video) return;
@@ -110,6 +180,7 @@ export const CinematicVideoDisplay: React.FC<CinematicVideoDisplayProps> = ({
                     loop
                     muted={isMuted}
                     playsInline
+                    onLoadedMetadata={handleLoadedMetadata}
                     src={videoWebm || videoMov}
                     className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-500 ease-out"
                 >
@@ -134,7 +205,7 @@ export const CinematicVideoDisplay: React.FC<CinematicVideoDisplayProps> = ({
                             type="button"
                             onClick={toggleMute}
                             title={isMuted ? "Click to unmute audio" : "Mute audio"}
-                            className="p-1.5 rounded-full bg-black/60 hover:bg-black/90 text-white border border-white/15 backdrop-blur-md transition-all hover:scale-110 active:scale-95"
+                            className="p-1.5 rounded-full bg-black/60 hover:bg-black/90 text-white border border-white/15 backdrop-blur-md transition-all hover:scale-110 active:scale-95 cursor-pointer"
                         >
                             {isMuted ? (
                                 <VolumeX className="w-3.5 h-3.5 text-white/70" />
@@ -146,7 +217,7 @@ export const CinematicVideoDisplay: React.FC<CinematicVideoDisplayProps> = ({
                             type="button"
                             onClick={openModal}
                             title="Fullscreen Cinema Player"
-                            className="p-1.5 rounded-full bg-black/60 hover:bg-black/90 text-white border border-white/15 backdrop-blur-md transition-all hover:scale-110 active:scale-95"
+                            className="p-1.5 rounded-full bg-black/60 hover:bg-black/90 text-white border border-white/15 backdrop-blur-md transition-all hover:scale-110 active:scale-95 cursor-pointer"
                         >
                             <Maximize2 className="w-3.5 h-3.5 text-white/70" />
                         </button>
@@ -158,52 +229,77 @@ export const CinematicVideoDisplay: React.FC<CinematicVideoDisplayProps> = ({
                     <button
                         type="button"
                         onClick={togglePlay}
-                        className="pointer-events-auto p-3 rounded-full bg-black/70 backdrop-blur-md border border-white/20 text-white shadow-xl hover:scale-110 active:scale-95 transition-all"
+                        className="pointer-events-auto p-3 rounded-full bg-black/70 backdrop-blur-md border border-white/20 text-white shadow-xl hover:scale-110 active:scale-95 transition-all cursor-pointer"
                     >
                         {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 ml-0.5" />}
                     </button>
                 </div>
             </div>
 
-            {/* FULLSCREEN CINEMA MASTER MODAL */}
-            {isModalOpen && (
+            {/* FULLSCREEN CINEMA MASTER MODAL VIA PORTAL TO BODY (White blur backdrop) */}
+            {isMounted && isModalOpen && typeof document !== "undefined" && createPortal(
                 <div
-                    className="fixed inset-0 z-[99999] bg-black/95 backdrop-blur-2xl flex items-center justify-center p-3 sm:p-6 animate-fade-in select-none"
+                    className="fixed inset-0 z-[99990] bg-white/75 backdrop-blur-2xl flex items-center justify-center p-3 sm:p-6 select-none animate-fade-in"
                     onClick={() => closeModal()}
                 >
+                    {/* Top Right Quick Close Button on White Backdrop */}
+                    <button
+                        type="button"
+                        onClick={() => closeModal()}
+                        data-cursor="pointer"
+                        className="absolute top-4 right-4 sm:top-6 sm:right-6 z-40 p-2.5 rounded-full bg-black/10 hover:bg-black/20 text-black/70 hover:text-black transition-all hover:scale-110 active:scale-95 cursor-pointer backdrop-blur-md border border-black/5"
+                        aria-label="Close modal"
+                        title="Close (Esc)"
+                    >
+                        <X className="w-5 h-5" />
+                    </button>
+
                     <div
-                        className="relative w-full max-w-md max-h-[92vh] aspect-[9/16] bg-black rounded-2xl overflow-hidden border border-white/20 shadow-[0_25px_70px_rgba(0,0,0,1)] flex flex-col"
+                        className={`relative bg-black rounded-2xl overflow-hidden border border-black/10 shadow-[0_25px_80px_rgba(0,0,0,0.35)] flex flex-col transition-all duration-300 ${
+                            videoMeta?.isPortrait
+                                ? "w-full max-w-[420px] sm:max-w-[460px] max-h-[92vh]"
+                                : "w-full max-w-4xl lg:max-w-5xl xl:max-w-6xl max-h-[92vh]"
+                        }`}
+                        style={{
+                            aspectRatio: videoMeta
+                                ? `${videoMeta.width} / ${videoMeta.height}`
+                                : undefined,
+                        }}
                         onClick={(e) => e.stopPropagation()}
                     >
                         {/* Cinema Header */}
-                        <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between p-4 bg-gradient-to-b from-black/90 to-transparent">
-                            <div className="flex flex-col">
-                                <span className="font-sans text-xl text-white font-bold leading-none drop-shadow">
+                        <div className="absolute top-0 left-0 right-0 z-30 flex items-center justify-between p-3.5 sm:p-4 bg-gradient-to-b from-black/95 via-black/60 to-transparent pointer-events-auto">
+                            <div className="flex flex-col pr-3 min-w-0">
+                                <span className="font-sans text-base sm:text-xl text-white font-bold leading-tight drop-shadow truncate">
                                     {title}
                                 </span>
-                                <span className="font-['DM_Mono'] text-[10px] text-[#D4A017] tracking-widest uppercase mt-1">
-                                    1080×1920 • VP9 MASTER • 24 FPS
+                                <span className="font-['DM_Mono'] text-[9px] sm:text-[10px] text-[#D4A017] tracking-widest uppercase mt-0.5 sm:mt-1 truncate">
+                                    {videoMeta
+                                        ? `${videoMeta.width}×${videoMeta.height} • ${videoMeta.ratioString} • ${badgeLabel || "24 FPS"}`
+                                        : `${badgeLabel || "CINEMA MASTER"} • 24 FPS`}
                                 </span>
                             </div>
 
                             <button
                                 type="button"
                                 onClick={() => closeModal()}
-                                className="p-2 rounded-full bg-white/10 hover:bg-white/25 text-white transition-all hover:scale-105 active:scale-95"
-                                aria-label="Close"
+                                data-cursor="pointer"
+                                className="p-1.5 sm:p-2 rounded-full bg-white/10 hover:bg-white/25 text-white transition-all hover:scale-105 active:scale-95 shrink-0 cursor-pointer"
+                                aria-label="Close modal"
                             >
-                                <X className="w-5 h-5" />
+                                <X className="w-4 h-4 sm:w-5 sm:h-5" />
                             </button>
                         </div>
 
                         {/* Modal Video Player with Native HTML5 Controls */}
-                        <div className="relative flex-1 w-full h-full bg-black flex items-center justify-center">
+                        <div className="relative flex-1 w-full h-full bg-black flex items-center justify-center overflow-hidden">
                             <video
                                 ref={modalVideoRef}
                                 autoPlay
                                 loop
                                 controls
                                 playsInline
+                                onLoadedMetadata={handleLoadedMetadata}
                                 src={videoWebm || videoMov}
                                 className="w-full h-full object-contain"
                             >
@@ -213,7 +309,8 @@ export const CinematicVideoDisplay: React.FC<CinematicVideoDisplayProps> = ({
                             </video>
                         </div>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
         </>
     );

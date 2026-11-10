@@ -19,9 +19,7 @@ import {
 } from 'lucide-react';
 import {
   BlogArticle,
-  getRelatedArticles,
   fetchDynamicArticleBySlug,
-  fetchDynamicArticles,
 } from '../data/articles';
 import { formatPublishedWithTime } from './BlogLanding';
 import CinematicMedia from './CinematicMedia';
@@ -34,6 +32,7 @@ import SEOHead from './SEOHead';
 interface ArticleDetailProps {
   slug: string;
   initialArticle?: BlogArticle | null;
+  initialRelatedArticles?: BlogArticle[];
   onNavigate?: (path: string) => void;
 }
 
@@ -41,20 +40,30 @@ interface ArticleDetailProps {
 export default function ArticleDetail({
   slug,
   initialArticle,
+  initialRelatedArticles,
   onNavigate,
 }: ArticleDetailProps) {
   const router = useRouter();
   const [article, setArticle] = useState<BlogArticle | null>(() => initialArticle || null);
-  const [allArticles, setAllArticles] = useState<BlogArticle[]>([]);
+  const [relatedArticlesList, setRelatedArticlesList] = useState<BlogArticle[]>(() => {
+    if (initialRelatedArticles && initialRelatedArticles.length > 0) return initialRelatedArticles;
+    if (initialArticle?.relatedArticles && initialArticle.relatedArticles.length > 0) {
+      return initialArticle.relatedArticles;
+    }
+    return [];
+  });
   const [scrollProgress, setScrollProgress] = useState(0);
   const [copiedLink, setCopiedLink] = useState(false);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
 
-  // Sync article dynamically from API
+  // Sync article dynamically when initialArticle or slug changes
   useEffect(() => {
     if (initialArticle && initialArticle.slug === slug) {
       setArticle(initialArticle);
+      if (initialArticle.relatedArticles && initialArticle.relatedArticles.length > 0) {
+        setRelatedArticlesList(initialArticle.relatedArticles);
+      }
       return;
     }
 
@@ -62,6 +71,9 @@ export default function ArticleDetail({
     fetchDynamicArticleBySlug(slug).then((fetched) => {
       if (!isCancelled && fetched) {
         setArticle(fetched);
+        if (fetched.relatedArticles && fetched.relatedArticles.length > 0) {
+          setRelatedArticlesList(fetched.relatedArticles);
+        }
       }
     });
 
@@ -70,18 +82,77 @@ export default function ArticleDetail({
     };
   }, [slug, initialArticle]);
 
-  // Fetch all dynamic articles for related content
+  // Auto-refresh detail page on focus, visibility change, or admin broadcast update
   useEffect(() => {
-    let isCancelled = false;
-    fetchDynamicArticles().then((articles) => {
-      if (!isCancelled && articles) {
-        setAllArticles(articles);
+    let lastRefresh = Date.now();
+
+    const refreshArticle = async () => {
+      try {
+        const fresh = await fetchDynamicArticleBySlug(slug);
+        if (fresh) {
+          setArticle((prev) => {
+            if (
+              !prev ||
+              prev.updatedAt !== fresh.updatedAt ||
+              prev.title !== fresh.title ||
+              prev.status !== fresh.status ||
+              prev.content !== fresh.content
+            ) {
+              return fresh;
+            }
+            return prev;
+          });
+          if (fresh.relatedArticles && fresh.relatedArticles.length > 0) {
+            setRelatedArticlesList(fresh.relatedArticles);
+          }
+        }
+      } catch {
+        // Non-blocking background sync
       }
-    });
-    return () => {
-      isCancelled = true;
     };
-  }, []);
+
+    const triggerRefreshIfStale = () => {
+      const now = Date.now();
+      if (now - lastRefresh >= 8000) {
+        lastRefresh = now;
+        refreshArticle();
+      }
+    };
+
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'blog_published_at' || e.key === 'studio_articles_updated') {
+        lastRefresh = Date.now();
+        refreshArticle();
+      }
+    };
+
+    const handleLocalUpdate = () => {
+      lastRefresh = Date.now();
+      refreshArticle();
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        triggerRefreshIfStale();
+      }
+    };
+
+    const handleFocus = () => {
+      triggerRefreshIfStale();
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('studio_articles_updated', handleLocalUpdate);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleFocus);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('studio_articles_updated', handleLocalUpdate);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, [slug]);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'auto' });
@@ -227,7 +298,12 @@ export default function ArticleDetail({
     );
   }
 
-  const relatedArticles = getRelatedArticles(article, allArticles, 3);
+  const relatedArticles =
+    relatedArticlesList.length > 0
+      ? relatedArticlesList
+      : (article.relatedArticles && article.relatedArticles.length > 0)
+      ? article.relatedArticles
+      : [];
 
   return (
     <>

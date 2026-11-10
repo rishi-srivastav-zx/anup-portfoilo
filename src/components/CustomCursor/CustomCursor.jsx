@@ -185,19 +185,19 @@ export default function CustomCursor() {
   useEffect(() => {
     setMounted(true);
     
-    // Check if device supports hover
+    // Check if device is purely a touch device with no mouse/hover
     if (window.matchMedia('(hover: none) and (pointer: coarse)').matches) {
       document.body.style.cursor = 'auto';
       return;
     }
 
-    // Never use custom cursor in dashboard
+    // Never hide cursor in dashboard
     if (isDashboard) {
       document.body.style.cursor = 'auto';
       return;
     }
     
-    // Hide default cursor on body
+    // Hide default OS cursor so custom cursor takes over
     document.body.style.cursor = 'none';
 
     const updateHoverState = (nextType, nextLabel) => {
@@ -326,6 +326,7 @@ export default function CustomCursor() {
     };
 
     window.addEventListener('mousemove', moveCursor);
+    window.addEventListener('pointermove', moveCursor, { passive: true });
     window.addEventListener('scroll', handleScroll, { passive: true, capture: true });
     window.addEventListener('custom-cursor-move', handleCustomCursor);
     window.addEventListener('mousedown', handleMouseDown);
@@ -336,6 +337,7 @@ export default function CustomCursor() {
     return () => {
       document.body.style.cursor = 'auto';
       window.removeEventListener('mousemove', moveCursor);
+      window.removeEventListener('pointermove', moveCursor);
       window.removeEventListener('scroll', handleScroll, { capture: true });
       window.removeEventListener('custom-cursor-move', handleCustomCursor);
       window.removeEventListener('mousedown', handleMouseDown);
@@ -346,7 +348,7 @@ export default function CustomCursor() {
     };
   }, [mouseX, mouseY, isDashboard]);
 
-  if (!mounted || shouldReduceMotion || isDashboard) return null;
+  if (!mounted || isDashboard) return null;
   if (typeof window !== 'undefined' && window.matchMedia('(hover: none) and (pointer: coarse)').matches) return null;
 
   // Variants for the outer cursor element with seamless dark/light section color adaptation
@@ -414,15 +416,15 @@ export default function CustomCursor() {
   };
 
   return (
-    <div className="fixed inset-0 pointer-events-none z-[9999999]" style={{ opacity: isVisible ? 1 : 0, transition: 'opacity 0.25s ease', zIndex: 9999999 }}>
+    <div className="fixed inset-0 pointer-events-none" style={{ opacity: isVisible ? 1 : 0, transition: 'opacity 0.25s ease', zIndex: 2147483647 }}>
       <motion.div
         className="absolute top-0 left-0 flex items-center justify-center -translate-x-1/2 -translate-y-1/2"
         style={{
           x: smoothX,
           y: smoothY,
-          scaleX: hoverType ? 1 : stretchX,
-          scaleY: hoverType ? 1 : stretchY,
-          rotate: rotation,
+          scaleX: (hoverType || shouldReduceMotion) ? 1 : stretchX,
+          scaleY: (hoverType || shouldReduceMotion) ? 1 : stretchY,
+          rotate: (hoverType || shouldReduceMotion) ? 0 : rotation,
         }}
       >
         <motion.div

@@ -35,13 +35,19 @@ export default async function sitemap() {
   ];
 
   try {
-    const articles = await fetchDynamicArticles();
-    const blogRoutes = (articles || []).map((article) => ({
-      url: `${siteUrl}/blog/${article.slug}`,
-      lastModified: article.publishedAt ? new Date(article.publishedAt) : new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.7,
-    }));
+    const articles = await fetchDynamicArticles(100);
+    const blogRoutes = (articles || [])
+      .filter((article) => article.status === 'published')
+      .map((article) => ({
+        url: `${siteUrl}/blog/${article.slug}`,
+        lastModified: article.updatedAt
+          ? new Date(article.updatedAt)
+          : article.publishedAt
+          ? new Date(article.publishedAt)
+          : new Date(),
+        changeFrequency: 'monthly',
+        priority: 0.7,
+      }));
 
     return [...staticRoutes, ...blogRoutes];
   } catch (error) {

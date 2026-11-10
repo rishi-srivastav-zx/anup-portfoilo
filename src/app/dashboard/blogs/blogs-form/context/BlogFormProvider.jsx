@@ -755,8 +755,13 @@ export function BlogFormProvider({ children, initialEditId = null }) {
           // ignore
         }
 
-        // Notify other windows/tabs or listeners to refresh the articles list
+        // Notify other windows/tabs or listeners to refresh the articles list immediately
         if (typeof window !== "undefined") {
+          try {
+            localStorage.setItem("blog_published_at", String(Date.now()));
+          } catch {
+            // ignore localStorage quota errors
+          }
           window.dispatchEvent(new Event("studio_articles_updated"));
         }
 
