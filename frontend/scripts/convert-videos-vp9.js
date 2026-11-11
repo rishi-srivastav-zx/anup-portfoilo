@@ -1,10 +1,13 @@
 const fs = require('fs');
 const path = require('path');
 const cp = require('child_process');
+const { getFFmpegPath, getFFmpegInfo } = require('../src/lib/ffmpeg');
 
-const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path;
+const ffmpegInfo = getFFmpegInfo();
+const ffmpegPath = getFFmpegPath();
 const videosDir = path.join(__dirname, '..', 'public', 'videos');
 
+console.log('FFmpeg Environment:', `${ffmpegInfo.platformKey} (v${ffmpegInfo.version})`);
 console.log('Using ffmpeg at:', ffmpegPath);
 console.log('Scanning directory:', videosDir);
 
