@@ -21,6 +21,10 @@ import {
     notFoundHandler,
 } from "./middleware/errorHandler.js";
 import { schedulerWorker } from "./workers/blogSchedulerWorker.js";
+import {
+    renderLiveStatusPage,
+    renderErrorStatusPage,
+} from "./utils/statusPage.js";
 
 const app = express();
 
@@ -28,6 +32,7 @@ const app = express();
 app.use(
     helmet({
         crossOriginResourcePolicy: { policy: "cross-origin" },
+        contentSecurityPolicy: false,
     })
 );
 
@@ -82,11 +87,69 @@ if (env.NODE_ENV === "production") {
     app.set("trust proxy", 1);
 }
 
-// Existing root welcome endpoint
-app.get("/", (req, res) => {
-    res.json({
+// Root status endpoint: renders live status page if healthy, or error page if database/server fails
+app.get("/", async (req, res) => {
+    let dbStatus = "Connected";
+    let dbLatencyMs = null;
+    let isHealthy = true;
+    let errorMessage = null;
+
+    try {
+        const startTime = Date.now();
+        const timeoutPromise = new Promise((_, reject) =>
+            setTimeout(() => reject(new Error("Database connection timed out (3000ms)")), 3000)
+        );
+        await Promise.race([pool.query("SELECT 1"), timeoutPromise]);
+        dbLatencyMs = Date.now() - startTime;
+    } catch (err) {
+        isHealthy = false;
+        dbStatus = "Disconnected";
+        errorMessage = err.message || "Failed to establish a connection to Neon PostgreSQL.";
+    }
+
+    const frontendUrl = env.FRONTEND_URL || "https://anuprawatstudio.vercel.app";
+
+    if (!isHealthy) {
+        if (req.accepts("html") && !req.xhr && !req.headers["accept"]?.includes("application/json")) {
+            return res.status(503).send(
+                renderErrorStatusPage({
+                    statusCode: 503,
+                    title: "Backend Service Degraded",
+                    message: "The Express server process is running, but the database connection is currently unavailable.",
+                    errorDetails: errorMessage,
+                    frontendUrl,
+                })
+            );
+        }
+        return res.status(503).json({
+            success: false,
+            status: "degraded",
+            message: "Database connection failed",
+            error: errorMessage,
+        });
+    }
+
+    if (req.accepts("html") && !req.xhr && !req.headers["accept"]?.includes("application/json")) {
+        return res.status(200).send(
+            renderLiveStatusPage({
+                uptime: process.uptime(),
+                timestamp: new Date().toISOString(),
+                dbStatus,
+                dbLatencyMs,
+                environment: env.NODE_ENV,
+                frontendUrl,
+            })
+        );
+    }
+
+    return res.status(200).json({
         success: true,
+        status: "healthy",
         message: "Portfolio backend is running!",
+        database: dbStatus.toLowerCase(),
+        dbLatencyMs,
+        uptime: Math.floor(process.uptime()),
+        timestamp: new Date().toISOString(),
     });
 });
 

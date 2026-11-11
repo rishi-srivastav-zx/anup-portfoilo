@@ -3,11 +3,22 @@ import { ChatError } from "../services/chat.service.js";
 import { KnowledgeError } from "../services/portfolioKnowledge.service.js";
 import { ChatDatabaseError } from "../repositories/chat.repository.js";
 import { env } from "../config/env.js";
+import { renderErrorStatusPage } from "../utils/statusPage.js";
 
 /**
  * Standardized 404 Not Found Handler
  */
 export const notFoundHandler = (req, res) => {
+    if (req.accepts("html") && !req.path.startsWith("/api")) {
+        return res.status(404).send(
+            renderErrorStatusPage({
+                statusCode: 404,
+                title: "Endpoint Not Found",
+                message: `The requested path "${req.method} ${req.originalUrl}" does not exist on this API service.`,
+                frontendUrl: env.FRONTEND_URL || "https://anuprawatstudio.vercel.app",
+            })
+        );
+    }
     res.status(404).json({
         success: false,
         message: `Resource not found: ${req.method} ${req.originalUrl}`,
@@ -94,6 +105,20 @@ export const errorHandler = (err, req, res, next) => {
 
     // Log the unexpected error internally without leaking to client
     console.error("Unhandled Server Error:", err);
+
+    if (req.accepts("html") && !req.path.startsWith("/api")) {
+        return res.status(500).send(
+            renderErrorStatusPage({
+                statusCode: 500,
+                title: "Internal Server Error",
+                message:
+                    env.NODE_ENV === "production"
+                        ? "An unexpected internal server error occurred."
+                        : err.message,
+                frontendUrl: env.FRONTEND_URL || "https://anuprawatstudio.vercel.app",
+            })
+        );
+    }
 
     res.status(500).json({
         success: false,

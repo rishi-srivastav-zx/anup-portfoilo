@@ -473,15 +473,19 @@ body { font-family: ${type.body}; font-weight: ${type.bodyWeight}; }
   padding: 0 !important;
   overflow: hidden !important;
 }
+html, body {
+  background: transparent !important;
+}
 .wash {
   background-image: url(/landing-pages/meng-to-sketchbook/bg-wash.jpg) !important;
   background-position: center center !important;
   background-size: cover !important;
   background-repeat: no-repeat !important;
-  opacity: 0.95 !important;
+  opacity: 1 !important;
+  z-index: -1 !important;
 }
 .wash:after {
-  background: radial-gradient(ellipse at center, rgba(230, 221, 210, 0.2) 0%, rgba(230, 221, 210, 0) 70%) !important;
+  background: radial-gradient(ellipse at center, rgba(230, 221, 210, 0.1) 0%, rgba(230, 221, 210, 0) 70%) !important;
 }
 .top .name, .plate .t { font-family: ${type.heading}; font-weight: ${type.headingWeight}; }
 .top .name {

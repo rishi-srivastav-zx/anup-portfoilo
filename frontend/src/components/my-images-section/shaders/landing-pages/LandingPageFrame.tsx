@@ -178,7 +178,7 @@ export function LandingPageFrame({
             style={{
                 position: "relative",
                 overflow: "hidden",
-                background: "#E6DDD2",
+                background: "transparent",
                 pointerEvents: "auto",
                 ...style,
             }}
