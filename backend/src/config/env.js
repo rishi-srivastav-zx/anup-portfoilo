@@ -6,9 +6,9 @@ import { z } from "zod";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Load .env from root first, then backend/.env
-dotenv.config({ path: path.resolve(__dirname, "../../../.env") });
+// Load backend/.env first, then root .env as fallback
 dotenv.config({ path: path.resolve(__dirname, "../../.env") });
+dotenv.config({ path: path.resolve(__dirname, "../../../.env") });
 
 const envSchema = z.object({
     NODE_ENV: z

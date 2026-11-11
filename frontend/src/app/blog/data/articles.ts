@@ -1,3 +1,5 @@
+import { API_BASE_URL } from '@/api/utils/baseUrl';
+
 export type BlogCategory =
   | 'Cinematography'
   | 'Lighting & Exposure'
@@ -221,15 +223,11 @@ export function normalizeApiBlog(raw: any): BlogArticle {
 
 export async function fetchDynamicArticleBySlug(slug: string): Promise<BlogArticle | null> {
   const cleanSlug = decodeURIComponent(slug).trim();
-  const backendUrl =
-    process.env.NEXT_PUBLIC_BACKEND_URL ||
-    process.env.NEXT_PUBLIC_BASE_URL ||
-    'http://localhost:5000';
 
   try {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 3500);
-    const res = await fetch(`${backendUrl}/api/blogs/${encodeURIComponent(cleanSlug)}`, {
+    const res = await fetch(`${API_BASE_URL}/blogs/${encodeURIComponent(cleanSlug)}`, {
       signal: controller.signal,
       cache: 'no-store',
       headers: {
@@ -263,15 +261,10 @@ export async function fetchDynamicArticleBySlug(slug: string): Promise<BlogArtic
 }
 
 export async function fetchDynamicArticles(limit = 50): Promise<BlogArticle[]> {
-  const backendUrl =
-    process.env.NEXT_PUBLIC_BACKEND_URL ||
-    process.env.NEXT_PUBLIC_BASE_URL ||
-    'http://localhost:5000';
-
   try {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 3500);
-    const res = await fetch(`${backendUrl}/api/blogs?limit=${limit}&status=published`, {
+    const res = await fetch(`${API_BASE_URL}/blogs?limit=${limit}&status=published`, {
       signal: controller.signal,
       cache: 'no-store',
       headers: {

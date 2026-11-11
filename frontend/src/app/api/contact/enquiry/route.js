@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { SERVER_URL } from '@/api/utils/baseUrl';
 
 export async function POST(request) {
   try {
@@ -29,7 +30,10 @@ export async function POST(request) {
 
     // 1. Forward to Express backend API
     try {
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000';
+      const backendUrl = SERVER_URL;
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 4000);
+
       const backendRes = await fetch(`${backendUrl}/api/enquiries`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -41,35 +45,18 @@ export async function POST(request) {
           project_type: project_type || projectType || null,
           source: source || 'Portfolio Contact Form',
         }),
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
 
       const resData = await backendRes.json().catch(() => null);
       if (backendRes.ok && resData?.success) {
         saved = true;
         savedData = resData.data;
       }
-    } catch {
-      // Backend server unavailable; proceed to direct database repository
-    }
-
-    // 2. Direct database repository insertion fallback
-    if (!saved) {
-      try {
-        const { createEnquiry } = await import(
-          '../../../../../backend/src/repositories/enquiry.repository.js'
-        );
-        savedData = await createEnquiry({
-          name: trimmedName,
-          phone: trimmedPhone,
-          message: trimmedMessage,
-          email: email?.trim() || null,
-          project_type: project_type || projectType || null,
-          source: source || 'Portfolio Contact Form',
-        });
-        saved = true;
-      } catch (dbErr) {
-        console.error('Neon DB direct insertion error:', dbErr.message);
-      }
+    } catch (err) {
+      console.error('Backend contact enquiry forward error:', err.message);
     }
 
     if (!saved) {

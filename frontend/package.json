@@ -1,11 +1,12 @@
 {
-  "name": "portfolio-2",
+  "name": "portfolio-frontend",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "test": "node --test tests/*.test.js"
   },
   "dependencies": {
     "@imagekit/next": "^2.1.6",

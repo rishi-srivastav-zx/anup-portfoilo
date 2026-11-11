@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { executeAction } from '../actionExecutor/actionExecutor';
+import { API_BASE_URL } from '@/api/utils/baseUrl';
 
 const CONV_STORAGE_KEY = 'ar_chat_conv_id';
 const TOKEN_STORAGE_KEY = 'ar_chat_token';
@@ -11,7 +12,7 @@ const TOKEN_STORAGE_KEY = 'ar_chat_token';
  * Handles both root /api/chat and explicit /api/chat/message endpoints.
  */
 const getBaseApiUrl = (rawUrl) => {
-  if (!rawUrl) return 'http://localhost:5000/api/chat';
+  if (!rawUrl) return `${API_BASE_URL}/chat`;
   return rawUrl.replace(/\/message\/?$/, '').replace(/\/$/, '');
 };
 

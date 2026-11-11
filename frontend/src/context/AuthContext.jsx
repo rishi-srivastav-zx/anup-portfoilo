@@ -10,9 +10,9 @@ import React, {
     useRef,
 } from "react";
 import { useRouter } from "next/navigation";
-import { apiClient } from "@/api";
+import { apiClient, SERVER_URL } from "@/api";
 
-const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
+const API_BASE = SERVER_URL;
 const AUTH_SESSION_KEY = "studio_auth_session";
 
 const AuthContext = createContext(null);
