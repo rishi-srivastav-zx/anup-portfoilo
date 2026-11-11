@@ -9,6 +9,8 @@
     "test": "node --test tests/*.test.js"
   },
   "dependencies": {
+    "@ffmpeg-installer/win32-x64": "^4.1.0",
+     "@ffmpeg-installer/linux-x64": "4.1.0",
     "@imagekit/next": "^2.1.6",
     "@tinymce/tinymce-react": "^6.3.1",
     "@types/three": "^0.186.0",
@@ -25,7 +27,6 @@
   },
   "devDependencies": {
     "@ffmpeg-installer/ffmpeg": "^1.1.0",
-    "@ffmpeg-installer/win32-x64": "^4.1.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^26.6.4",
     "@types/react": "^19.3.0",
