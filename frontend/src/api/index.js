@@ -15,7 +15,7 @@ export {
 
 export { default as API_CONFIG } from "./config/api.config";
 export { default as ENDPOINTS } from "./constants/apiEndpoints";
-export { API_BASE_URL, SERVER_URL } from "./utils/baseUrl";
+export { API_BASE_URL, SERVER_URL, resolveApiUrl } from "./utils/baseUrl";
 
 export { default as AuthServices } from "./services/auth.services";
 export { default as UserServices } from "./services/user.services";

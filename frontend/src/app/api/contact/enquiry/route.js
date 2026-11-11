@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { SERVER_URL } from '@/api/utils/baseUrl';
+import { resolveApiUrl } from '@/api/utils/baseUrl';
 
 export async function POST(request) {
   try {
@@ -30,11 +30,10 @@ export async function POST(request) {
 
     // 1. Forward to Express backend API
     try {
-      const backendUrl = SERVER_URL;
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 4000);
+      const timeoutId = setTimeout(() => controller.abort(), 8000);
 
-      const backendRes = await fetch(`${backendUrl}/api/enquiries`, {
+      const backendRes = await fetch(resolveApiUrl('/enquiries'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

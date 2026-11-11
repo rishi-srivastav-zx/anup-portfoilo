@@ -1,5 +1,5 @@
 import { ENDPOINTS } from "../constants/apiEndpoints";
-import { API_BASE_URL } from "../utils/baseUrl";
+import { API_BASE_URL, resolveApiUrl } from "../utils/baseUrl";
 
 // Concurrency control for silent refresh
 let isRefreshing = false;
@@ -162,7 +162,7 @@ export const setupInterceptors = (axiosInstance) => {
                     try {
                         // Issue silent refresh via HttpOnly cookie
                         const refreshResponse = await fetch(
-                            `${API_BASE_URL}${ENDPOINTS.AUTH.REFRESH}`,
+                            resolveApiUrl(ENDPOINTS.AUTH.REFRESH),
                             {
                                 method: "POST",
                                 headers: {

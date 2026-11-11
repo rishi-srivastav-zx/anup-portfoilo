@@ -1,7 +1,5 @@
 import { NextResponse } from 'next/server';
-import { SERVER_URL } from '@/api/utils/baseUrl';
-
-const BACKEND_URL = SERVER_URL;
+import { resolveApiUrl } from '@/api/utils/baseUrl';
 
 export async function GET(request) {
   try {
@@ -10,9 +8,9 @@ export async function GET(request) {
     // 1. Forward to Express backend if active
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 2000);
+      const timeoutId = setTimeout(() => controller.abort(), 8000);
 
-      const backendRes = await fetch(`${BACKEND_URL}/api/auth/me`, {
+      const backendRes = await fetch(resolveApiUrl('/auth/me'), {
         method: 'GET',
         headers: {
           Cookie: cookieHeader,

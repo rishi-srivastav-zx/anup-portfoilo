@@ -90,22 +90,34 @@ app.get("/", (req, res) => {
     });
 });
 
-// Existing database health check endpoint
+// Lightweight health check endpoint for keep-alive monitoring (zero database overhead)
 app.get("/api/health", async (req, res) => {
-    try {
-        const result = await pool.query("SELECT NOW() AS current_time");
-        res.json({
-            success: true,
-            message: "Backend and Neon are connected!",
-            databaseTime: result.rows[0].current_time,
-        });
-    } catch (error) {
-        console.error("Health check failed:", error.message);
-        res.status(500).json({
-            success: false,
-            message: "Database connection failed",
-        });
+    // Optional deep health-check when explicitly requested with ?db=true
+    if (req.query?.db === "true") {
+        try {
+            await pool.query("SELECT 1");
+            return res.status(200).json({
+                status: "healthy",
+                database: "connected",
+                timestamp: new Date().toISOString(),
+                uptime: Math.floor(process.uptime()),
+            });
+        } catch {
+            return res.status(503).json({
+                status: "degraded",
+                database: "disconnected",
+                timestamp: new Date().toISOString(),
+                uptime: Math.floor(process.uptime()),
+            });
+        }
     }
+
+    // Default lightweight health response: fast, zero DB queries, no sensitive data exposed
+    return res.status(200).json({
+        status: "healthy",
+        timestamp: new Date().toISOString(),
+        uptime: Math.floor(process.uptime()),
+    });
 });
 
 // API Routes

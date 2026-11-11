@@ -1,7 +1,5 @@
 import { NextResponse } from 'next/server';
-import { SERVER_URL } from '@/api/utils/baseUrl';
-
-const BACKEND_URL = SERVER_URL;
+import { resolveApiUrl } from '@/api/utils/baseUrl';
 
 export async function POST(request) {
   try {
@@ -10,9 +8,9 @@ export async function POST(request) {
     // Forward refresh request to standalone Express backend
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 4000);
+      const timeoutId = setTimeout(() => controller.abort(), 8000);
 
-      const backendRes = await fetch(`${BACKEND_URL}/api/auth/refresh`, {
+      const backendRes = await fetch(resolveApiUrl('/auth/refresh'), {
         method: 'POST',
         headers: {
           Cookie: cookieHeader,

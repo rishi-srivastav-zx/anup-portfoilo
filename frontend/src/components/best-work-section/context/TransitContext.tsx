@@ -52,7 +52,7 @@ interface TransitContextValue {
   transitCsContentRef: React.RefObject<HTMLDivElement | null>;
   // Interactive actions
   triggerMetroEntrance: () => void;
-  navigateTransit: (index: number) => void;
+  navigateTransit: (index: number, userInitiated?: boolean) => void;
   nextStation: () => void;
   prevStation: () => void;
   stepOutToCaseStudy: (event: React.MouseEvent | Event | null, dataIndex: number) => void;
@@ -265,7 +265,7 @@ export const TransitProvider: React.FC<{
   }, [ensureMetroAudio]);
 
   const navigateTransit = useCallback(
-    (index: number) => {
+    (index: number, userInitiated = false) => {
       if (index < 0 || index >= transitStations.length) return;
       setActiveStationIdx(index);
       activeStationIdxRef.current = index;
@@ -273,9 +273,18 @@ export const TransitProvider: React.FC<{
       const targetX = -(index * 100);
       const gsap = window.gsap;
 
-      // Real physical device vibration (Haptics)
-      if (typeof navigator !== 'undefined' && navigator.vibrate) {
-        navigator.vibrate([40, 50, 40, 50, 60, 50, 200]);
+      // Real physical device vibration (Haptics) only following valid user interaction
+      if (userInitiated && typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function') {
+        try {
+          const hasActivation = typeof navigator.userActivation !== 'undefined'
+            ? navigator.userActivation.isActive || navigator.userActivation.hasBeenActive
+            : true;
+          if (hasActivation) {
+            navigator.vibrate([40, 50, 40, 50, 60, 50, 200]);
+          }
+        } catch {
+          // Gracefully ignore vibration failure when unsupported or restricted by browser policy
+        }
       }
 
       // Train remains static at the platform - moving animation removed
@@ -326,14 +335,14 @@ export const TransitProvider: React.FC<{
   const nextStation = useCallback(() => {
     ensureMetroAudio();
     if (activeStationIdxRef.current < transitStations.length - 1) {
-      navigateTransit(activeStationIdxRef.current + 1);
+      navigateTransit(activeStationIdxRef.current + 1, true);
     }
   }, [ensureMetroAudio, navigateTransit, transitStations.length]);
 
   const prevStation = useCallback(() => {
     ensureMetroAudio();
     if (activeStationIdxRef.current > 0) {
-      navigateTransit(activeStationIdxRef.current - 1);
+      navigateTransit(activeStationIdxRef.current - 1, true);
     }
   }, [ensureMetroAudio, navigateTransit]);
 

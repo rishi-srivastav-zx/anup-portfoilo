@@ -10,9 +10,8 @@ import React, {
     useRef,
 } from "react";
 import { useRouter } from "next/navigation";
-import { apiClient, SERVER_URL } from "@/api";
+import { apiClient, SERVER_URL, API_BASE_URL, resolveApiUrl } from "@/api";
 
-const API_BASE = SERVER_URL;
 const AUTH_SESSION_KEY = "studio_auth_session";
 
 const AuthContext = createContext(null);
@@ -112,7 +111,7 @@ export const AuthProvider = ({ children }) => {
                     setNetworkError(false);
 
                     // 1. Query /api/auth/me (HttpOnly access cookie attached by browser automatically)
-                    const meRes = await fetch(`${API_BASE}/api/auth/me`, {
+                    const meRes = await fetch(resolveApiUrl("/auth/me"), {
                         method: "GET",
                         credentials: "include",
                         headers: { "X-Requested-With": "XMLHttpRequest" },
@@ -131,7 +130,7 @@ export const AuthProvider = ({ children }) => {
                     if (meRes.status === 401) {
                         try {
                             const refreshRes = await fetch(
-                                `${API_BASE}/api/auth/refresh`,
+                                resolveApiUrl("/auth/refresh"),
                                 {
                                     method: "POST",
                                     credentials: "include",
@@ -265,7 +264,7 @@ export const AuthProvider = ({ children }) => {
             setNetworkError(false);
 
             try {
-                const res = await fetch(`${API_BASE}/api/auth/login`, {
+                const res = await fetch(resolveApiUrl("/auth/login"), {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
@@ -305,7 +304,7 @@ export const AuthProvider = ({ children }) => {
             setLoading(true);
             setAuthError(null);
             try {
-                const res = await fetch(`${API_BASE}/api/auth/register`, {
+                const res = await fetch(resolveApiUrl("/auth/register"), {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
@@ -347,7 +346,7 @@ export const AuthProvider = ({ children }) => {
     const logout = useCallback(async () => {
         setLoading(true);
         try {
-            await fetch(`${API_BASE}/api/auth/logout`, {
+            await fetch(resolveApiUrl("/auth/logout"), {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -371,7 +370,7 @@ export const AuthProvider = ({ children }) => {
     const logoutAll = useCallback(async () => {
         setLoading(true);
         try {
-            await fetch(`${API_BASE}/api/auth/logout-all`, {
+            await fetch(resolveApiUrl("/auth/logout-all"), {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -394,7 +393,7 @@ export const AuthProvider = ({ children }) => {
      */
     const authFetch = useCallback(
         async (url, options = {}) => {
-            const endpoint = url.startsWith("http") ? url : `${API_BASE}${url}`;
+            const endpoint = resolveApiUrl(url);
             const headers = {
                 ...(options.headers || {}),
                 "X-Requested-With": "XMLHttpRequest",

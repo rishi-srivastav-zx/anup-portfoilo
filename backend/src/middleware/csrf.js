@@ -14,16 +14,33 @@ export const verifyCsrfOrigin = (req, res, next) => {
     const referer = req.headers.referer;
 
     // Allowed origins: configured frontend URL and local dev URLs
-    const allowedOrigins = [
-        env.FRONTEND_URL?.replace(/\/+$/, ""),
-        "http://localhost:3000",
-        "http://localhost:3001",
-        "http://127.0.0.1:3000",
-        "http://127.0.0.1:3001",
-    ].filter(Boolean);
+    const configuredOrigins = (env.FRONTEND_URL || "")
+        .split(",")
+        .map((url) => url.trim().replace(/\/+$/, ""))
+        .filter(Boolean);
+
+    const allowedOrigins = Array.from(
+        new Set([
+            ...configuredOrigins,
+            "https://anuprawatstudio.vercel.app",
+            "http://localhost:3000",
+            "http://localhost:3001",
+            "http://127.0.0.1:3000",
+            "http://127.0.0.1:3001",
+        ])
+    );
+
+    const isPermittedOrigin = (candidate) => {
+        if (!candidate) return false;
+        const clean = candidate.trim().replace(/\/+$/, "");
+        if (allowedOrigins.some((allowed) => clean.startsWith(allowed))) return true;
+        if (clean === "https://anuprawatstudio.vercel.app" || clean.endsWith(".vercel.app")) return true;
+        if (env.NODE_ENV !== "production" && (clean.includes("localhost") || clean.includes("127.0.0.1"))) return true;
+        return false;
+    };
 
     if (origin) {
-        if (allowedOrigins.some((allowed) => origin.startsWith(allowed))) {
+        if (isPermittedOrigin(origin)) {
             return next();
         }
         return res.status(403).json({
@@ -36,11 +53,7 @@ export const verifyCsrfOrigin = (req, res, next) => {
         try {
             const refererUrl = new URL(referer);
             const refererOrigin = refererUrl.origin;
-            if (
-                allowedOrigins.some((allowed) =>
-                    refererOrigin.startsWith(allowed)
-                )
-            ) {
+            if (isPermittedOrigin(refererOrigin)) {
                 return next();
             }
         } catch {

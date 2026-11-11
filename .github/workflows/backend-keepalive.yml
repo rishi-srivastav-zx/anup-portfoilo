@@ -1,0 +1,74 @@
+name: Backend Keep-Alive Monitor
+
+on:
+  schedule:
+    # Runs every 2 hours at minute 0 (00:00, 02:00, 04:00, ..., 22:00 UTC)
+    - cron: '0 */2 * * *'
+  # Enables manual trigger from GitHub Actions tab
+  workflow_dispatch:
+
+concurrency:
+  group: backend-keepalive
+  cancel-in-progress: false
+
+jobs:
+  keepalive:
+    name: Ping Backend Health Endpoint
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Send Keep-Alive Health Ping
+        env:
+          HEALTH_URL: ${{ secrets.BACKEND_HEALTH_URL }}
+        run: |
+          if [ -z "$HEALTH_URL" ]; then
+            echo "::error::Secret BACKEND_HEALTH_URL is missing! Please configure it in your GitHub repository: Settings -> Secrets and variables -> Actions -> Repository secrets."
+            exit 1
+          fi
+
+          MAX_RETRIES=2
+          RETRY_DELAY=5
+          TIMEOUT=15
+          SUCCESS=false
+
+          echo "Initiating keep-alive monitoring cycle..."
+          echo "Target Endpoint: Configured via GitHub Repository Secrets"
+
+          for attempt in $(seq 1 $((MAX_RETRIES + 1))); do
+            TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+            echo "[$TIMESTAMP] Attempt $attempt: Sending GET request..."
+
+            # Execute lightweight HTTP GET request
+            RESPONSE=$(curl -s -S -o /dev/null \
+              -w "HTTP_STATUS:%{http_code}\nTIME_TOTAL:%{time_total}s\n" \
+              --max-time "$TIMEOUT" \
+              --header "User-Agent: GitHub-Actions-KeepAlive/1.0" \
+              "$HEALTH_URL" 2>&1)
+
+            CURL_EXIT=$?
+            HTTP_CODE=$(echo "$RESPONSE" | grep "HTTP_STATUS:" | cut -d':' -f2)
+            TIME_TOTAL=$(echo "$RESPONSE" | grep "TIME_TOTAL:" | cut -d':' -f2)
+
+            echo "[$TIMESTAMP] Attempt $attempt result -> HTTP Status: ${HTTP_CODE:-Error}, Latency: ${TIME_TOTAL:-N/A}"
+
+            if [ "$CURL_EXIT" -eq 0 ] && [ "$HTTP_CODE" -eq 200 ]; then
+              echo "[$TIMESTAMP] Backend is healthy and actively serving requests."
+              SUCCESS=true
+              break
+            else
+              echo "[$TIMESTAMP] Attempt $attempt failed (cURL exit code: $CURL_EXIT, HTTP Status: ${HTTP_CODE:-N/A})."
+              if [ "$attempt" -le "$MAX_RETRIES" ]; then
+                echo "[$TIMESTAMP] Waiting ${RETRY_DELAY}s before retry..."
+                sleep "$RETRY_DELAY"
+              fi
+            fi
+          done
+
+          if [ "$SUCCESS" != "true" ]; then
+            echo "::error::Backend keep-alive health check failed after $((MAX_RETRIES + 1)) attempts."
+            exit 1
+          fi
+
+          echo "Keep-alive cycle completed successfully."
+
