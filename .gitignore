@@ -26,14 +26,18 @@ Thumbs.db
 *.pem
 *.log
 
-# Environment variables
-.env
-.env.*
-!.env.example
-!*/.env.example
+# ========================================================
+# Environment Variables & All .env files (STRICTLY IGNORED)
+# ========================================================
+.env*
+*.env*
+**/.env*
 
 # Vercel
 .vercel/
+*/.vercel/
 
 # TypeScript cache
 *.tsbuildinfo
+next-env.d.ts
+*/next-env.d.ts

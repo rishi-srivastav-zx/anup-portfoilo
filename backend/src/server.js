@@ -32,20 +32,35 @@ app.use(
 );
 
 // Secure CORS configuration with credentials support
-const allowedOrigins = [
-    env.FRONTEND_URL?.replace(/\/+$/, ""),
-    "http://localhost:3000",
-    "http://localhost:3001",
-    "http://127.0.0.1:3000",
-    "http://127.0.0.1:3001",
-].filter(Boolean);
+const configuredOrigins = (env.FRONTEND_URL || "")
+    .split(",")
+    .map((url) => url.trim().replace(/\/+$/, ""))
+    .filter(Boolean);
+
+const allowedOrigins = Array.from(
+    new Set([
+        ...configuredOrigins,
+        "https://anuprawatstudio.vercel.app",
+        "http://localhost:3000",
+        "http://localhost:3001",
+        "http://127.0.0.1:3000",
+        "http://127.0.0.1:3001",
+    ])
+);
 
 app.use(
     cors({
         origin: (origin, callback) => {
             // Allow requests with no origin (e.g. mobile apps, curl, server-to-server)
-            const cleanOrigin = origin?.replace(/\/+$/, "");
-            if (!cleanOrigin || allowedOrigins.includes(cleanOrigin)) {
+            if (!origin) return callback(null, true);
+            const cleanOrigin = origin.replace(/\/+$/, "");
+            if (
+                allowedOrigins.includes(cleanOrigin) ||
+                cleanOrigin === "https://anuprawatstudio.vercel.app" ||
+                cleanOrigin.endsWith(".vercel.app") ||
+                (env.NODE_ENV !== "production" &&
+                    (cleanOrigin.includes("localhost") || cleanOrigin.includes("127.0.0.1")))
+            ) {
                 callback(null, true);
             } else {
                 callback(new Error(`Origin ${origin} not allowed by CORS`));

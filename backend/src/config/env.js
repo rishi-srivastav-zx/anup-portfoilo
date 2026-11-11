@@ -18,7 +18,10 @@ const envSchema = z.object({
         .string()
         .transform((v) => parseInt(v, 10))
         .default(5000),
-    FRONTEND_URL: z.string().url().default("http://localhost:3001"),
+    FRONTEND_URL: z
+        .string()
+        .transform((v) => v.trim().replace(/\/+$/, ""))
+        .default("https://anuprawatstudio.vercel.app"),
     DATABASE_URL: z.string().min(1, "DATABASE_URL is required"),
     ACCESS_TOKEN_SECRET: z
         .string()
