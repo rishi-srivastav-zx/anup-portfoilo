@@ -70,7 +70,7 @@ export default function RootLayout({ children }) {
             className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
         >
             <head>
-                {/* Google Tag Manager / Google Analytics */}
+                {/* Google Tag (gtag.js) & Google Tag Manager */}
                 <script
                     async
                     src="https://www.googletagmanager.com/gtm.js?id=GTM-TG87L66X"
@@ -81,6 +81,12 @@ export default function RootLayout({ children }) {
                             window.dataLayer = window.dataLayer || [];
                             function gtag(){dataLayer.push(arguments);}
                             gtag('js', new Date());
+                            gtag('config', 'GTM-TG87L66X');
+                            gtag('config', 'G-6YRCVQKEQM');
+                            window.dataLayer.push({
+                                'gtm.start': new Date().getTime(),
+                                event: 'gtm.js'
+                            });
                         `,
                     }}
                 />
