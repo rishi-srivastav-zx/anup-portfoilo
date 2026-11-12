@@ -1,5 +1,4 @@
 import { Geist, Geist_Mono } from "next/font/google";
-import Script from "next/script";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -71,18 +70,20 @@ export default function RootLayout({ children }) {
             className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
         >
             <head>
-                <Script
-                    id="gtm-script"
-                    strategy="afterInteractive"
+                {/* Google Tag Manager / Google Analytics */}
+                <script
+                    async
                     src="https://www.googletagmanager.com/gtm.js?id=GTM-TG87L66X"
                 />
-                <Script id="google-analytics" strategy="afterInteractive">
-                    {`
-                        window.dataLayer = window.dataLayer || [];
-                        function gtag(){window.dataLayer.push(arguments);}
-                        gtag('js', new Date());
-                    `}
-                </Script>
+                <script
+                    dangerouslySetInnerHTML={{
+                        __html: `
+                            window.dataLayer = window.dataLayer || [];
+                            function gtag(){dataLayer.push(arguments);}
+                            gtag('js', new Date());
+                        `,
+                    }}
+                />
 
                 <link rel="icon" href="/favicon.ico" sizes="any" />
                 <link rel="icon" href="/favicon.webp" type="image/webp" />
@@ -99,6 +100,15 @@ export default function RootLayout({ children }) {
                 />
             </head>
             <body className="min-h-full flex flex-col font-sans">
+                {/* Google Tag Manager (noscript) */}
+                <noscript>
+                    <iframe
+                        src="https://www.googletagmanager.com/ns.html?id=GTM-TG87L66X"
+                        height="0"
+                        width="0"
+                        style={{ display: "none", visibility: "hidden" }}
+                    />
+                </noscript>
                 <CookieConsentProvider>
                     <AuthProvider>
                         <ConnectionProvider>
