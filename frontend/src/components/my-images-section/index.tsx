@@ -32,7 +32,7 @@ export function MyImagesSection() {
                 {/* Botanical Watercolor Paper Canvas Ground */}
                 <div
                     className="absolute inset-0 pointer-events-none z-0 bg-cover bg-center bg-no-repeat opacity-100 transition-opacity duration-700"
-                    style={{ backgroundImage: `url('/images/botanical_sketchbook_bg.jpg')` }}
+                    style={{ backgroundImage: `url('/images/botanical_sketchbook_bg.webp')` }}
                     aria-hidden="true"
                 />
 

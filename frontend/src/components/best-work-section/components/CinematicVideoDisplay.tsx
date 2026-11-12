@@ -6,6 +6,7 @@ import { Volume2, VolumeX, Maximize2, Play, Pause, X } from "lucide-react";
 
 interface CinematicVideoDisplayProps {
     title: string;
+    videoMp4?: string;
     videoWebm?: string;
     videoMov?: string;
     badgeLabel?: string;
@@ -22,11 +23,13 @@ interface VideoMeta {
 
 export const CinematicVideoDisplay: React.FC<CinematicVideoDisplayProps> = ({
     title,
+    videoMp4,
     videoWebm,
     videoMov,
     badgeLabel = "24 FPS",
     className = "",
 }) => {
+    const containerRef = useRef<HTMLDivElement>(null);
     const videoRef = useRef<HTMLVideoElement>(null);
     const modalVideoRef = useRef<HTMLVideoElement>(null);
 
@@ -34,7 +37,11 @@ export const CinematicVideoDisplay: React.FC<CinematicVideoDisplayProps> = ({
     const [isPlaying, setIsPlaying] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isMounted, setIsMounted] = useState(false);
+    const [isInView, setIsInView] = useState(false);
     const [videoMeta, setVideoMeta] = useState<VideoMeta | null>(null);
+
+    // Resolve MP4 path with automatic fallback if not explicitly provided
+    const resolvedMp4 = videoMp4 || (videoMov ? videoMov.replace(/\.mov$/i, ".mp4") : undefined);
 
     useEffect(() => {
         setIsMounted(true);
@@ -71,7 +78,14 @@ export const CinematicVideoDisplay: React.FC<CinematicVideoDisplayProps> = ({
         e.stopPropagation();
         if (!videoRef.current) return;
         if (videoRef.current.paused) {
-            videoRef.current.play();
+            const playPromise = videoRef.current.play();
+            if (playPromise !== undefined) {
+                playPromise.catch((err) => {
+                    if (err?.name !== "AbortError") {
+                        console.warn("Video playback error:", err);
+                    }
+                });
+            }
             setIsPlaying(true);
         } else {
             videoRef.current.pause();
@@ -99,8 +113,11 @@ export const CinematicVideoDisplay: React.FC<CinematicVideoDisplayProps> = ({
         e?.stopPropagation();
         if (modalVideoRef.current && videoRef.current) {
             videoRef.current.currentTime = modalVideoRef.current.currentTime;
-            if (isPlaying) {
-                videoRef.current.play().catch(() => {});
+            if (isPlaying && isInView) {
+                const p = videoRef.current.play();
+                if (p !== undefined) {
+                    p.catch(() => {});
+                }
             }
         }
         setIsModalOpen(false);
@@ -110,7 +127,10 @@ export const CinematicVideoDisplay: React.FC<CinematicVideoDisplayProps> = ({
     useEffect(() => {
         if (isModalOpen && modalVideoRef.current && videoRef.current) {
             modalVideoRef.current.currentTime = videoRef.current.currentTime;
-            modalVideoRef.current.play().catch(() => {});
+            const p = modalVideoRef.current.play();
+            if (p !== undefined) {
+                p.catch(() => {});
+            }
         }
     }, [isModalOpen]);
 
@@ -134,29 +154,60 @@ export const CinematicVideoDisplay: React.FC<CinematicVideoDisplayProps> = ({
         };
     }, [isModalOpen]);
 
-    // Intersection observer for thumbnail video autoplay
+    // Intersection observer for container visibility to prevent loading off-screen videos
     useEffect(() => {
-        const video = videoRef.current;
-        if (!video) return;
+        const container = containerRef.current;
+        if (!container) return;
 
         const observer = new IntersectionObserver(
             ([entry]) => {
-                if (entry.isIntersecting) {
-                    if (isPlaying) {
-                        video.play().catch(() => {});
+                const intersecting = entry.isIntersecting && entry.intersectionRatio >= 0.25;
+                setIsInView(intersecting);
+
+                const video = videoRef.current;
+                if (!video) return;
+
+                if (intersecting && isPlaying) {
+                    const p = video.play();
+                    if (p !== undefined) {
+                        p.catch((err) => {
+                            if (err?.name !== "AbortError") {
+                                // Silently ignore autoplay rejections
+                            }
+                        });
                     }
-                } else {
+                } else if (!intersecting) {
                     video.pause();
                 }
             },
-            { rootMargin: "300px 0px" }
+            { threshold: [0, 0.25, 0.5] }
         );
 
-        observer.observe(video);
+        observer.observe(container);
         return () => observer.disconnect();
     }, [isPlaying]);
 
-    if (!videoWebm && !videoMov) {
+    // Handle tab visibility to stop decoder when backgrounded
+    useEffect(() => {
+        const handleVisibilityChange = () => {
+            const video = videoRef.current;
+            if (!video) return;
+
+            if (document.hidden) {
+                video.pause();
+            } else if (isInView && isPlaying) {
+                const p = video.play();
+                if (p !== undefined) {
+                    p.catch(() => {});
+                }
+            }
+        };
+
+        document.addEventListener("visibilitychange", handleVisibilityChange);
+        return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
+    }, [isInView, isPlaying]);
+
+    if (!resolvedMp4 && !videoWebm && !videoMov) {
         return (
             <div className={`w-full h-full flex items-center justify-center bg-[#14100E] ${className}`}>
                 <h3 className="font-sans text-[32px] md:text-[50px] text-white/90 text-center">
@@ -169,6 +220,7 @@ export const CinematicVideoDisplay: React.FC<CinematicVideoDisplayProps> = ({
     return (
         <>
             <div
+                ref={containerRef}
                 className={`relative w-full h-full bg-black overflow-hidden group select-none cursor-pointer ${className}`}
                 onClick={openModal}
                 title="Click to view full cinema master"
@@ -180,12 +232,12 @@ export const CinematicVideoDisplay: React.FC<CinematicVideoDisplayProps> = ({
                     loop
                     muted={isMuted}
                     playsInline
+                    preload={isInView ? "metadata" : "none"}
                     onLoadedMetadata={handleLoadedMetadata}
-                    src={videoWebm || videoMov}
                     className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-500 ease-out"
                 >
+                    {resolvedMp4 && <source src={resolvedMp4} type="video/mp4" />}
                     {videoWebm && <source src={videoWebm} type="video/webm" />}
-                    {videoWebm && <source src={videoWebm} type="video/mp4" />}
                     {videoMov && <source src={videoMov} type="video/quicktime" />}
                 </video>
 
@@ -299,12 +351,12 @@ export const CinematicVideoDisplay: React.FC<CinematicVideoDisplayProps> = ({
                                 loop
                                 controls
                                 playsInline
+                                preload="metadata"
                                 onLoadedMetadata={handleLoadedMetadata}
-                                src={videoWebm || videoMov}
                                 className="w-full h-full object-contain"
                             >
+                                {resolvedMp4 && <source src={resolvedMp4} type="video/mp4" />}
                                 {videoWebm && <source src={videoWebm} type="video/webm" />}
-                                {videoWebm && <source src={videoWebm} type="video/mp4" />}
                                 {videoMov && <source src={videoMov} type="video/quicktime" />}
                             </video>
                         </div>

@@ -3,12 +3,25 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Clapperboard3D } from './Clapperboard3D';
+import dynamic from 'next/dynamic';
 import CinematicFooter from '@/components/legal/CinematicFooter';
 import {
   CinematographyTakeStill,
   getCinematographyTakeStill,
 } from './cinematographyTakeVisuals';
+
+// Code-split Three.js Clapperboard3D with SSR false so three.js and its shaders are not bundled into initial client chunks
+const Clapperboard3D = dynamic(
+  () => import('./Clapperboard3D').then((mod) => mod.Clapperboard3D),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="relative w-full h-[360px] sm:h-[430px] lg:h-[520px] flex items-center justify-center pointer-events-none">
+        <div className="w-16 h-16 rounded-full border-2 border-white/10 border-t-[#3b82f6] animate-spin" />
+      </div>
+    ),
+  }
+);
 
 /**
  * CONFIGURATION CONSTANT — PORTFOLIO OWNER EMAIL

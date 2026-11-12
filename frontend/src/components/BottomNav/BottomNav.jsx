@@ -32,103 +32,96 @@ export default function BottomNav() {
     const activeItemRef = useRef(activeItem);
     activeItemRef.current = activeItem;
 
-    // Determine active section based on current viewport scroll position
-    const updateActiveSection = useCallback(() => {
-        if (typeof window === "undefined" || isProgrammaticScrollRef.current)
-            return;
-
-        if (pathname?.startsWith("/blog")) {
-            if (activeItemRef.current !== "/blog") {
-                setActiveItem("/blog");
-            }
-            return;
-        }
-
-        const scrollY = window.scrollY;
-        const windowHeight = window.innerHeight;
-        const docHeight = document.documentElement.scrollHeight;
-
-        // 1. Near very top of the page
-        if (scrollY < 120) {
-            if (activeItemRef.current !== "#home") {
-                setActiveItem("#home");
-            }
-            return;
-        }
-
-        // 2. Near bottom of page (footer / contact section)
-        if (scrollY + windowHeight >= docHeight - 120) {
-            if (activeItemRef.current !== "#contact") {
-                setActiveItem("#contact");
-            }
-            return;
-        }
-
-        // 3. Focal zone (approx 38% down the viewport)
-        const focalPoint = windowHeight * 0.38;
-        let matchingHref = null;
-        let minDistance = Infinity;
-
-        for (const link of navLinks) {
-            const id = link.href.replace("#", "");
-            const el = document.getElementById(id);
-            if (!el) continue;
-
-            const rect = el.getBoundingClientRect();
-
-            // If the focal point is within this section's bounding rectangle
-            if (rect.top <= focalPoint && rect.bottom > focalPoint) {
-                matchingHref = link.href;
-                break;
-            }
-
-            // Fallback: check closest section to focal point
-            const dist = Math.abs(rect.top - focalPoint);
-            if (dist < minDistance) {
-                minDistance = dist;
-                matchingHref = link.href;
-            }
-        }
-
-        if (matchingHref && matchingHref !== activeItemRef.current) {
-            setActiveItem(matchingHref);
-        }
-    }, [pathname]);
-
+    // Cache section elements and observe them with IntersectionObserver
     useEffect(() => {
         setIsMounted(true);
 
-        // Initial check on mount
-        if (typeof window !== "undefined") {
-            const initialHash = window.location.hash;
-            if (initialHash && navLinks.some((l) => l.href === initialHash)) {
-                setActiveItem(initialHash);
-            } else {
-                updateActiveSection();
+        if (typeof window === "undefined" || pathname?.startsWith("/blog")) return;
+
+        // Collect section DOM elements
+        const sectionIds = ["home", "about", "visuals", "work", "contact"];
+        const observedElements = [];
+        const elementToHref = new Map();
+
+        sectionIds.forEach((id) => {
+            let el = document.getElementById(id);
+            if (!el && id === "about") el = document.getElementById("origin");
+            if (!el && id === "work") el = document.getElementById("featured-work") || document.getElementById("work-inner");
+            if (el) {
+                observedElements.push(el);
+                elementToHref.set(el, `#${id}`);
             }
+        });
+
+        // Track visibility ratios of sections using IntersectionObserver
+        const visibilityRatios = new Map();
+
+        const observer = new IntersectionObserver(
+            (entries) => {
+                if (isProgrammaticScrollRef.current) return;
+
+                entries.forEach((entry) => {
+                    visibilityRatios.set(entry.target, entry.isIntersecting ? entry.intersectionRatio : 0);
+                });
+
+                // Check edge cases: top and bottom of page
+                const scrollY = window.scrollY;
+                const windowHeight = window.innerHeight;
+                const docHeight = document.documentElement.scrollHeight;
+
+                if (scrollY < 100) {
+                    if (activeItemRef.current !== "#home") {
+                        setActiveItem("#home");
+                    }
+                    return;
+                }
+
+                if (scrollY + windowHeight >= docHeight - 80) {
+                    if (activeItemRef.current !== "#contact") {
+                        setActiveItem("#contact");
+                    }
+                    return;
+                }
+
+                // Find section with the highest visibility ratio
+                let maxRatio = 0;
+                let mostVisibleElement = null;
+
+                observedElements.forEach((el) => {
+                    const ratio = visibilityRatios.get(el) || 0;
+                    if (ratio > maxRatio) {
+                        maxRatio = ratio;
+                        mostVisibleElement = el;
+                    }
+                });
+
+                if (mostVisibleElement && maxRatio > 0.1) {
+                    const href = elementToHref.get(mostVisibleElement);
+                    if (href && href !== activeItemRef.current) {
+                        setActiveItem(href);
+                    }
+                }
+            },
+            {
+                // Focal window matching the user's reading zone
+                rootMargin: "-15% 0px -40% 0px",
+                threshold: [0, 0.15, 0.3, 0.5, 0.75],
+            }
+        );
+
+        observedElements.forEach((el) => observer.observe(el));
+
+        // Initial hash check
+        const initialHash = window.location.hash;
+        if (initialHash && navLinks.some((l) => l.href === initialHash)) {
+            setActiveItem(initialHash);
         }
 
-        // Update active section on scroll with rAF throttling
-        let rafId = null;
-        const handleScroll = () => {
-            if (rafId) return;
-            rafId = requestAnimationFrame(() => {
-                updateActiveSection();
-                rafId = null;
-            });
-        };
-
-        window.addEventListener("scroll", handleScroll, { passive: true });
-        window.addEventListener("resize", handleScroll, { passive: true });
-
         return () => {
-            if (rafId) cancelAnimationFrame(rafId);
-            window.removeEventListener("scroll", handleScroll);
-            window.removeEventListener("resize", handleScroll);
-            if (scrollTimeoutRef.current)
-                clearTimeout(scrollTimeoutRef.current);
+            observer.disconnect();
+            if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
         };
-    }, [updateActiveSection]);
+    }, [pathname]);
 
     const handleNavClick = (e, href) => {
         e.preventDefault();
@@ -192,8 +185,7 @@ export default function BottomNav() {
         // Re-enable scroll spy after instant navigation settles
         scrollTimeoutRef.current = setTimeout(() => {
             isProgrammaticScrollRef.current = false;
-            updateActiveSection();
-        }, 50);
+        }, 80);
     };
 
     if (

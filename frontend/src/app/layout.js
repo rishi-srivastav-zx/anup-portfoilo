@@ -1,4 +1,5 @@
 import { Geist, Geist_Mono } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -23,7 +24,8 @@ export const metadata = {
         default: "Anup Rawat | Cinematographer & Director of Photography",
         template: "%s | Anup Rawat",
     },
-    description: "Official portfolio of Anup Rawat — Contemporary Cinematographer & Director of Photography specializing in feature films, commercials, and visual storytelling.",
+    description:
+        "Official portfolio of Anup Rawat — Contemporary Cinematographer & Director of Photography specializing in feature films, commercials, and visual storytelling.",
     keywords: [
         "Anup Rawat",
         "Cinematographer",
@@ -43,7 +45,11 @@ export const metadata = {
             { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
         ],
         apple: [
-            { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+            {
+                url: "/apple-touch-icon.png",
+                sizes: "180x180",
+                type: "image/png",
+            },
         ],
     },
     manifest: "/manifest.json",
@@ -65,6 +71,19 @@ export default function RootLayout({ children }) {
             className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
         >
             <head>
+                <Script
+                    id="gtm-script"
+                    strategy="afterInteractive"
+                    src="https://www.googletagmanager.com/gtm.js?id=GTM-TG87L66X"
+                />
+                <Script id="google-analytics" strategy="afterInteractive">
+                    {`
+                        window.dataLayer = window.dataLayer || [];
+                        function gtag(){window.dataLayer.push(arguments);}
+                        gtag('js', new Date());
+                    `}
+                </Script>
+
                 <link rel="icon" href="/favicon.ico" sizes="any" />
                 <link rel="icon" href="/favicon.webp" type="image/webp" />
                 <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
@@ -72,8 +91,7 @@ export default function RootLayout({ children }) {
                 <link
                     rel="preconnect"
                     href="https://fonts.gstatic.com"
-                    crossOrigin="anonymous" />
-                <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Jost:wght@400;500;600&display=swap"
+                    crossOrigin="anonymous"
                 />
                 <link
                     href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Jost:wght@400;500;600&family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600&family=Bebas+Neue&family=Caveat:wght@400;600;700&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Dr+Sugiyama&family=Gloria+Hallelujah&family=Homemade+Apple&family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&family=Kalam:wght@400;700&family=Kaushan+Script&family=Patrick+Hand&family=Permanent+Marker&family=Plus+Jakarta+Sans:wght@400;600;800;900&family=Rock+Salt&family=Schoolbell&display=swap"

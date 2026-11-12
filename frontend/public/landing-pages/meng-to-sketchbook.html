@@ -1624,7 +1624,8 @@
             ).matches;
 
             /* ------------------------------------------------ the turning leaf */
-            const N = 18; /* strips — enough for a smooth curve          */
+            const isMobileScreen = window.innerWidth <= 768;
+            const N = isMobileScreen ? 10 : 18; /* strips: 10 on mobile to avoid DOM thrash, 18 on desktop for buttery curve */
             const SPAN = 0.5; /* gutter → outer page edge, as a fraction     */
             const BETA = 0.6; /* peak curl of the arc, radians              */
             let idx = 0,
@@ -2682,6 +2683,18 @@
             window.addEventListener("mousemove", (e) => forwardParentCursor(e), { passive: true });
             window.addEventListener("mousedown", (e) => forwardParentCursor(e, true), { passive: true });
             window.addEventListener("mouseup", (e) => forwardParentCursor(e, false), { passive: true });
+
+            // Pause animation when tab or window is backgrounded to release GPU
+            document.addEventListener("visibilitychange", () => {
+                if (document.hidden) {
+                    if (raf !== null) {
+                        cancelAnimationFrame(raf);
+                        raf = null;
+                    }
+                } else if (spring || viewActive) {
+                    kick();
+                }
+            });
         </script>
     </body>
 </html>

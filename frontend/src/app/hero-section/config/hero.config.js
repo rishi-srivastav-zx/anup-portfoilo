@@ -45,7 +45,7 @@ export const heroConfig = {
     }
   },
   images: {
-    portrait: '/images/anup_portrait.png',
+    portrait: '/images/anup_portrait.webp',
     logo: '/images/ar-logo.webp',
     monogram: '/ar-monogram.webp',
   }

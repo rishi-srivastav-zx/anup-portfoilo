@@ -573,18 +573,40 @@ export const Clapperboard3D: React.FC<Clapperboard3DProps> = ({
     const visibilityObserver = new IntersectionObserver(
       ([entry]) => {
         const wasVisible = isVisible;
-        isVisible = entry.isIntersecting;
+        isVisible = entry.isIntersecting && !document.hidden;
         if (!wasVisible && isVisible) {
           lastTime = performance.now();
+          cancelAnimationFrame(animFrameId);
           animFrameId = requestAnimationFrame(animate);
+        } else if (wasVisible && !isVisible) {
+          cancelAnimationFrame(animFrameId);
         }
       },
-      { rootMargin: '300px 0px' }
+      { rootMargin: '200px 0px' }
     );
     visibilityObserver.observe(container);
 
+    const handleDocVisibility = () => {
+      if (document.hidden) {
+        isVisible = false;
+        cancelAnimationFrame(animFrameId);
+      } else {
+        const rect = container.getBoundingClientRect();
+        const isInViewport =
+          rect.top < window.innerHeight + 200 && rect.bottom > -200;
+        if (isInViewport) {
+          isVisible = true;
+          lastTime = performance.now();
+          cancelAnimationFrame(animFrameId);
+          animFrameId = requestAnimationFrame(animate);
+        }
+      }
+    };
+    document.addEventListener('visibilitychange', handleDocVisibility);
+
     return () => {
       visibilityObserver.disconnect();
+      document.removeEventListener('visibilitychange', handleDocVisibility);
       cancelAnimationFrame(animFrameId);
       window.removeEventListener('pointermove', handlePointerMove);
       container.removeEventListener('pointerleave', handlePointerLeave);
@@ -620,8 +642,12 @@ export const Clapperboard3D: React.FC<Clapperboard3DProps> = ({
       topStickTex.dispose();
       shadowTex.dispose();
       envTexture.dispose();
+      scene.environment = null;
 
       renderer.dispose();
+      if (renderer.domElement && renderer.domElement.parentNode) {
+        renderer.domElement.parentNode.removeChild(renderer.domElement);
+      }
     };
   }, []);
 

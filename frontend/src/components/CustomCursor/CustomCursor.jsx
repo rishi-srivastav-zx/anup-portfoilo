@@ -57,16 +57,19 @@ function ClosedHandIcon({ className = "w-4 h-4" }) {
  * Checks whether an element or its nearest visible container has a dark background
  * by traversing up ancestors and checking attributes, classes, and computed color luminance.
  */
+// Cache background luminance to avoid thrashing window.getComputedStyle
+const elementLuminanceCache = new WeakMap();
+
 function isDarkBackground(element) {
   if (!element || typeof window === 'undefined') return false;
 
   let curr = element;
   let depth = 0;
 
-  while (curr && curr !== document.documentElement && curr !== document.body && depth < 10) {
+  while (curr && curr !== document.documentElement && curr !== document.body && depth < 8) {
     depth++;
 
-    // 1. Explicit data attributes
+    // 1. Explicit data attributes (fastest check)
     if (curr.dataset) {
       if (
         curr.dataset.theme === 'dark' ||
@@ -99,26 +102,32 @@ function isDarkBackground(element) {
       }
     }
 
-    // 3. Computed background color luminance calculation
-    try {
-      const style = window.getComputedStyle(curr);
-      const bg = style.backgroundColor;
-      if (bg && bg !== 'transparent' && bg !== 'rgba(0, 0, 0, 0)') {
-        const rgb = bg.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
-        if (rgb) {
-          const alpha = rgb[4] !== undefined ? parseFloat(rgb[4]) : 1;
-          if (alpha > 0.25) {
-            const r = parseInt(rgb[1], 10);
-            const g = parseInt(rgb[2], 10);
-            const b = parseInt(rgb[3], 10);
-            // Perceived brightness (ITU-R BT.601)
-            const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
-            return luminance < 135; // Luminance < 135 qualifies as dark
+    // 3. Computed background color luminance calculation (WeakMap cached)
+    if (elementLuminanceCache.has(curr)) {
+      const cached = elementLuminanceCache.get(curr);
+      if (cached !== null) return cached;
+    } else {
+      try {
+        const style = window.getComputedStyle(curr);
+        const bg = style.backgroundColor;
+        if (bg && bg !== 'transparent' && bg !== 'rgba(0, 0, 0, 0)') {
+          const rgb = bg.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
+          if (rgb) {
+            const alpha = rgb[4] !== undefined ? parseFloat(rgb[4]) : 1;
+            if (alpha > 0.25) {
+              const r = parseInt(rgb[1], 10);
+              const g = parseInt(rgb[2], 10);
+              const b = parseInt(rgb[3], 10);
+              const isDark = (0.299 * r + 0.587 * g + 0.114 * b) < 135;
+              elementLuminanceCache.set(curr, isDark);
+              return isDark;
+            }
           }
         }
+        elementLuminanceCache.set(curr, null);
+      } catch {
+        elementLuminanceCache.set(curr, null);
       }
-    } catch {
-      // Ignore security or frame errors
     }
 
     curr = curr.parentElement;
@@ -126,6 +135,10 @@ function isDarkBackground(element) {
 
   // Check document.body computed background
   try {
+    if (elementLuminanceCache.has(document.body)) {
+      const cached = elementLuminanceCache.get(document.body);
+      if (cached !== null) return cached;
+    }
     const bodyBg = window.getComputedStyle(document.body).backgroundColor;
     if (bodyBg && bodyBg !== 'transparent' && bodyBg !== 'rgba(0, 0, 0, 0)') {
       const rgb = bodyBg.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
@@ -133,7 +146,9 @@ function isDarkBackground(element) {
         const r = parseInt(rgb[1], 10);
         const g = parseInt(rgb[2], 10);
         const b = parseInt(rgb[3], 10);
-        return (0.299 * r + 0.587 * g + 0.114 * b) < 135;
+        const isDark = (0.299 * r + 0.587 * g + 0.114 * b) < 135;
+        elementLuminanceCache.set(document.body, isDark);
+        return isDark;
       }
     }
   } catch {}
@@ -182,14 +197,18 @@ export default function CustomCursor() {
   const isDarkRef = useRef(false);
   const lastTargetRef = useRef(null);
 
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
+
   useEffect(() => {
-    setMounted(true);
-    
-    // Check if device is purely a touch device with no mouse/hover
-    if (window.matchMedia('(hover: none) and (pointer: coarse)').matches) {
+    // Check if device is purely a touch device with coarse pointer and no hover capability
+    const touchOnly = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+    if (touchOnly) {
+      setIsTouchDevice(true);
       document.body.style.cursor = 'auto';
       return;
     }
+
+    setMounted(true);
 
     // Never hide cursor in dashboard
     if (isDashboard) {
@@ -348,7 +367,7 @@ export default function CustomCursor() {
     };
   }, [mouseX, mouseY, isDashboard]);
 
-  if (!mounted || isDashboard) return null;
+  if (!mounted || isDashboard || isTouchDevice) return null;
   if (typeof window !== 'undefined' && window.matchMedia('(hover: none) and (pointer: coarse)').matches) return null;
 
   // Variants for the outer cursor element with seamless dark/light section color adaptation

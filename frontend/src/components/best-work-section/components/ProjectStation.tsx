@@ -59,6 +59,7 @@ export const ProjectStation: React.FC<{
                     <div className="w-full md:w-[45%] h-[180px] sm:h-[200px] md:h-auto min-h-[170px] border-b-[4px] md:border-b-0 md:border-r-[8px] border-[#14100E] relative overflow-hidden bg-[#0A0A0A]">
                         <CinematicVideoDisplay
                             title={projectName}
+                            videoMp4={project.videoMp4}
                             videoWebm={project.videoWebm}
                             videoMov={project.videoMov}
                             badgeLabel={`${project.keyword || "FILM"} // 24FPS`}

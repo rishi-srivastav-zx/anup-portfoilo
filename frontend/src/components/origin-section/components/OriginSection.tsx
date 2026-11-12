@@ -171,11 +171,17 @@ export const OriginSection: React.FC = () => {
         baseOpacity = 1,
     ) => {
         if (!el) return;
+        const isDesktop =
+            typeof window !== "undefined" && window.innerWidth > 768;
         const rawBlur = (1 - focus) * maxBlur;
         // Quantize blur to 0.2px increments for optimal GPU texture caching
         const blur = Math.round(rawBlur * 5) / 5;
         const opacity = (Math.round(((0.36 + focus * 0.64) * baseOpacity) * 50) / 50).toFixed(2);
-        const filterStr = blur < 0.25 ? "none" : `blur(${blur.toFixed(1)}px)`;
+        
+        // On mobile viewports, bypass expensive dynamic blur filter to protect WebKit GPU memory from OOM crashes
+        const filterStr = isDesktop
+            ? (blur < 0.25 ? "none" : `blur(${blur.toFixed(1)}px)`)
+            : "none";
 
         const elAny = el as unknown as { _fFilter?: string; _fOpacity?: string };
         if (elAny._fFilter !== filterStr) {
@@ -629,23 +635,24 @@ export const OriginSection: React.FC = () => {
 
             // Operator cutout blur & crisp focus
             if (personalCutoutRef.current) {
-                const opBlur = (1 - fOperatorPolaroid) * maxBlur;
-                const opOpacity = 0.45 + fOperatorPolaroid * 0.55;
-                if (opBlur < 0.25) {
-                    personalCutoutRef.current.style.filter = "none";
-                    personalCutoutRef.current.style.opacity = "1";
-                } else {
-                    personalCutoutRef.current.style.filter = `blur(${opBlur.toFixed(1)}px)`;
-                    personalCutoutRef.current.style.opacity = `${opOpacity.toFixed(2)}`;
+                const opOpacity = (Math.round((0.45 + fOperatorPolaroid * 0.55) * 50) / 50).toFixed(2);
+                const opBlur = isDesktop ? (1 - fOperatorPolaroid) * maxBlur : 0;
+                const filterStr = opBlur < 0.25 ? "none" : `blur(${opBlur.toFixed(1)}px)`;
+                const elCutout = personalCutoutRef.current as unknown as { _fFilter?: string; _fOpacity?: string };
+                if (elCutout._fFilter !== filterStr) {
+                    personalCutoutRef.current.style.filter = filterStr;
+                    elCutout._fFilter = filterStr;
+                }
+                if (elCutout._fOpacity !== opOpacity) {
+                    personalCutoutRef.current.style.opacity = opOpacity;
+                    elCutout._fOpacity = opOpacity;
                 }
             }
 
             // Notebook Content Blur (STRICTLY CONTAINED INSIDE DIARY):
-            // The inner diary content (pages, textures, sketches, cutout, spine) smoothly becomes heavily blurred
+            // The inner diary content (pages, textures, sketches, cutout, spine) smoothly becomes heavily blurred on desktop
             // starting at 8-10px and increasing up to 18-22px, while the outer page and UI remain 100% sharp!
-            // Notebook Content Blur (STRICTLY CONTAINED INSIDE DIARY):
-            // The inner diary content (pages, textures, sketches, cutout, spine) smoothly becomes heavily blurred
-            // starting at 8-10px and increasing up to 18-22px, while the outer page and UI remain 100% sharp!
+            // On mobile, dynamic blur is bypassed to prevent WebKit GPU OOM termination.
             if (diaryContentRef.current) {
                 const elDiary = diaryContentRef.current as unknown as { _lastFilter?: string; _lastOpacity?: string };
                 if (p <= 0.80) {
@@ -660,7 +667,9 @@ export const OriginSection: React.FC = () => {
                     const maxExitBlur = isDesktop ? 22 : 16;
                     const curBlur = Math.round((8 + blurProg * (maxExitBlur - 8)) * 4) / 4;
                     const curOpacity = (Math.round((1 - blurProg * 0.08) * 50) / 50).toFixed(2);
-                    const filterStr = `blur(${curBlur.toFixed(1)}px) saturate(${(1 - blurProg * 0.15).toFixed(2)}) brightness(${(1 + blurProg * 0.04).toFixed(2)})`;
+                    const filterStr = isDesktop
+                        ? `blur(${curBlur.toFixed(1)}px) saturate(${(1 - blurProg * 0.15).toFixed(2)}) brightness(${(1 + blurProg * 0.04).toFixed(2)})`
+                        : "none";
                     
                     if (elDiary._lastFilter !== filterStr) {
                         diaryContentRef.current.style.filter = filterStr;
@@ -1123,7 +1132,7 @@ export const OriginSection: React.FC = () => {
                         >
                             {/* Authentic Blank Paper Texture Mirrored so spine shadow faces the spine */}
                             <img
-                                src="/images/blank_notebook_page.png"
+                                src="/images/blank_notebook_page.webp"
                                 alt="Notebook Page Paper Base"
                                 className="absolute inset-0 w-full h-full object-cover z-0 pointer-events-none select-none opacity-[0.95]"
                                 style={{ transform: "scaleX(-1)" }}

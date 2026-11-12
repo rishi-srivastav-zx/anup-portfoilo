@@ -18,7 +18,7 @@ function LenisScrollTriggerBridge() {
       (window).lenis = lenis;
     }
 
-    // Direct synchronization between Lenis and GSAP ScrollTrigger
+    // Synchronize Lenis and GSAP ScrollTrigger
     const handleScroll = () => {
       ScrollTrigger.update();
     };
@@ -29,8 +29,18 @@ function LenisScrollTriggerBridge() {
       lenis.raf(time * 1000);
     };
     gsap.ticker.add(onTick);
-    // Allow standard lag smoothing (500ms max lag, 33ms target) so brief main-thread pauses don't cause sudden jumpy stutters
+    // Allow standard lag smoothing (500ms max lag, 33ms target)
     gsap.ticker.lagSmoothing(500, 33);
+
+    // Pause ticker when document is hidden (tab switch or screen lock)
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        gsap.ticker.sleep();
+      } else {
+        gsap.ticker.wake();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
 
     // Scroll smoothly to target hash element using Lenis
     const scrollToHashTarget = (hash, immediate = false) => {
@@ -74,6 +84,7 @@ function LenisScrollTriggerBridge() {
     return () => {
       lenis.off('scroll', handleScroll);
       gsap.ticker.remove(onTick);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('hashchange', handleHashChange);
       clearTimeout(timer1);
       clearTimeout(timer2);

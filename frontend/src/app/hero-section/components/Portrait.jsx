@@ -106,7 +106,7 @@ export default function Portrait() {
                         }}
                     >
                         <Image
-                            src={images?.portrait || "/images/anup_portrait.png"}
+                            src={images?.portrait || "/images/anup_portrait.webp"}
                             alt="Anup Rawat"
                             fill
                             priority
@@ -187,7 +187,7 @@ export default function Portrait() {
                         }}
                     >
                         <Image
-                            src={images?.portrait || "/images/anup_portrait.png"}
+                            src={images?.portrait || "/images/anup_portrait.webp"}
                             alt="Anup Rawat"
                             fill
                             priority

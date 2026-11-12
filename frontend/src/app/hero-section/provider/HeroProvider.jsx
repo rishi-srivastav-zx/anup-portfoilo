@@ -14,6 +14,11 @@ export const HeroProvider = ({ children, config }) => {
   });
 
   useEffect(() => {
+    // Completely bypass mouse position parallax tracking on touch-only devices
+    if (typeof window !== 'undefined' && window.matchMedia('(hover: none) and (pointer: coarse)').matches) {
+      return;
+    }
+
     let rafId = null;
     let latestE = null;
     let lastX = 0;
