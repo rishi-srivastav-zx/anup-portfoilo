@@ -109,7 +109,7 @@ export const RouteMapBoard: React.FC = () => {
     return (
         <div
             id="fixed-route-board"
-            className="absolute top-[155px] sm:top-[195px] left-3 right-3 sm:left-6 sm:right-6 md:top-7 md:left-auto md:right-8 lg:right-12 z-20 w-[calc(100%-1.5rem)] sm:w-[calc(100%-3rem)] md:w-[48%] lg:w-[44%] xl:w-[40%] h-[82px] sm:h-[105px] md:h-[135px] border-[3px] md:border-[4px] border-[#14100E] shadow-[5px_5px_0_rgba(20,16,14,0.3)] md:shadow-[6px_6px_0_rgba(20,16,14,0.3)] pointer-events-none flex flex-col items-center justify-center overflow-visible"
+            className="hidden md:flex absolute md:top-7 md:left-auto md:right-8 lg:right-12 z-20 md:w-[48%] lg:w-[44%] xl:w-[40%] md:h-[135px] border-[3px] md:border-[4px] border-[#14100E] shadow-[5px_5px_0_rgba(20,16,14,0.3)] md:shadow-[6px_6px_0_rgba(20,16,14,0.3)] pointer-events-none flex-col items-center justify-center overflow-visible"
             style={{ backgroundColor: routeBoard.boardBg || "#F4EFE6" }}
         >
             {/* Subtle Background Texture */}

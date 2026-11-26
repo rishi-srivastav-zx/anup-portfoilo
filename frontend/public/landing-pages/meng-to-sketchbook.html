@@ -259,11 +259,22 @@
             @media (max-width: 768px) {
                 .hero {
                     align-content: start;
-                    padding-top: clamp(14px, 2.5svh, 24px);
+                    padding-top: clamp(56px, 8svh, 72px);
                     padding-bottom: 20px;
                 }
                 .chapter-bridge {
-                    margin: 0 0 clamp(8px, 1.5vh, 14px);
+                    margin: 0 0 clamp(10px, 1.8vh, 16px);
+                    padding-inline: 12px;
+                    max-width: 100%;
+                    box-sizing: border-box;
+                }
+                .chapter-pill {
+                    max-width: calc(100vw - 24px);
+                    padding: 5px 12px;
+                }
+                .chapter-tag {
+                    font-size: 9px;
+                    letter-spacing: 0.14em;
                 }
             }
 
@@ -1128,11 +1139,15 @@
             }
             @media (max-width: 640px) {
                 .cue-pill {
-                    padding: 5px 10px;
-                    font-size: 10px;
+                    padding: 4px 10px;
+                    font-size: 9.5px;
+                    gap: 5px;
                 }
                 .sb-turn-cue {
-                    right: 8px;
+                    top: auto;
+                    bottom: 8px;
+                    right: 10px;
+                    transform: none;
                 }
             }
 
@@ -1195,8 +1210,15 @@
                     letter-spacing: 0.16em;
                 }
                 .sb-wrap {
-                    width: 100vw;
-                    margin-inline: calc(50% - 50vw);
+                    width: calc(100vw - 24px);
+                    max-width: 100%;
+                    margin-inline: auto;
+                }
+                .sb-caption {
+                    text-align: center;
+                    padding-inline: 12px;
+                    font-size: 11px;
+                    line-height: 1.4;
                 }
                 .sb-arrow {
                     display: none !important;

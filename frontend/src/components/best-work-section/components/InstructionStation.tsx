@@ -3,7 +3,13 @@ import { useTransit } from "../context/TransitContext";
 import { CinematicVideoDisplay } from "./CinematicVideoDisplay";
 
 export const InstructionStation: React.FC = () => {
-    const { config, transitStations, activeStationIdx, isLoadingProjects, projectsError } = useTransit();
+    const {
+        config,
+        transitStations,
+        activeStationIdx,
+        isLoadingProjects,
+        projectsError,
+    } = useTransit();
     const { originStation } = config;
     const nextStationName = transitStations[1]?.stationName || "TERMINUS";
 

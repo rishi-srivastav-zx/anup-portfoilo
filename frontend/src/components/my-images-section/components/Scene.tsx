@@ -316,7 +316,7 @@ export function Scene() {
                 type="button"
                 onClick={toggleIndexDrawer}
                 aria-label="Open table of plates index"
-                className="absolute top-4 right-4 z-30 px-3.5 py-1.5 rounded-full bg-[#14100E]/75 hover:bg-[#14100E] text-[#F4EFE6] backdrop-blur-md border border-white/10 shadow-[0_4px_20px_rgba(0,0,0,0.2)] text-xs font-mono tracking-wider uppercase transition-all flex items-center gap-2 cursor-pointer group focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:outline-hidden hover:scale-105 active:scale-95"
+                className="absolute top-3 right-3 sm:top-4 sm:right-4 z-30 px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full bg-[#14100E]/75 hover:bg-[#14100E] text-[#F4EFE6] backdrop-blur-md border border-white/10 shadow-[0_4px_20px_rgba(0,0,0,0.2)] text-[11px] sm:text-xs font-mono tracking-wider uppercase transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer group focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:outline-hidden hover:scale-105 active:scale-95"
                 title="Table of Plates"
             >
                 <span className="w-1.5 h-1.5 rounded-full bg-[#9a6a3e] group-hover:scale-125 transition-transform" />

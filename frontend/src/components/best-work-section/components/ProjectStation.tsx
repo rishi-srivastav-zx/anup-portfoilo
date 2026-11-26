@@ -8,7 +8,14 @@ export const ProjectStation: React.FC<{
     stationIndex: number;
     dataIndex: number;
 }> = ({ project, stationIndex, dataIndex }) => {
-    const { config, transitStations, stepOutToCaseStudy, activeStationIdx, isLoadingProjects, projectsError } = useTransit();
+    const {
+        config,
+        transitStations,
+        stepOutToCaseStudy,
+        activeStationIdx,
+        isLoadingProjects,
+        projectsError,
+    } = useTransit();
     const nextStationName =
         transitStations[stationIndex + 1]?.stationName || "TERMINUS";
 
