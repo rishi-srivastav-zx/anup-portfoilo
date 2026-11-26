@@ -1761,6 +1761,31 @@
                     st.setProperty("--a2", ((1 - l2) * 0.62).toFixed(3));
                 }
             }
+            const decodedPageUrls = new Set();
+            function decodePageImage(page) {
+                if (!page || !page.url || decodedPageUrls.has(page.url)) {
+                    return Promise.resolve();
+                }
+                decodedPageUrls.add(page.url);
+                const im = new Image();
+                im.src = page.url;
+                return im.decode
+                    ? im.decode().catch(() => {})
+                    : new Promise((r) => {
+                          im.onload = im.onerror = r;
+                      });
+            }
+            function preloadAdjacentPages(centerIdx) {
+                if (!PAGES || M <= 0) return;
+                const indices = new Set([
+                    ((centerIdx % M) + M) % M,
+                    ((centerIdx - 1 + M) + M) % M,
+                    ((centerIdx + 1) % M + M) % M,
+                ]);
+                indices.forEach((i) => {
+                    decodePageImage(getPage(i));
+                });
+            }
             function paint() {
                 book.textContent = "";
                 if (!turn) {
@@ -1815,6 +1840,7 @@
                 if (cornerEl) cornerEl.style.opacity = turn ? "0" : "1";
                 if (typeof syncZoomLayer === "function") syncZoomLayer();
                 if (typeof placeLoupe === "function") placeLoupe();
+                preloadAdjacentPages(idx);
             }
             function caption() {
                 capBox.textContent = "";
@@ -2574,17 +2600,8 @@
                     : 0;
                 paint();
                 applyView();
-                await Promise.all(
-                    PAGES.map((p) => {
-                        const im = new Image();
-                        im.src = p.url;
-                        return im.decode
-                            ? im.decode().catch(() => {})
-                            : new Promise((r) => {
-                                  im.onload = im.onerror = r;
-                              });
-                    }),
-                );
+                await decodePageImage(getPage(idx));
+                preloadAdjacentPages(idx);
                 if (document.fonts && document.fonts.ready)
                     await document.fonts.ready.catch(() => {});
                 syncZoom();

@@ -151,11 +151,38 @@ export function LandingPageFrame({
     title,
 }: LandingPageFrameProps) {
     const [ready, setReady] = useState(false);
+    const [isNearViewport, setIsNearViewport] = useState(false);
+    const containerRef = useRef<HTMLDivElement>(null);
     const frameRef = useRef<HTMLIFrameElement>(null);
+
+    // Lazy-mount iframe only when container approaches viewport to reduce initial mobile RAM/GPU pressure
+    useEffect(() => {
+        const container = containerRef.current;
+        if (!container) return;
+
+        if (typeof IntersectionObserver === "undefined") {
+            setIsNearViewport(true);
+            return;
+        }
+
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                if (entry.isIntersecting) {
+                    setIsNearViewport(true);
+                    observer.disconnect();
+                }
+            },
+            { rootMargin: "600px 0px" },
+        );
+
+        observer.observe(container);
+        return () => observer.disconnect();
+    }, []);
 
     // Re-applied on every change; the load handler covers the first paint and
     // any navigation the page does inside its own frame.
     useEffect(() => {
+        if (!isNearViewport) return;
         applyPageCustomization(frameRef.current, customization);
         postPageCustomization(frameRef.current, customization);
         applyBackgroundPresentation(
@@ -165,6 +192,7 @@ export function LandingPageFrame({
         );
         if (frameRef.current) applyScene?.(frameRef.current);
     }, [
+        isNearViewport,
         applyScene,
         backgroundCanvasSelector,
         backgroundVisualSelector,
@@ -173,6 +201,7 @@ export function LandingPageFrame({
 
     return (
         <div
+            ref={containerRef}
             className={`threeui-background landing-page-frame${className ? ` ${className}` : ""}`}
             data-state={ready ? "ready" : "loading"}
             style={{
@@ -183,41 +212,43 @@ export function LandingPageFrame({
                 ...style,
             }}
         >
-            <iframe
-                key={srcDoc ? `srcdoc-${srcDoc.length}` : "src-static"}
-                ref={frameRef}
-                title={title}
-                {...(srcDoc ? { srcDoc } : { src: sourceUrl })}
-                sandbox={srcDoc ? SRCDOC_FRAME_SANDBOX : undefined}
-                loading="eager"
-                onLoad={(event) => {
-                    applyPageCustomization(event.currentTarget, customization);
-                    postPageCustomization(event.currentTarget, customization);
-                    applyBackgroundPresentation(
-                        event.currentTarget,
-                        backgroundCanvasSelector,
-                        backgroundVisualSelector,
-                    );
-                    applyScene?.(event.currentTarget);
-                    setReady(true);
-                }}
-                style={{
-                    position: "absolute",
-                    inset: 0,
-                    display: "block",
-                    width: "100%",
-                    height: "100%",
-                    border: 0,
-                    background: "transparent",
-                    // A background presentation begins life as the complete source page.
-                    // Keep that page visually sealed until onLoad has installed the
-                    // scene-only CSS, otherwise its authored navigation/copy can flash for
-                    // one paint before the canvas is isolated.
-                    opacity: backgroundCanvasSelector && !ready ? 0 : 1,
-                    pointerEvents:
-                        backgroundCanvasSelector && !ready ? "none" : "auto",
-                }}
-            />
+            {isNearViewport && (
+                <iframe
+                    key={srcDoc ? `srcdoc-${srcDoc.length}` : "src-static"}
+                    ref={frameRef}
+                    title={title}
+                    {...(srcDoc ? { srcDoc } : { src: sourceUrl })}
+                    sandbox={srcDoc ? SRCDOC_FRAME_SANDBOX : undefined}
+                    loading="lazy"
+                    onLoad={(event) => {
+                        applyPageCustomization(event.currentTarget, customization);
+                        postPageCustomization(event.currentTarget, customization);
+                        applyBackgroundPresentation(
+                            event.currentTarget,
+                            backgroundCanvasSelector,
+                            backgroundVisualSelector,
+                        );
+                        applyScene?.(event.currentTarget);
+                        setReady(true);
+                    }}
+                    style={{
+                        position: "absolute",
+                        inset: 0,
+                        display: "block",
+                        width: "100%",
+                        height: "100%",
+                        border: 0,
+                        background: "transparent",
+                        // A background presentation begins life as the complete source page.
+                        // Keep that page visually sealed until onLoad has installed the
+                        // scene-only CSS, otherwise its authored navigation/copy can flash for
+                        // one paint before the canvas is isolated.
+                        opacity: backgroundCanvasSelector && !ready ? 0 : 1,
+                        pointerEvents:
+                            backgroundCanvasSelector && !ready ? "none" : "auto",
+                    }}
+                />
+            )}
         </div>
     );
 }

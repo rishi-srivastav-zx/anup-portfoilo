@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import { ImageManagerModal } from "./components/ImageManagerModal";
 import { PlateIndexDrawer } from "./components/PlateIndexDrawer";
 import { Scene } from "./components/Scene";
@@ -18,9 +19,36 @@ export {
 
 function SketchbookSectionContent() {
     const { activePalette } = useSketchbook();
+    const sectionRef = useRef<HTMLElement>(null);
+    const [shouldMountScene, setShouldMountScene] = useState(false);
+
+    // Lazy-mount the sketchbook scene when #my-images-section approaches the viewport
+    useEffect(() => {
+        const el = sectionRef.current;
+        if (!el) return;
+
+        if (typeof IntersectionObserver === "undefined") {
+            setShouldMountScene(true);
+            return;
+        }
+
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                if (entry.isIntersecting) {
+                    setShouldMountScene(true);
+                    observer.disconnect();
+                }
+            },
+            { rootMargin: "600px 0px" },
+        );
+
+        observer.observe(el);
+        return () => observer.disconnect();
+    }, []);
 
     return (
         <section
+            ref={sectionRef}
             id="my-images-section"
             className="relative w-full h-screen min-h-[500px] h-[100dvh] overflow-hidden select-none z-10 font-sans transition-colors duration-500"
             style={{ backgroundColor: activePalette?.paperColor || "#E6DDD2" }}
@@ -41,8 +69,12 @@ function SketchbookSectionContent() {
                 aria-hidden="true"
             />
 
-            {/* 3D Curled Sketchbook Scene */}
-            <Scene />
+            {/* 3D Curled Sketchbook Scene (lazy-mounted near viewport) */}
+            {shouldMountScene ? (
+                <Scene />
+            ) : (
+                <div className="w-full h-full" aria-hidden="true" />
+            )}
 
             {/* Dynamic Fields & Typography Drawer */}
             <SketchbookControls />
