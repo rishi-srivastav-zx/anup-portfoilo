@@ -729,6 +729,45 @@ export const blogQueueRepository = {
             isReached: count >= limit,
         };
     },
+
+    /**
+     * Permanently deletes a non-processing queue record by ID.
+     */
+    async deleteQueueItem(queueId) {
+        const client = await pool.connect();
+        try {
+            await client.query("BEGIN");
+            const existing = await client.query(
+                "SELECT id, blog_id, status FROM blog_publish_queue WHERE id = $1 FOR UPDATE",
+                [queueId]
+            );
+            const row = existing.rows[0];
+            if (!row) {
+                const err = new Error("Queue item not found.");
+                err.status = 404;
+                err.isUserFacing = true;
+                throw err;
+            }
+            if (row.status === "processing") {
+                const err = new Error("Cannot delete a queue item that is currently processing.");
+                err.status = 400;
+                err.isUserFacing = true;
+                throw err;
+            }
+
+            const delRes = await client.query(
+                "DELETE FROM blog_publish_queue WHERE id = $1 RETURNING *",
+                [queueId]
+            );
+            await client.query("COMMIT");
+            return delRes.rows[0];
+        } catch (err) {
+            await client.query("ROLLBACK").catch(() => {});
+            throw err;
+        } finally {
+            client.release();
+        }
+    },
 };
 
 export default blogQueueRepository;

@@ -28,10 +28,46 @@ export function SketchbookControls() {
         "typography" | "metadata" | "palettes"
     >("typography");
 
+    // Handle Escape key and background scroll locking with Lenis coordination
+    React.useEffect(() => {
+        if (!isControlsOpen) return;
+
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Escape") {
+                setIsControlsOpen(false);
+            }
+        };
+        window.addEventListener("keydown", handleKeyDown);
+
+        const lenis = (window as any).lenis;
+        if (lenis && typeof lenis.stop === "function") lenis.stop();
+        const prevOverflow = document.body.style.overflow;
+        document.body.style.overflow = "hidden";
+
+        return () => {
+            window.removeEventListener("keydown", handleKeyDown);
+            if (lenis && typeof lenis.start === "function") lenis.start();
+            document.body.style.overflow = prevOverflow;
+        };
+    }, [isControlsOpen, setIsControlsOpen]);
+
     if (!isControlsOpen) return null;
 
     return (
-        <div className="fixed inset-y-0 right-0 z-50 w-full max-w-md bg-[#ece7dc] border-l border-[#2b2721]/15 shadow-2xl flex flex-col overflow-hidden text-[#2b2721] animate-slide-left">
+        <div
+            className="fixed inset-0 z-50 flex justify-end pointer-events-auto"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Dynamic Fields & Styles Drawer"
+        >
+            {/* Backdrop */}
+            <div
+                className="fixed inset-0 bg-black/40 backdrop-blur-xs transition-opacity animate-fade-in"
+                onClick={() => setIsControlsOpen(false)}
+                aria-hidden="true"
+            />
+
+            <div className="relative z-10 w-full max-w-md bg-[#ece7dc] border-l border-[#2b2721]/15 shadow-2xl flex flex-col overflow-hidden text-[#2b2721] animate-slide-left">
             {/* Header */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-[#2b2721]/10 bg-[#ece7dc]/90 backdrop-blur-xs">
                 <div className="flex items-center gap-2.5">
@@ -477,6 +513,7 @@ export function SketchbookControls() {
                 >
                     Close
                 </button>
+            </div>
             </div>
         </div>
     );

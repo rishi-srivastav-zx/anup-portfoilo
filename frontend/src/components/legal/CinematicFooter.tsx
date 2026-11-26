@@ -18,15 +18,15 @@ export default function CinematicFooter({ onSecretClick }: CinematicFooterProps 
   return (
     <footer
       aria-label="Site footer"
-      className="w-full bg-[#DDD3C5] text-[#14100E] border-t border-[#14100E]/15 px-6 sm:px-10 lg:px-16 xl:px-24 py-12 sm:py-16 font-sans transition-colors"
+      className="w-full bg-[#DDD3C5] text-[#14100E] border-t border-[#14100E]/15 px-4 sm:px-8 md:px-10 lg:px-16 xl:px-24 py-10 sm:py-14 lg:py-16 font-sans transition-colors"
     >
-      <div className="max-w-[1440px] mx-auto space-y-12">
+      <div className="max-w-[1440px] mx-auto space-y-10 sm:space-y-12">
         {/* Top Tier: Brand, Summary, Creative Services, and Quick Links */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-12">
           {/* Column 1: Brand & Philosophy (5 cols) */}
-          <div className="lg:col-span-5 space-y-4">
+          <div className="md:col-span-2 lg:col-span-5 min-w-0 space-y-4">
             <div className="flex items-center gap-3">
-              <span className="font-['DM_Mono'] text-xs font-bold uppercase tracking-widest text-[#012CEB] bg-[#E6DDD2] px-2.5 py-0.5 rounded border border-[#14100E]/10">
+              <span className="font-['DM_Mono'] text-[11px] sm:text-xs font-bold uppercase tracking-widest text-[#012CEB] bg-[#E6DDD2] px-2.5 py-0.5 rounded border border-[#14100E]/10">
                 DIRECTOR OF PHOTOGRAPHY
               </span>
             </div>
@@ -39,14 +39,23 @@ export default function CinematicFooter({ onSecretClick }: CinematicFooterProps 
               Specializing in narrative feature films, commercial visuals, and evocative visual storytelling. Operating across Dehradun, Rishikesh, Uttarakhand, and global on-location productions.
             </p>
 
-            <div className="pt-1 text-xs text-[#6B625A] space-y-1 font-['DM_Mono']">
-              <div>Base: Dehradun & Rishikesh, Uttarakhand, India</div>
-              <div className="whitespace-nowrap">Direct: <a href="mailto:Anooprawat123123@gmail.com" className="text-[11px] text-[#14100E] underline hover:text-[#012CEB]">Anooprawat123123@gmail.com</a></div>
+            <div className="pt-1 text-xs text-[#6B625A] space-y-1.5 font-['DM_Mono']">
+              <div>Base: Dehradun &amp; Rishikesh, Uttarakhand, India</div>
+              <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5">
+                <span>Direct:</span>
+                <a
+                  href="mailto:Anooprawat123123@gmail.com"
+                  style={{ fontSize: '12px', lineHeight: '1.25rem' }}
+                  className="text-xs text-[#14100E] underline underline-offset-2 hover:text-[#012CEB] transition-colors break-all sm:break-normal"
+                >
+                  Anooprawat123123@gmail.com
+                </a>
+              </div>
             </div>
           </div>
 
           {/* Column 2: Creative Services (4 cols) */}
-          <div className="lg:col-span-4 space-y-3">
+          <div className="lg:col-span-4 min-w-0 space-y-3">
             <h4 className="font-['DM_Mono'] text-xs font-bold uppercase tracking-wider text-[#14100E]">
               Cinematography Services
             </h4>
@@ -60,7 +69,7 @@ export default function CinematicFooter({ onSecretClick }: CinematicFooterProps 
           </div>
 
           {/* Column 3: Navigation & Verified Socials (3 cols) */}
-          <div className="lg:col-span-3 space-y-3">
+          <div className="lg:col-span-3 min-w-0 space-y-3">
             <h4 className="font-['DM_Mono'] text-xs font-bold uppercase tracking-wider text-[#14100E]">
               Navigation & Networks
             </h4>

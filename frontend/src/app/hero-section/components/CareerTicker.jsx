@@ -1,10 +1,10 @@
 'use client';
 
 import React from 'react';
-import { useHero } from '../provider/HeroProvider';
+import { useHeroConfig } from '../provider/HeroProvider';
 
 export default function CareerTicker() {
-  const { config } = useHero();
+  const { config } = useHeroConfig();
   const { content: { careerSteps }, colors } = config;
 
   if (!careerSteps || careerSteps.length === 0) return null;
@@ -79,12 +79,14 @@ export default function CareerTicker() {
         }
       `}} />
       <div 
-        className="career-ticker-container sm:hidden absolute left-0 right-0 bottom-[74px] z-30 pointer-events-auto py-1.5 overflow-hidden border-y border-[#14100E]/10 bg-[#E6DDD2]/80 backdrop-blur-[2px]"
+        className="career-ticker-container sm:hidden absolute left-0 right-0 z-30 pointer-events-auto py-1.5 overflow-hidden border-y border-[#14100E]/10 bg-[#E6DDD2]/85 backdrop-blur-[2px]"
         style={{
+          bottom: 'calc(82px + env(safe-area-inset-bottom, 0px))',
           maskImage: 'linear-gradient(to right, transparent 0%, black 7%, black 93%, transparent 100%)',
           WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 7%, black 93%, transparent 100%)',
         }}
-        title="Career Milestones (hover to pause)"
+        title="Career Milestones (tap or hover to pause)"
+        role="region"
         aria-label="Career Milestones"
       >
         <div className="career-ticker-track">

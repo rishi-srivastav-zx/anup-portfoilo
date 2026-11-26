@@ -21,6 +21,7 @@ import {
   AlertTriangle,
   Layers,
   Sparkles,
+  Trash2,
 } from "lucide-react";
 import SchedulerConfirmModal from "./SchedulerConfirmModal";
 import BlogHistoryModal from "./BlogHistoryModal";
@@ -36,6 +37,7 @@ export default function SchedulerQueueTable({
   onPageChange,
   onManualPublish,
   onCancelItem,
+  onDeleteItem,
   onRetryItem,
   onReorderItem,
   onRevalidateItem,
@@ -58,12 +60,15 @@ export default function SchedulerQueueTable({
     setIsActionLoading(true);
     try {
       const { type, item } = activeModal;
+      const targetId = item.queueId || item.id;
       if (type === "publish") {
-        await onManualPublish(item.id);
+        await onManualPublish(targetId);
       } else if (type === "cancel") {
-        await onCancelItem(item.id);
+        await onCancelItem(targetId);
+      } else if (type === "delete") {
+        await onDeleteItem(targetId);
       } else if (type === "retry") {
-        await onRetryItem(item.id);
+        await onRetryItem(targetId);
       } else if (type === "revalidate") {
         await onRevalidateItem(item.slug);
       }
@@ -216,13 +221,14 @@ export default function SchedulerQueueTable({
             ) : (
               // Render real queue items
               items.map((row, index) => {
+                const rowId = row.queueId || row.id;
                 const isPending = row.status === "pending";
                 const isFailed = row.status === "failed";
                 const isPublished = row.status === "published";
 
                 return (
                   <tr
-                    key={row.id}
+                    key={rowId || index}
                     className="hover:bg-[#E6DDD2]/30 transition-colors"
                   >
                     {/* Reorder / Rank */}
@@ -231,7 +237,7 @@ export default function SchedulerQueueTable({
                         <div className="flex flex-col items-center gap-1">
                           <button
                             type="button"
-                            onClick={() => onReorderItem(row.id, "up")}
+                            onClick={() => onReorderItem(rowId, "up")}
                             disabled={index === 0}
                             className="p-1 rounded hover:bg-black/10 text-[#6B625A] disabled:opacity-30 disabled:hover:bg-transparent"
                             title="Move up in queue"
@@ -243,7 +249,7 @@ export default function SchedulerQueueTable({
                           </span>
                           <button
                             type="button"
-                            onClick={() => onReorderItem(row.id, "down")}
+                            onClick={() => onReorderItem(rowId, "down")}
                             disabled={index === items.length - 1}
                             className="p-1 rounded hover:bg-black/10 text-[#6B625A] disabled:opacity-30 disabled:hover:bg-transparent"
                             title="Move down in queue"
@@ -466,6 +472,28 @@ export default function SchedulerQueueTable({
                         >
                           <History className="w-3.5 h-3.5" />
                         </button>
+
+                        {/* Delete Queue Item (disabled while actively processing) */}
+                        {row.status !== "processing" && onDeleteItem && (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setActiveModal({
+                                type: "delete",
+                                item: row,
+                                title: `Delete Queue Entry "${row.title}"?`,
+                                message:
+                                  "This permanently removes this entry from the publishing queue. The underlying blog article itself will not be deleted.",
+                                confirmLabel: "Delete Entry",
+                                variant: "danger",
+                              })
+                            }
+                            className="p-1.5 rounded-lg border border-rose-600/30 bg-rose-50 hover:bg-rose-600 text-rose-700 hover:text-white transition-colors"
+                            title="Delete from queue"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>

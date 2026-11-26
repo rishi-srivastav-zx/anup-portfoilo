@@ -63,6 +63,7 @@ export const ENDPOINTS = {
         QUEUE_STATS: "/blogs/scheduler/stats",
         QUEUE_REORDER: "/blogs/scheduler/queue/reorder",
         QUEUE_CANCEL: "/blogs/scheduler/queue/:id/cancel",
+        QUEUE_DELETE: "/blogs/scheduler/queue/:id",
         QUEUE_RETRY: "/blogs/scheduler/queue/:id/retry",
         QUEUE_PUBLISH: "/blogs/scheduler/queue/:id/publish",
         QUEUE_LOGS: "/blogs/scheduler/logs",

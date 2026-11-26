@@ -6,7 +6,7 @@ export const NavigationArrows: React.FC = () => {
 
     return (
         <>
-            <div className="absolute right-1 sm:right-2 md:right-8 top-[48%] sm:top-[47%] md:top-[45%] -translate-y-1/2 z-[90] pointer-events-auto">
+            <div className="absolute right-[4vw] sm:right-[3.5vw] md:right-8 top-[48%] sm:top-[47%] md:top-[45%] -translate-y-1/2 z-[90] pointer-events-auto">
                 <button
                     id="transit-next-btn"
                     onClick={nextStation}
@@ -27,7 +27,7 @@ export const NavigationArrows: React.FC = () => {
                     </svg>
                 </button>
             </div>
-            <div className="absolute left-1 sm:left-2 md:left-8 top-[48%] sm:top-[47%] md:top-[45%] -translate-y-1/2 z-[90] pointer-events-auto">
+            <div className="absolute left-[4vw] sm:left-[3.5vw] md:left-8 top-[48%] sm:top-[47%] md:top-[45%] -translate-y-1/2 z-[90] pointer-events-auto">
                 <button
                     id="transit-prev-btn"
                     onClick={prevStation}

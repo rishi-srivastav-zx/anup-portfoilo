@@ -1,21 +1,31 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useMemo, useCallback } from 'react';
 
-const HeroContext = createContext({});
+const HeroConfigContext = createContext(null);
+const HeroMotionContext = createContext(null);
+
+const DEFAULT_MOUSE_POSITION = {
+  x: 0,
+  y: 0,
+  clientX: 0,
+  clientY: 0,
+  isHoveringPortrait: false
+};
 
 export const HeroProvider = ({ children, config }) => {
-  const [mousePosition, setMousePosition] = useState({ 
-    x: 0, 
-    y: 0, 
-    clientX: 0, 
-    clientY: 0,
-    isHoveringPortrait: false 
-  });
+  const [mousePosition, setMousePosition] = useState(DEFAULT_MOUSE_POSITION);
 
   useEffect(() => {
-    // Completely bypass mouse position parallax tracking on touch-only devices
-    if (typeof window !== 'undefined' && window.matchMedia('(hover: none) and (pointer: coarse)').matches) {
+    // Completely bypass mouse position parallax tracking on touch-only or iOS devices
+    const isTouchOnly =
+      (typeof window !== 'undefined' && window.matchMedia('(hover: none) and (pointer: coarse)').matches) ||
+      (typeof navigator !== 'undefined' && (
+        /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+      ));
+
+    if (isTouchOnly) {
       return;
     }
 
@@ -59,18 +69,41 @@ export const HeroProvider = ({ children, config }) => {
     };
   }, []);
 
-  const setHoveringPortrait = (isHovering) => {
+  const setHoveringPortrait = useCallback((isHovering) => {
     setMousePosition(prev => {
       if (prev.isHoveringPortrait === isHovering) return prev;
       return { ...prev, isHoveringPortrait: isHovering };
     });
-  };
+  }, []);
+
+  const configValue = useMemo(() => ({ config }), [config]);
+  const motionValue = useMemo(() => ({ mousePosition, setHoveringPortrait }), [mousePosition, setHoveringPortrait]);
 
   return (
-    <HeroContext.Provider value={{ config, mousePosition, setHoveringPortrait }}>
-      {children}
-    </HeroContext.Provider>
+    <HeroConfigContext.Provider value={configValue}>
+      <HeroMotionContext.Provider value={motionValue}>
+        {children}
+      </HeroMotionContext.Provider>
+    </HeroConfigContext.Provider>
   );
 };
 
-export const useHero = () => useContext(HeroContext);
+export const useHeroConfig = () => {
+  const ctx = useContext(HeroConfigContext);
+  return ctx || { config: {} };
+};
+
+export const useHeroMotion = () => {
+  const ctx = useContext(HeroMotionContext);
+  return ctx || { mousePosition: DEFAULT_MOUSE_POSITION, setHoveringPortrait: () => {} };
+};
+
+export const useHero = () => {
+  const configCtx = useContext(HeroConfigContext);
+  const motionCtx = useContext(HeroMotionContext);
+  return {
+    config: configCtx?.config,
+    mousePosition: motionCtx?.mousePosition || DEFAULT_MOUSE_POSITION,
+    setHoveringPortrait: motionCtx?.setHoveringPortrait,
+  };
+};

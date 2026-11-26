@@ -28,10 +28,12 @@ interface SketchbookContextType {
     typography: SketchbookTypography;
     metadata: SketchbookMetadata;
     activePaletteId: string;
+    activePalette: ColorPalette;
     isControlsOpen: boolean;
     isImageManagerOpen: boolean;
     isIndexDrawerOpen: boolean;
     generatedSrcDoc: string | undefined;
+    isHydrated: boolean;
 
     // Navigation
     goToPage: (index: number) => void;
@@ -73,64 +75,67 @@ export function SketchbookProvider({
 }: {
     children: React.ReactNode;
 }) {
-    // 1. Pages state
-    const [pages, setPages] = useState<SketchbookPage[]>(() => {
+    // 1. Pages state (deterministic defaults for SSR and hydration)
+    const [pages, setPages] = useState<SketchbookPage[]>(INITIAL_SKETCHBOOK_PAGES);
+
+    // 2. Typography state
+    const [typography, setTypography] = useState<SketchbookTypography>(DEFAULT_SKETCHBOOK_TYPOGRAPHY);
+
+    // 3. Metadata state
+    const [metadata, setMetadata] = useState<SketchbookMetadata>(DEFAULT_SKETCHBOOK_METADATA);
+
+    const [isHydrated, setIsHydrated] = useState<boolean>(false);
+    const [activePaletteId, setActivePaletteId] = useState<string>("classic-ink");
+    const [currentPageIndex, setCurrentPageIndex] = useState<number>(0);
+    const [isControlsOpen, setIsControlsOpen] = useState<boolean>(false);
+    const [isImageManagerOpen, setIsImageManagerOpen] = useState<boolean>(false);
+    const [isIndexDrawerOpen, setIsIndexDrawerOpen] = useState<boolean>(false);
+
+    const frameRef = useRef<HTMLIFrameElement | null>(null);
+
+    // Restore saved settings from localStorage after client hydration
+    useEffect(() => {
+        setIsHydrated(true);
         try {
-            const saved = localStorage.getItem(STORAGE_KEY_PAGES);
-            if (saved) {
-                const parsed = JSON.parse(saved);
+            const savedPages = localStorage.getItem(STORAGE_KEY_PAGES);
+            if (savedPages) {
+                const parsed = JSON.parse(savedPages);
                 if (
                     Array.isArray(parsed) &&
                     parsed.length > 0 &&
                     !parsed.some((p: any) => typeof p.file === "string" && p.file.startsWith("spread-"))
                 ) {
-                    return parsed;
+                    setPages(parsed);
                 }
+            }
+        } catch {
+            // ignore JSON or access error
+        }
+
+        try {
+            const savedTypo = localStorage.getItem(STORAGE_KEY_TYPOGRAPHY);
+            if (savedTypo) {
+                setTypography({
+                    ...DEFAULT_SKETCHBOOK_TYPOGRAPHY,
+                    ...JSON.parse(savedTypo),
+                });
             }
         } catch {
             // ignore
         }
-        return INITIAL_SKETCHBOOK_PAGES;
-    });
 
-    // 2. Typography state
-    const [typography, setTypography] = useState<SketchbookTypography>(() => {
         try {
-            const saved = localStorage.getItem(STORAGE_KEY_TYPOGRAPHY);
-            if (saved)
-                return {
-                    ...DEFAULT_SKETCHBOOK_TYPOGRAPHY,
-                    ...JSON.parse(saved),
-                };
+            const savedMeta = localStorage.getItem(STORAGE_KEY_METADATA);
+            if (savedMeta) {
+                setMetadata({
+                    ...DEFAULT_SKETCHBOOK_METADATA,
+                    ...JSON.parse(savedMeta),
+                });
+            }
         } catch {
             // ignore
         }
-        return DEFAULT_SKETCHBOOK_TYPOGRAPHY;
-    });
-
-    // 3. Metadata state
-    const [metadata, setMetadata] = useState<SketchbookMetadata>(() => {
-        try {
-            const saved = localStorage.getItem(STORAGE_KEY_METADATA);
-            if (saved)
-                return { ...DEFAULT_SKETCHBOOK_METADATA, ...JSON.parse(saved) };
-        } catch {
-            // ignore
-        }
-        return DEFAULT_SKETCHBOOK_METADATA;
-    });
-
-    const [activePaletteId, setActivePaletteId] =
-        useState<string>("classic-ink");
-    const [currentPageIndex, setCurrentPageIndex] = useState<number>(0);
-    const [isControlsOpen, setIsControlsOpen] = useState<boolean>(false);
-    const [isImageManagerOpen, setIsImageManagerOpen] =
-        useState<boolean>(false);
-    const [isIndexDrawerOpen, setIsIndexDrawerOpen] = useState<boolean>(false);
-
-    // Template HTML fetched from public
-    const [baseHtml, setBaseHtml] = useState<string>("");
-    const frameRef = useRef<HTMLIFrameElement | null>(null);
+    }, []);
 
     // Fetch curated plates from backend API (max 10)
     useEffect(() => {
@@ -186,46 +191,18 @@ export function SketchbookProvider({
         return () => { isCancelled = true; };
     }, []);
 
-    // Fetch base HTML template for dynamic page rewriting
+    // Save to localStorage safely only after client hydration
     useEffect(() => {
-        const fetchTemplate = async () => {
-            try {
-                const res = await fetch(
-                    `/landing-pages/meng-to-sketchbook.html?t=${Date.now()}`,
-                    { cache: "no-store" },
-                );
-                if (!res.ok) throw new Error("Failed to load sketchbook HTML");
-                let text = await res.text();
-                // Ensure arrow buttons and polyline chevrons are completely stripped from template
-                text = text.replace(
-                    /<polyline[^>]*points=["'](?:11,3 3,22 11,41|3,3 11,22 3,41)["'][^>]*>/gi,
-                    "",
-                );
-                text = text.replace(
-                    /<button[^>]*class=["'][^"']*sb-arrow[^"']*["'][^>]*>[\s\S]*?<\/button>/gi,
-                    '<button class="sb-arrow" style="display:none!important;visibility:hidden!important;width:0!important;height:0!important;"></button>',
-                );
-                setBaseHtml(text);
-            } catch (err) {
-                console.warn(
-                    "Could not prefetch sketchbook HTML template:",
-                    err,
-                );
-            }
-        };
-        fetchTemplate();
-    }, []);
-
-    // Save to localStorage
-    useEffect(() => {
+        if (!isHydrated) return;
         try {
             localStorage.setItem(STORAGE_KEY_PAGES, JSON.stringify(pages));
         } catch {
             // ignore storage quota errors for large base64 images
         }
-    }, [pages]);
+    }, [pages, isHydrated]);
 
     useEffect(() => {
+        if (!isHydrated) return;
         try {
             localStorage.setItem(
                 STORAGE_KEY_TYPOGRAPHY,
@@ -234,9 +211,10 @@ export function SketchbookProvider({
         } catch {
             // ignore
         }
-    }, [typography]);
+    }, [typography, isHydrated]);
 
     useEffect(() => {
+        if (!isHydrated) return;
         try {
             localStorage.setItem(
                 STORAGE_KEY_METADATA,
@@ -245,15 +223,14 @@ export function SketchbookProvider({
         } catch {
             // ignore
         }
-    }, [metadata]);
+    }, [metadata, isHydrated]);
 
-    // Sync background color with active palette
-    useEffect(() => {
-        const palette = COLOR_PALETTES.find((p) => p.id === activePaletteId);
-        if (palette) {
-            document.documentElement.style.backgroundColor = palette.paperColor;
-            document.body.style.backgroundColor = palette.paperColor;
-        }
+    // Active palette resolved and scoped cleanly to the section (no global document mutation)
+    const activePalette = useMemo(() => {
+        return (
+            COLOR_PALETTES.find((p) => p.id === activePaletteId) ||
+            COLOR_PALETTES[0]
+        );
     }, [activePaletteId]);
 
     // Determine if pages have been customized from the initial 9
@@ -444,10 +421,12 @@ export function SketchbookProvider({
         typography,
         metadata,
         activePaletteId,
+        activePalette,
         isControlsOpen,
         isImageManagerOpen,
         isIndexDrawerOpen,
         generatedSrcDoc,
+        isHydrated,
         goToPage,
         nextPage,
         prevPage,

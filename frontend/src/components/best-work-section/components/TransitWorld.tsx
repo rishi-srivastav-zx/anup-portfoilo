@@ -14,7 +14,7 @@ export const TransitWorld: React.FC = () => {
       className="absolute inset-0 left-0 will-change-transform z-10 flex"
       style={{
         transform: 'translateX(0px)',
-        width: `${transitStations.length * 100}vw`,
+        width: `${Math.max(transitStations.length, 1) * 100}vw`,
       }}
     >
       {/* Stations & City injected */}

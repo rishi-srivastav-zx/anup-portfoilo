@@ -27,6 +27,117 @@ const SIGNATURE_UNDERLINE_PATH =
 
 const SIGNATURE_CROSS_PATH = "M 822,144 C 836,140 858,136 878,133";
 
+// Standardized Breakpoint Helper: >= 786px is desktop; < 786px is mobile/tablet
+const checkIsDesktop = (): boolean =>
+    typeof window !== "undefined" && window.innerWidth >= 786;
+
+// Pure Mathematical interpolation & easing helpers
+const clamp = (val: number, min = 0, max = 1): number =>
+    Math.max(min, Math.min(max, val));
+
+const mapRange = (
+    val: number,
+    inMin: number,
+    inMax: number,
+    outMin = 0,
+    outMax = 1,
+): number => {
+    if (inMax === inMin) return outMin;
+    const t = clamp((val - inMin) / (inMax - inMin), 0, 1);
+    return outMin + t * (outMax - outMin);
+};
+
+// Quintic smootherstep spline
+const smootherstep = (t: number): number => {
+    const c = clamp(t, 0, 1);
+    return c * c * c * (c * (c * 6 - 15) + 10);
+};
+
+const easeInOutQuad = (t: number): number =>
+    t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+
+// Organic Camera Lens Rack Focus Calculation with Depth of Field Plateau (0 = defocused, 1 = razor sharp)
+const calcZoneFocus = (
+    p: number,
+    start: number,
+    plateauStart: number,
+    plateauEnd: number,
+    end: number,
+): number => {
+    // When pulling out into full spread overview at the end (p >= 0.92),
+    // all sections smoothly transition into 100% crystal-clear focus!
+    if (p >= 0.92) {
+        const spreadProgress = smootherstep((p - 0.92) / (0.97 - 0.92));
+        const local =
+            p >= start && p <= end
+                ? p < plateauStart
+                    ? smootherstep((p - start) / (plateauStart - start))
+                    : p <= plateauEnd
+                      ? 1
+                      : 1 -
+                        smootherstep((p - plateauEnd) / (end - plateauEnd))
+                : 0;
+        return Math.max(local, spreadProgress);
+    }
+    if (p < start || p > end) return 0;
+    if (p < plateauStart)
+        return smootherstep((p - start) / (plateauStart - start));
+    if (p <= plateauEnd) return 1;
+    return 1 - smootherstep((p - plateauEnd) / (end - plateauEnd));
+};
+
+// High-Performance SVG Path Lookup Table (LUT) to eliminate getPointAtLength calls during animation frames
+interface PointLUT {
+    xs: Float32Array;
+    ys: Float32Array;
+    count: number;
+}
+
+const LUT_SAMPLES = 128; // 128 samples per curve guarantees sub-0.15px positioning precision
+
+function createPathLUT(pathEl: SVGPathElement, totalLength: number): PointLUT {
+    const xs = new Float32Array(LUT_SAMPLES);
+    const ys = new Float32Array(LUT_SAMPLES);
+    for (let i = 0; i < LUT_SAMPLES; i++) {
+        const t = i / (LUT_SAMPLES - 1);
+        try {
+            const pt = pathEl.getPointAtLength(t * totalLength);
+            xs[i] = pt.x;
+            ys[i] = pt.y;
+        } catch (_) {
+            xs[i] = 0;
+            ys[i] = 0;
+        }
+    }
+    return { xs, ys, count: LUT_SAMPLES };
+}
+
+function sampleLUT(
+    lut: PointLUT | null,
+    t: number,
+    fallbackEl: SVGPathElement | null,
+): { x: number; y: number } {
+    const clampedT = clamp(t, 0, 1);
+    if (lut && lut.count === LUT_SAMPLES) {
+        const fIdx = clampedT * (LUT_SAMPLES - 1);
+        const i0 = Math.floor(fIdx);
+        const i1 = Math.min(i0 + 1, LUT_SAMPLES - 1);
+        const frac = fIdx - i0;
+        return {
+            x: lut.xs[i0] + frac * (lut.xs[i1] - lut.xs[i0]),
+            y: lut.ys[i0] + frac * (lut.ys[i1] - lut.ys[i0]),
+        };
+    }
+    if (fallbackEl) {
+        try {
+            const total = fallbackEl.getTotalLength() || 1000;
+            const pt = fallbackEl.getPointAtLength(clampedT * total);
+            return { x: pt.x, y: pt.y };
+        } catch (_) {}
+    }
+    return { x: 0, y: 0 };
+}
+
 export const OriginSection: React.FC = () => {
     const containerRef = useRef<HTMLDivElement>(null);
     const stRef = useRef<ScrollTrigger | null>(null);
@@ -45,23 +156,28 @@ export const OriginSection: React.FC = () => {
     const whiteGuideLineRef = useRef<SVGPathElement>(null);
     const whiteGuideTipRef = useRef<SVGCircleElement>(null);
     const lenGuideCurveRef = useRef(1100);
+    const lutGuideCurveRef = useRef<PointLUT | null>(null);
 
-    // Large Animated "Anup Rawat" Signature Stroke Refs
+    // Large Animated "Anup Rawat" Signature Stroke Refs & LUTs
     const sigMainAnupRef = useRef<SVGPathElement>(null);
     const sigGlowAnupRef = useRef<SVGPathElement>(null);
     const lenSigAnupRef = useRef(1350);
+    const lutSigAnupRef = useRef<PointLUT | null>(null);
 
     const sigMainRawatRef = useRef<SVGPathElement>(null);
     const sigGlowRawatRef = useRef<SVGPathElement>(null);
     const lenSigRawatRef = useRef(1850);
+    const lutSigRawatRef = useRef<PointLUT | null>(null);
 
     const sigUnderlineRef = useRef<SVGPathElement>(null);
     const sigGlowUnderlineRef = useRef<SVGPathElement>(null);
     const lenSigUnderlineRef = useRef(1150);
+    const lutSigUnderlineRef = useRef<PointLUT | null>(null);
 
     const sigMainCrossRef = useRef<SVGPathElement>(null);
     const sigGlowCrossRef = useRef<SVGPathElement>(null);
     const lenSigCrossRefRef = useRef(70);
+    const lutSigCrossRefRef = useRef<PointLUT | null>(null);
 
     // Luminous Artist Pen Tip & Dynamic Glow Group Refs
     const sigPenTipRef = useRef<SVGGElement>(null);
@@ -106,64 +222,12 @@ export const OriginSection: React.FC = () => {
     // Epilogue Quote Ref
     const epilogueRef = useRef<HTMLDivElement>(null);
 
-    // High-Precision Physics Refs (Virtual Camera Engine)
+    // Physics & Progress Tracking Refs
     const progressRef = useRef(0);
     const targetProgressRef = useRef(0);
-    const lastTimeRef = useRef(performance.now());
+    const isVisibleRef = useRef(false);
 
-    // Mathematical interpolation & easing curves
-    const clamp = (val: number, min = 0, max = 1) =>
-        Math.max(min, Math.min(max, val));
-    const mapRange = (
-        val: number,
-        inMin: number,
-        inMax: number,
-        outMin = 0,
-        outMax = 1,
-    ) => {
-        if (inMax === inMin) return outMin;
-        const t = clamp((val - inMin) / (inMax - inMin), 0, 1);
-        return outMin + t * (outMax - outMin);
-    };
-
-    // Quintic smootherstep spline
-    const smootherstep = (t: number) => {
-        const c = clamp(t, 0, 1);
-        return c * c * c * (c * (c * 6 - 15) + 10);
-    };
-    const easeInOutQuad = (t: number) =>
-        t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
-
-    // Organic Camera Lens Rack Focus Calculation with Depth of Field Plateau (0 = defocused, 1 = razor sharp)
-    const calcZoneFocus = (
-        p: number,
-        start: number,
-        plateauStart: number,
-        plateauEnd: number,
-        end: number,
-    ) => {
-        // When pulling out into full spread overview at the end (p >= 0.92),
-        // all sections smoothly transition into 100% crystal-clear focus!
-        if (p >= 0.92) {
-            const spreadProgress = smootherstep((p - 0.92) / (0.97 - 0.92));
-            const local =
-                p >= start && p <= end
-                    ? p < plateauStart
-                        ? smootherstep((p - start) / (plateauStart - start))
-                        : p <= plateauEnd
-                          ? 1
-                          : 1 -
-                            smootherstep((p - plateauEnd) / (end - plateauEnd))
-                    : 0;
-            return Math.max(local, spreadProgress);
-        }
-        if (p < start || p > end) return 0;
-        if (p < plateauStart)
-            return smootherstep((p - start) / (plateauStart - start));
-        if (p <= plateauEnd) return 1;
-        return 1 - smootherstep((p - plateauEnd) / (end - plateauEnd));
-    };
-
+    // Standardized focus effect application with cached DOM properties
     const applyFocusEffect = (
         el: HTMLElement | null,
         focus: number,
@@ -171,19 +235,25 @@ export const OriginSection: React.FC = () => {
         baseOpacity = 1,
     ) => {
         if (!el) return;
-        const isDesktop =
-            typeof window !== "undefined" && window.innerWidth > 768;
+        const isDesktop = checkIsDesktop();
         const rawBlur = (1 - focus) * maxBlur;
         // Quantize blur to 0.2px increments for optimal GPU texture caching
         const blur = Math.round(rawBlur * 5) / 5;
-        const opacity = (Math.round(((0.36 + focus * 0.64) * baseOpacity) * 50) / 50).toFixed(2);
-        
-        // On mobile viewports, bypass expensive dynamic blur filter to protect WebKit GPU memory from OOM crashes
+        const opacity = (
+            Math.round((0.36 + focus * 0.64) * baseOpacity * 50) / 50
+        ).toFixed(2);
+
+        // On mobile viewports (< 786px), bypass expensive dynamic blur filter to protect WebKit GPU memory
         const filterStr = isDesktop
-            ? (blur < 0.25 ? "none" : `blur(${blur.toFixed(1)}px)`)
+            ? blur < 0.25
+                ? "none"
+                : `blur(${blur.toFixed(1)}px)`
             : "none";
 
-        const elAny = el as unknown as { _fFilter?: string; _fOpacity?: string };
+        const elAny = el as unknown as {
+            _fFilter?: string;
+            _fOpacity?: string;
+        };
         if (elAny._fFilter !== filterStr) {
             el.style.filter = filterStr;
             elAny._fFilter = filterStr;
@@ -194,10 +264,8 @@ export const OriginSection: React.FC = () => {
         }
     };
 
-    const updateVisuals = useCallback(
-        (rawP: number) => {
-            const isDesktop =
-                typeof window !== "undefined" && window.innerWidth > 768;
+    const updateVisuals = useCallback((rawP: number) => {
+        const isDesktop = checkIsDesktop();
             // Scale raw progress so that the entire animation finishes comfortably before unpinning
             const p = isDesktop
                 ? Math.min(1, Math.max(0, rawP / 0.96))
@@ -709,26 +777,22 @@ export const OriginSection: React.FC = () => {
                 whiteGuideLineRef.current.style.strokeDashoffset = `${((1 - pCurve) * len).toFixed(2)}px`;
                 whiteGuideLineRef.current.style.opacity = `${(pCurve > 0 ? (p < 0.98 ? 0.92 : 0.8) : 0).toFixed(2)}`;
             }
-            if (
-                whiteGuideTipRef.current &&
-                whiteGuideLineRef.current &&
-                lenGuideCurveRef.current
-            ) {
+            if (whiteGuideTipRef.current) {
                 if (pCurve > 0.01 && pCurve < 0.99) {
-                    try {
-                        const pt = whiteGuideLineRef.current.getPointAtLength(
-                            pCurve * lenGuideCurveRef.current,
-                        );
-                        whiteGuideTipRef.current.setAttribute(
-                            "cx",
-                            `${pt.x.toFixed(1)}`,
-                        );
-                        whiteGuideTipRef.current.setAttribute(
-                            "cy",
-                            `${pt.y.toFixed(1)}`,
-                        );
-                        whiteGuideTipRef.current.style.opacity = "1";
-                    } catch (_) {}
+                    const pt = sampleLUT(
+                        lutGuideCurveRef.current,
+                        pCurve,
+                        whiteGuideLineRef.current,
+                    );
+                    whiteGuideTipRef.current.setAttribute(
+                        "cx",
+                        `${pt.x.toFixed(1)}`,
+                    );
+                    whiteGuideTipRef.current.setAttribute(
+                        "cy",
+                        `${pt.y.toFixed(1)}`,
+                    );
+                    whiteGuideTipRef.current.style.opacity = "1";
                 } else {
                     whiteGuideTipRef.current.style.opacity = "0";
                 }
@@ -775,71 +839,55 @@ export const OriginSection: React.FC = () => {
                 }
             }
 
-            // 5. Luminous Artist Pen Tip (Active Drawing Flare tracking the live pen point)
+            // 5. Luminous Artist Pen Tip (Active Drawing Flare tracking the live pen point via precomputed LUT)
             if (sigPenTipRef.current) {
                 if (p >= 0.875 && p < 0.994) {
                     let px = 135;
                     let py = 238;
                     let penOp = 1;
 
-                    if (
-                        p < 0.920 &&
-                        sigMainAnupRef.current &&
-                        lenSigAnupRef.current
-                    ) {
-                        try {
-                            const pt = sigMainAnupRef.current.getPointAtLength(
-                                pAnup * lenSigAnupRef.current,
-                            );
-                            px = pt.x;
-                            py = pt.y;
-                            penOp = Math.min(1, (p - 0.875) / 0.005);
-                        } catch (_) {}
+                    if (p < 0.920) {
+                        const pt = sampleLUT(
+                            lutSigAnupRef.current,
+                            pAnup,
+                            sigMainAnupRef.current,
+                        );
+                        px = pt.x;
+                        py = pt.y;
+                        penOp = Math.min(1, (p - 0.875) / 0.005);
                     } else if (p < 0.925) {
                         // Air glide from 'p' exit flick (488, 206) to 'R' start (522, 105)
                         const tAir = (p - 0.920) / (0.925 - 0.920);
                         px = 488 + tAir * (522 - 488);
                         py = 206 + tAir * (105 - 206);
                         penOp = 0.85;
-                    } else if (
-                        p < 0.965 &&
-                        sigMainRawatRef.current &&
-                        lenSigRawatRef.current
-                    ) {
-                        try {
-                            const pt = sigMainRawatRef.current.getPointAtLength(
-                                pRawat * lenSigRawatRef.current,
-                            );
-                            px = pt.x;
-                            py = pt.y;
-                            penOp = 1;
-                        } catch (_) {}
-                    } else if (
-                        p < 0.982 &&
-                        sigUnderlineRef.current &&
-                        lenSigUnderlineRef.current
-                    ) {
-                        try {
-                            const pt = sigUnderlineRef.current.getPointAtLength(
-                                pUnderline * lenSigUnderlineRef.current,
-                            );
-                            px = pt.x;
-                            py = pt.y;
-                            penOp = 1;
-                        } catch (_) {}
-                    } else if (
-                        p < 0.994 &&
-                        sigMainCrossRef.current &&
-                        lenSigCrossRefRef.current
-                    ) {
-                        try {
-                            const pt = sigMainCrossRef.current.getPointAtLength(
-                                pCross * lenSigCrossRefRef.current,
-                            );
-                            px = pt.x;
-                            py = pt.y;
-                            penOp = 1 - Math.max(0, (p - 0.988) / 0.006);
-                        } catch (_) {}
+                    } else if (p < 0.965) {
+                        const pt = sampleLUT(
+                            lutSigRawatRef.current,
+                            pRawat,
+                            sigMainRawatRef.current,
+                        );
+                        px = pt.x;
+                        py = pt.y;
+                        penOp = 1;
+                    } else if (p < 0.982) {
+                        const pt = sampleLUT(
+                            lutSigUnderlineRef.current,
+                            pUnderline,
+                            sigUnderlineRef.current,
+                        );
+                        px = pt.x;
+                        py = pt.y;
+                        penOp = 1;
+                    } else if (p < 0.994) {
+                        const pt = sampleLUT(
+                            lutSigCrossRefRef.current,
+                            pCross,
+                            sigMainCrossRef.current,
+                        );
+                        px = pt.x;
+                        py = pt.y;
+                        penOp = 1 - Math.max(0, (p - 0.988) / 0.006);
                     }
 
                     sigPenTipRef.current.setAttribute(
@@ -869,25 +917,44 @@ export const OriginSection: React.FC = () => {
                 }
             }
         },
-        [easeInOutQuad, mapRange, smootherstep],
+        [],
     );
 
+    // Track section visibility to pause/resume ticker work when offscreen
     useEffect(() => {
-        lastTimeRef.current = performance.now();
+        const container = containerRef.current;
+        if (!container) return;
 
+        const observer = new IntersectionObserver(
+            (entries) => {
+                for (const entry of entries) {
+                    const visible = entry.isIntersecting;
+                    isVisibleRef.current = visible;
+                    if (visible) {
+                        // Resumed visibility: ensure visuals are synchronized to current progress
+                        updateVisuals(progressRef.current);
+                    }
+                }
+            },
+            {
+                root: null,
+                rootMargin: "100px 0px 100px 0px",
+                threshold: 0,
+            },
+        );
+
+        observer.observe(container);
+        return () => {
+            observer.disconnect();
+        };
+    }, [updateVisuals]);
+
+    // Keep progress reconciled without layout thrashing or redundant RAF loops
+    useEffect(() => {
         const tick = () => {
-            const now = performance.now();
-            const dt = Math.min((now - lastTimeRef.current) / 1000, 0.033);
-            lastTimeRef.current = now;
-
+            if (!isVisibleRef.current) return;
             const diff = targetProgressRef.current - progressRef.current;
-
             if (Math.abs(diff) > 0.0001) {
-                const decayRate = targetProgressRef.current > 0.85 ? 18.0 : 16.0;
-                const factor = 1 - Math.exp(-decayRate * dt);
-                progressRef.current += diff * factor;
-                updateVisuals(progressRef.current);
-            } else if (progressRef.current !== targetProgressRef.current) {
                 progressRef.current = targetProgressRef.current;
                 updateVisuals(progressRef.current);
             }
@@ -899,7 +966,7 @@ export const OriginSection: React.FC = () => {
         };
     }, [updateVisuals]);
 
-    // SVG Path length initialization
+    // SVG Path length initialization & LUT precomputation
     useEffect(() => {
         if (unifiedPathRef.current) {
             const len = unifiedPathRef.current.getTotalLength() || 3200;
@@ -923,6 +990,10 @@ export const OriginSection: React.FC = () => {
             lenGuideCurveRef.current = len;
             whiteGuideLineRef.current.style.strokeDasharray = `${len}px`;
             whiteGuideLineRef.current.style.strokeDashoffset = `${len}px`;
+            lutGuideCurveRef.current = createPathLUT(
+                whiteGuideLineRef.current,
+                len,
+            );
         }
         if (sigMainAnupRef.current) {
             const len = sigMainAnupRef.current.getTotalLength() || 1350;
@@ -933,6 +1004,10 @@ export const OriginSection: React.FC = () => {
                 sigGlowAnupRef.current.style.strokeDasharray = `${len}px`;
                 sigGlowAnupRef.current.style.strokeDashoffset = `${len}px`;
             }
+            lutSigAnupRef.current = createPathLUT(
+                sigMainAnupRef.current,
+                len,
+            );
         }
         if (sigMainRawatRef.current) {
             const len = sigMainRawatRef.current.getTotalLength() || 1850;
@@ -943,6 +1018,10 @@ export const OriginSection: React.FC = () => {
                 sigGlowRawatRef.current.style.strokeDasharray = `${len}px`;
                 sigGlowRawatRef.current.style.strokeDashoffset = `${len}px`;
             }
+            lutSigRawatRef.current = createPathLUT(
+                sigMainRawatRef.current,
+                len,
+            );
         }
         if (sigUnderlineRef.current) {
             const len = sigUnderlineRef.current.getTotalLength() || 1150;
@@ -953,6 +1032,10 @@ export const OriginSection: React.FC = () => {
                 sigGlowUnderlineRef.current.style.strokeDasharray = `${len}px`;
                 sigGlowUnderlineRef.current.style.strokeDashoffset = `${len}px`;
             }
+            lutSigUnderlineRef.current = createPathLUT(
+                sigUnderlineRef.current,
+                len,
+            );
         }
         if (sigMainCrossRef.current) {
             const len = sigMainCrossRef.current.getTotalLength() || 70;
@@ -963,19 +1046,24 @@ export const OriginSection: React.FC = () => {
                 sigGlowCrossRef.current.style.strokeDasharray = `${len}px`;
                 sigGlowCrossRef.current.style.strokeDashoffset = `${len}px`;
             }
+            lutSigCrossRefRef.current = createPathLUT(
+                sigMainCrossRef.current,
+                len,
+            );
         }
 
         updateVisuals(0);
     }, [updateVisuals]);
 
-    // ScrollTrigger to pin the section
+    // ScrollTrigger to pin the section with standardized 786px breakpoint & optimized mobile distance
     useEffect(() => {
         const container = containerRef.current;
         if (!container) return;
 
-        const prefersReducedMotion = window.matchMedia(
-            "(prefers-reduced-motion: reduce)",
-        ).matches;
+        const prefersReducedMotion =
+            typeof window !== "undefined" &&
+            window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
         if (prefersReducedMotion) {
             targetProgressRef.current = 1.0;
             progressRef.current = 1.0;
@@ -983,22 +1071,26 @@ export const OriginSection: React.FC = () => {
             return;
         }
 
-        const isMobile =
-            typeof window !== "undefined" && window.innerWidth <= 768;
-
         const st = ScrollTrigger.create({
             trigger: container,
             pin: true,
             start: "top top",
-            end: () =>
-                isMobile
-                    ? `+=${Math.max(window.innerHeight * 5.5, 4200)}`
-                    : `+=${Math.max(window.innerHeight * 8.5, 7200)}`,
+            end: () => {
+                const isMobile = window.innerWidth < 786;
+                const vh = window.innerHeight;
+                return isMobile
+                    ? `+=${Math.round(vh * 3.4)}`
+                    : `+=${Math.max(Math.round(vh * 8.5), 7200)}`;
+            },
             pinSpacing: true,
             anticipatePin: 0,
             invalidateOnRefresh: true,
             onUpdate: (self) => {
                 targetProgressRef.current = self.progress;
+                progressRef.current = self.progress;
+                if (isVisibleRef.current) {
+                    updateVisuals(self.progress);
+                }
             },
         });
 
@@ -1010,13 +1102,43 @@ export const OriginSection: React.FC = () => {
         };
     }, [updateVisuals]);
 
-    // Handle viewport resize and orientation changes
+    // Handle viewport resize and orientation changes with breakpoint crossing refresh
+    const wasDesktopRef = useRef(
+        typeof window !== "undefined" ? window.innerWidth >= 786 : true,
+    );
+
     useEffect(() => {
+        let resizeTimer: NodeJS.Timeout | null = null;
+
         const handleResize = () => {
+            const isDesktop = window.innerWidth >= 786;
+            if (isDesktop !== wasDesktopRef.current) {
+                wasDesktopRef.current = isDesktop;
+                ScrollTrigger.refresh();
+            }
             updateVisuals(progressRef.current);
         };
-        window.addEventListener("resize", handleResize);
-        return () => window.removeEventListener("resize", handleResize);
+
+        const handleOrientation = () => {
+            if (resizeTimer) clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                const isDesktop = window.innerWidth >= 786;
+                wasDesktopRef.current = isDesktop;
+                ScrollTrigger.refresh();
+                updateVisuals(progressRef.current);
+            }, 150);
+        };
+
+        window.addEventListener("resize", handleResize, { passive: true });
+        window.addEventListener("orientationchange", handleOrientation, {
+            passive: true,
+        });
+
+        return () => {
+            if (resizeTimer) clearTimeout(resizeTimer);
+            window.removeEventListener("resize", handleResize);
+            window.removeEventListener("orientationchange", handleOrientation);
+        };
     }, [updateVisuals]);
 
     return (
@@ -1062,7 +1184,7 @@ export const OriginSection: React.FC = () => {
                     <div
                         id="diary-inner-content"
                         ref={diaryContentRef}
-                        className="absolute inset-0 flex rounded-xl overflow-hidden will-change-[filter,opacity]"
+                        className="absolute inset-0 flex rounded-xl overflow-hidden"
                     >
                         {/* Ambient Directional Lighting (Top-Left Desk Lamp) */}
                         <div className="absolute inset-0 z-[120] pointer-events-none mix-blend-overlay bg-gradient-to-br from-white/20 via-transparent to-black/40 rounded-xl" />
@@ -1079,7 +1201,7 @@ export const OriginSection: React.FC = () => {
                         >
                             {/* Outer warm key light */}
                             <div
-                                className="absolute mix-blend-screen pointer-events-none"
+                                className="absolute mix-blend-screen pointer-events-none spotlight-blur-outer"
                                 style={{
                                     left: "var(--spot-x)",
                                     top: "var(--spot-y)",
@@ -1089,13 +1211,12 @@ export const OriginSection: React.FC = () => {
                                         "translate(-50%, -50%) rotate(-10deg)",
                                     background:
                                         "radial-gradient(ellipse 55% 58% at 48% 50%, rgba(255,244,220,0.45) 0%, rgba(255,236,190,0.2) 35%, transparent 68%)",
-                                    filter: "blur(35px)",
                                 }}
                             />
 
                             {/* Inner hot spot */}
                             <div
-                                className="absolute mix-blend-screen pointer-events-none"
+                                className="absolute mix-blend-screen pointer-events-none spotlight-blur-inner"
                                 style={{
                                     left: "var(--spot-x)",
                                     top: "var(--spot-y)",
@@ -1104,7 +1225,6 @@ export const OriginSection: React.FC = () => {
                                     transform: "translate(-50%, -50%)",
                                     background:
                                         "radial-gradient(circle at 50% 50%, rgba(255,255,245,0.4) 0%, rgba(255,245,210,0.15) 48%, transparent 70%)",
-                                    filter: "blur(15px)",
                                 }}
                             />
                         </div>
@@ -1128,7 +1248,7 @@ export const OriginSection: React.FC = () => {
                         <div
                             id="left-page-base"
                             ref={leftPageRef}
-                            className="absolute left-0 w-1/2 h-full bg-[#FAF7F0] flex flex-col page-crease-left rounded-l-xl overflow-hidden border-r border-black/20 z-[40] select-none relative shadow-[15px_0_30px_-10px_rgba(0,0,0,0.15)] will-change-[filter,opacity]"
+                            className="absolute left-0 w-1/2 h-full bg-[#FAF7F0] flex flex-col page-crease-left rounded-l-xl overflow-hidden border-r border-black/20 z-[40] select-none relative shadow-[15px_0_30px_-10px_rgba(0,0,0,0.15)]"
                         >
                             {/* Authentic Blank Paper Texture Mirrored so spine shadow faces the spine */}
                             <img
@@ -1181,7 +1301,7 @@ export const OriginSection: React.FC = () => {
                             <div
                                 id="intro-sticky-note"
                                 ref={startNoteZoneRef}
-                                className="absolute top-[5%] right-[5%] md:right-[6%] w-[210px] md:w-[240px] bg-[#FAF8F2] p-3.5 md:p-4 pt-5 rounded-[2px] shadow-[2px_8px_20px_rgba(0,0,0,0.12),_inset_0_0_12px_rgba(0,0,0,0.02)] border border-black/5 rotate-[-1.5deg] z-[30] will-change-[filter,opacity]"
+                                className="absolute top-[5%] right-[5%] md:right-[6%] w-[210px] md:w-[240px] bg-[#FAF8F2] p-3.5 md:p-4 pt-5 rounded-[2px] shadow-[2px_8px_20px_rgba(0,0,0,0.12),_inset_0_0_12px_rgba(0,0,0,0.02)] border border-black/5 rotate-[-1.5deg] z-[30]"
                             >
                                 {/* Beige Masking Tape */}
                                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-12 h-4.5 scotch-tape rotate-[1deg] z-40 bg-[#e8ded0]/80 border border-black/10" />
@@ -1203,7 +1323,7 @@ export const OriginSection: React.FC = () => {
                             <div
                                 id="frag-strategy-annot"
                                 ref={curiosityZoneRef}
-                                className="absolute top-[33%] right-[5%] md:right-[7%] max-w-[230px] md:max-w-[260px] font-caveat font-bold text-[17px] md:text-[20px] text-[#012CEB] leading-[1.22] rotate-[-0.5deg] z-[25] text-left select-none will-change-[filter,opacity]"
+                                className="absolute top-[33%] right-[5%] md:right-[7%] max-w-[230px] md:max-w-[260px] font-caveat font-bold text-[17px] md:text-[20px] text-[#012CEB] leading-[1.22] rotate-[-0.5deg] z-[25] text-left select-none"
                             >
                                 <p>It started as curiosity.</p>
                                 <p>Then it became a way of seeing the world.</p>
@@ -1214,7 +1334,7 @@ export const OriginSection: React.FC = () => {
                             <div
                                 id="origin-headline-story-zone"
                                 ref={headlineZoneRef}
-                                className="relative z-[20] w-full h-full flex flex-col justify-start pl-[12%] pr-[46%] pt-[6.5%] pb-[4%] will-change-[filter,opacity]"
+                                className="relative z-[20] w-full h-full flex flex-col justify-start pl-[12%] pr-[46%] pt-[6.5%] pb-[4%]"
                             >
                                 {/* Blue Handwritten Intro Tag */}
                                 <div
@@ -1358,7 +1478,7 @@ export const OriginSection: React.FC = () => {
                             <div
                                 id="art-polaroid"
                                 ref={polaroidZoneRef}
-                                className="absolute bottom-[4%] right-[3%] md:right-[5%] w-[160px] md:w-[180px] bg-[#FDFBF7] p-2.5 pb-4 rounded-[2px] shadow-[3px_12px_28px_rgba(0,0,0,0.16)] border border-black/5 rotate-[-6deg] flex flex-col z-[18] select-none will-change-[filter,opacity]"
+                                className="absolute bottom-[4%] right-[3%] md:right-[5%] w-[160px] md:w-[180px] bg-[#FDFBF7] p-2.5 pb-4 rounded-[2px] shadow-[3px_12px_28px_rgba(0,0,0,0.16)] border border-black/5 rotate-[-6deg] flex flex-col z-[18] select-none"
                             >
                                 {/* Beige Masking Tape on Top */}
                                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-10 h-4.5 scotch-tape rotate-[2deg] z-30 bg-[#e8ded0]/80 border border-black/10" />
@@ -1366,7 +1486,7 @@ export const OriginSection: React.FC = () => {
                                 {/* Sunset Skyline Photo Window */}
                                 <div className="w-full aspect-[4/3] rounded-[1px] overflow-hidden shadow-inner relative bg-[#1c1815]">
                                     <img
-                                        src="/images/polaroid_sunset.jpg"
+                                        src="/images/polaroid_sunset.webp"
                                         alt="Behind the frame - Golden hour skyline"
                                         className="w-full h-full object-cover"
                                     />
@@ -1388,11 +1508,11 @@ export const OriginSection: React.FC = () => {
                         <div
                             id="right-page-base"
                             ref={rightPageRef}
-                            className="absolute right-0 w-1/2 h-full bg-[#FAF7F0] flex flex-col page-crease-right rounded-r-xl overflow-hidden border-l border-black/10 z-[40] select-none relative shadow-[-15px_0_30px_-10px_rgba(0,0,0,0.12)] will-change-[filter,opacity]"
+                            className="absolute right-0 w-1/2 h-full bg-[#FAF7F0] flex flex-col page-crease-right rounded-r-xl overflow-hidden border-l border-black/10 z-[40] select-none relative shadow-[-15px_0_30px_-10px_rgba(0,0,0,0.12)]"
                         >
                             {/* High-Resolution Storyboard Workspace as Background */}
                             <img
-                                src="/origin-images/Cinematic%20Filmmaking%20Storyboard%20Workspace.png"
+                                src="/origin-images/Cinematic%20Filmmaking%20Storyboard%20Workspace.webp"
                                 alt="Cinematic Filmmaking Storyboard Workspace"
                                 className="absolute inset-0 w-full h-full object-cover z-0 pointer-events-none select-none opacity-[0.98]"
                             />
@@ -1416,7 +1536,7 @@ export const OriginSection: React.FC = () => {
                             <div
                                 id="cinematography-note"
                                 ref={cinematographyZoneRef}
-                                className="absolute top-[7.5%] left-[6.5%] w-[33%] max-w-[240px] z-[25] select-none pointer-events-none will-change-[filter,opacity]"
+                                className="absolute top-[7.5%] left-[6.5%] w-[33%] max-w-[240px] z-[25] select-none pointer-events-none"
                             >
                                 <div className="relative mb-2">
                                     <h3 className="font-kalam font-bold text-[13px] sm:text-[15px] md:text-[17px] text-[#14100E] leading-tight tracking-tight uppercase">
@@ -1445,7 +1565,7 @@ export const OriginSection: React.FC = () => {
                             <div
                                 id="crazy-creative-note"
                                 ref={crazyNoteZoneRef}
-                                className="absolute top-[30%] right-[16%] md:right-[18%] max-w-[210px] md:max-w-[240px] z-[25] select-none pointer-events-none text-left will-change-[filter,opacity]"
+                                className="absolute top-[30%] right-[16%] md:right-[18%] max-w-[210px] md:max-w-[240px] z-[25] select-none pointer-events-none text-left"
                             >
                                 <p className="font-caveat font-bold text-[16px] sm:text-[18px] md:text-[21px] text-[#012CEB] leading-[1.18] rotate-[-1.5deg]">
                                     crazy what happens when you just make
@@ -1457,7 +1577,7 @@ export const OriginSection: React.FC = () => {
                             <div
                                 id="places-ive-shot"
                                 ref={placesZoneRef}
-                                className="absolute bottom-[22%] left-[6%] w-[42%] max-w-[320px] z-[25] select-none pointer-events-none will-change-[filter,opacity]"
+                                className="absolute bottom-[22%] left-[6%] w-[42%] max-w-[320px] z-[25] select-none pointer-events-none"
                             >
                                 <div className="relative mb-2 inline-block">
                                     <span className="font-kalam font-bold text-[13px] sm:text-[15px] md:text-[17px] text-[#14100E] tracking-tight uppercase">
@@ -1518,7 +1638,7 @@ export const OriginSection: React.FC = () => {
                             <div
                                 id="ps-goal-note"
                                 ref={psGoalZoneRef}
-                                className="absolute bottom-[20%] left-[51%] w-[32%] max-w-[250px] z-[25] select-none pointer-events-none will-change-[filter,opacity]"
+                                className="absolute bottom-[20%] left-[51%] w-[32%] max-w-[250px] z-[25] select-none pointer-events-none"
                             >
                                 <span className="font-kalam font-bold text-[12px] sm:text-[14px] md:text-[15px] text-[#14100E] uppercase block mb-0.5">
                                     PS//
@@ -1542,7 +1662,7 @@ export const OriginSection: React.FC = () => {
                             <div
                                 id="still-figuring-note"
                                 ref={stillFiguringZoneRef}
-                                className="absolute bottom-[6.5%] right-[5%] w-[180px] md:w-[210px] z-[30] select-none pointer-events-none text-center will-change-[filter,opacity]"
+                                className="absolute bottom-[6.5%] right-[5%] w-[180px] md:w-[210px] z-[30] select-none pointer-events-none text-center"
                             >
                                 <p className="font-caveat font-bold text-[17px] sm:text-[19px] md:text-[22px] text-[#14100E] leading-tight rotate-[-2deg]">
                                     Still figuring

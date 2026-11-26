@@ -31,7 +31,27 @@ export const Clapperboard3D: React.FC<Clapperboard3DProps> = ({
 }) => {
   const mountRef = useRef<HTMLDivElement | null>(null);
   const [webglSupported, setWebglSupported] = useState(true);
+  const [isNearViewport, setIsNearViewport] = useState(false);
   const slateColorMapRef = useRef<THREE.CanvasTexture | null>(null);
+
+  // Lazy-mount WebGL only when footer approaches viewport to protect initial page load memory on iOS
+  useEffect(() => {
+    const container = mountRef.current;
+    if (!container) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsNearViewport(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: '400px 0px' }
+    );
+
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, []);
 
   // Mutable refs for animation loop without tearing down WebGL context
   const clapStateRef = useRef({
@@ -62,6 +82,7 @@ export const Clapperboard3D: React.FC<Clapperboard3DProps> = ({
   }, [clapCount, sceneCode, takeNumber]);
 
   useEffect(() => {
+    if (!isNearViewport) return;
     const container = mountRef.current;
     if (!container) return;
 
@@ -69,12 +90,18 @@ export const Clapperboard3D: React.FC<Clapperboard3DProps> = ({
       '(prefers-reduced-motion: reduce)'
     ).matches;
 
+    const isMobileDevice =
+      typeof navigator !== 'undefined' &&
+      (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+        (typeof window !== 'undefined' && window.matchMedia('(hover: none) and (pointer: coarse)').matches) ||
+        window.innerWidth < 768);
+
     let renderer: THREE.WebGLRenderer;
     try {
       renderer = new THREE.WebGLRenderer({
-        antialias: true,
+        antialias: !isMobileDevice,
         alpha: true,
-        powerPreference: 'high-performance',
+        powerPreference: isMobileDevice ? 'low-power' : 'high-performance',
       });
     } catch {
       setWebglSupported(false);
@@ -88,9 +115,9 @@ export const Clapperboard3D: React.FC<Clapperboard3DProps> = ({
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.18;
     renderer.setPixelRatio(
-      isHeadless ? 1 : Math.min(window.devicePixelRatio, 2)
+      isHeadless || isMobileDevice ? 1 : Math.min(window.devicePixelRatio, 2)
     );
-    renderer.shadowMap.enabled = !isHeadless;
+    renderer.shadowMap.enabled = !isHeadless && !isMobileDevice;
     renderer.shadowMap.type = THREE.PCFShadowMap;
 
     const width = container.clientWidth || 560;
@@ -644,12 +671,17 @@ export const Clapperboard3D: React.FC<Clapperboard3DProps> = ({
       envTexture.dispose();
       scene.environment = null;
 
-      renderer.dispose();
+      if (renderer) {
+        renderer.dispose();
+        try {
+          renderer.forceContextLoss();
+        } catch {}
+      }
       if (renderer.domElement && renderer.domElement.parentNode) {
         renderer.domElement.parentNode.removeChild(renderer.domElement);
       }
     };
-  }, []);
+  }, [isNearViewport]);
 
   if (!webglSupported) {
     // Graceful high-craft SVG/CSS 3D-rendered studio slate fallback if WebGL is disabled

@@ -8,7 +8,7 @@ export const ProjectStation: React.FC<{
     stationIndex: number;
     dataIndex: number;
 }> = ({ project, stationIndex, dataIndex }) => {
-    const { config, transitStations, stepOutToCaseStudy } = useTransit();
+    const { config, transitStations, stepOutToCaseStudy, activeStationIdx, isLoadingProjects, projectsError } = useTransit();
     const nextStationName =
         transitStations[stationIndex + 1]?.stationName || "TERMINUS";
 
@@ -62,7 +62,12 @@ export const ProjectStation: React.FC<{
                             videoMp4={project.videoMp4}
                             videoWebm={project.videoWebm}
                             videoMov={project.videoMov}
+                            imageUrl={project.imageUrl}
                             badgeLabel={`${project.keyword || "FILM"} // 24FPS`}
+                            stationIndex={stationIndex}
+                            isActive={activeStationIdx === stationIndex}
+                            isLoading={isLoadingProjects}
+                            isServerError={projectsError}
                         />
                     </div>
 

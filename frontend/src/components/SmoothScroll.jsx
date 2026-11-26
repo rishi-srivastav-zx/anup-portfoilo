@@ -95,16 +95,22 @@ function LenisScrollTriggerBridge() {
 }
 
 export default function SmoothScroll({ children }) {
+  const isIOS =
+    typeof navigator !== 'undefined' &&
+    (/iPad|iPhone|iPod/.test(navigator.userAgent) ||
+      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1));
+
   return (
     <ReactLenis
       root
       autoRaf={false}
       options={{
-        lerp: 0.09,
-        smoothWheel: true,
+        lerp: isIOS ? 1 : 0.09,
+        smoothWheel: !isIOS,
         wheelMultiplier: 1.0,
-        touchMultiplier: 1.2,
+        touchMultiplier: 0,
         syncTouch: false,
+        smoothTouch: false,
         respectReducedMotion: true,
       }}
     >

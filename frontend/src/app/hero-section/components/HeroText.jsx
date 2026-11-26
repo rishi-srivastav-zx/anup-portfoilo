@@ -2,10 +2,11 @@
 
 import React from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
-import { useHero } from '../provider/HeroProvider';
+import { useHeroConfig, useHeroMotion } from '../provider/HeroProvider';
 
 export default function HeroText() {
-  const { config, mousePosition } = useHero();
+  const { config } = useHeroConfig();
+  const { mousePosition } = useHeroMotion();
   const { content: { heroName } } = config;
   const shouldReduceMotion = useReducedMotion();
 
@@ -81,14 +82,14 @@ export default function HeroText() {
           position: relative;
           top: clamp(-54px, -3.8vw, -18px);
         }
-        @media (max-width: 1024px) {
+        @media (min-width: 640px) and (max-width: 1024px) {
           .hero-name-container {
             top: 50%;
             padding: 0 clamp(16px, 3vw, 40px);
           }
           .hero-title-grid {
-            --name-gap: clamp(210px, 30vw, 300px);
-            font-size: clamp(34px, 5.6vw, 64px);
+            --name-gap: clamp(280px, 44vw, 480px);
+            font-size: clamp(30px, 5vw, 60px);
           }
           .word-right {
             top: clamp(-24px, -2.5vw, -12px);
@@ -96,12 +97,25 @@ export default function HeroText() {
         }
         @media (max-width: 639px) {
           .hero-name-container {
-            display: none !important;
+            position: absolute !important;
+            width: 1px !important;
+            height: 1px !important;
+            padding: 0 !important;
+            margin: -1px !important;
+            overflow: hidden !important;
+            clip: rect(0, 0, 0, 0) !important;
+            white-space: nowrap !important;
+            border: 0 !important;
+            pointer-events: none !important;
+          }
+          .hero-title-grid {
+            display: block !important;
+            font-size: 1rem !important;
           }
         }
       `}} />
       
-      <div className="hero-name-container pointer-events-auto hidden sm:flex justify-center">
+      <div className="hero-name-container pointer-events-auto flex justify-center">
         <motion.div
           animate={{ x: textX, y: textY }}
           transition={{ type: "spring", stiffness: 40, damping: 20 }}
@@ -114,9 +128,10 @@ export default function HeroText() {
             whileHover="hover"
             className="hero-title-grid w-full m-0 p-0"
             style={{ fontFamily: "'Montserrat', sans-serif" }}
+            aria-label={`${heroName.first} ${heroName.last}`}
           >
             {/* First Name */}
-            <motion.span variants={wordLeftVariants} className="word-left flex">
+            <motion.span variants={wordLeftVariants} className="word-left flex" aria-hidden="true">
               {heroName.first.split('').map((char, index) => (
                 <motion.span key={`first-${index}`} variants={letterHoverVariants} className="inline-block">
                   {char}
@@ -125,7 +140,7 @@ export default function HeroText() {
             </motion.span>
             
             {/* Last Name */}
-            <motion.span variants={wordRightVariants} className="word-right flex">
+            <motion.span variants={wordRightVariants} className="word-right flex" aria-hidden="true">
               {heroName.last.split('').map((char, index) => (
                 <motion.span key={`last-${index}`} variants={letterHoverVariants} className="inline-block">
                   {char}

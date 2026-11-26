@@ -11,10 +11,12 @@ export const heroConfig = {
     navbar: {
       firstName: 'Anup',
       lastName: 'Rawat',
+      // Note: links kept for configuration schema compatibility;
+      // Hero Navbar features brand, interactive quote cycler & live scroll dial.
       links: [
-        { label: 'Fastest way to know me —', href: '#' },
-        { label: 'Best Work →', href: '#' },
-        { label: 'Contact', href: '#' }
+        { label: 'Fastest way to know me —', href: '#origin' },
+        { label: 'Best Work →', href: '#work' },
+        { label: 'Contact', href: '#contact' }
       ]
     },
     heroName: {
@@ -41,7 +43,7 @@ export const heroConfig = {
     ],
     showreel: {
       text: 'Showreel || Anup Rawat',
-      href: '#'
+      href: '#work'
     }
   },
   images: {

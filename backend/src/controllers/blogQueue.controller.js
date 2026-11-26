@@ -203,6 +203,30 @@ export const blogQueueController = {
     },
 
     /**
+     * DELETE /api/blogs/scheduler/queue/:id
+     * Permanently deletes a queue item (except actively processing items).
+     */
+    deleteQueueItem: async (req, res) => {
+        try {
+            const { id } = req.params;
+            if (!UUID_RE.test(id)) {
+                return fail(res, 400, "Invalid queue item UUID format.");
+            }
+
+            const deleted = await blogQueueRepository.deleteQueueItem(id);
+
+            return res.status(200).json({
+                success: true,
+                message: "Queue item deleted successfully.",
+                data: deleted,
+            });
+        } catch (err) {
+            const status = err.status === 404 ? 404 : 400;
+            return fail(res, status, safeErrorMessage(err, "Failed to delete queue item."));
+        }
+    },
+
+    /**
      * POST /api/blogs/scheduler/queue/:id/retry
      * Retries a failed queue item.
      */

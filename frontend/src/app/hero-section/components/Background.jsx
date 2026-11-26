@@ -1,14 +1,16 @@
 "use client";
 
 import React, { useRef, useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import { useHero } from "../provider/HeroProvider";
+import { motion, useReducedMotion } from "framer-motion";
+import { useHeroConfig, useHeroMotion } from "../provider/HeroProvider";
 
 export default function Background() {
-    const { config, mousePosition } = useHero();
+    const { config } = useHeroConfig();
+    const { mousePosition } = useHeroMotion();
     const { colors } = config;
     const containerRef = useRef(null);
     const [isVisible, setIsVisible] = useState(true);
+    const shouldReduceMotion = useReducedMotion();
 
     // Pause infinite animations when hero section is scrolled out of view or tab is hidden
     useEffect(() => {
@@ -41,8 +43,10 @@ export default function Background() {
         };
     }, []);
 
-    const circleX = mousePosition.x * -4;
-    const circleY = mousePosition.y * -4;
+    const circleX = shouldReduceMotion ? 0 : mousePosition.x * -4;
+    const circleY = shouldReduceMotion ? 0 : mousePosition.y * -4;
+
+    const shouldAnimate = isVisible && !shouldReduceMotion;
 
     return (
         <div
@@ -55,7 +59,7 @@ export default function Background() {
             {/* Light streaks */}
             <motion.div
                 animate={
-                    isVisible
+                    shouldAnimate
                         ? {
                               x: [0, -10, 0],
                               opacity: [0.2, 0.3, 0.2],
@@ -63,7 +67,7 @@ export default function Background() {
                         : { x: 0, opacity: 0.2 }
                 }
                 transition={
-                    isVisible
+                    shouldAnimate
                         ? {
                               duration: 10,
                               repeat: Infinity,
@@ -71,12 +75,10 @@ export default function Background() {
                           }
                         : { duration: 0.3 }
                 }
-                className="absolute top-0 right-0 w-full h-full opacity-30 will-change-transform"
+                className="absolute top-0 right-0 w-full h-full opacity-30 filter blur-[12px] md:blur-[40px] scale-110 md:scale-150"
                 style={{
                     background:
                         "linear-gradient(135deg, rgba(255,255,255,0) 30%, rgba(255,255,255,0.5) 50%, rgba(255,255,255,0) 70%)",
-                    filter: "blur(40px)",
-                    transform: "scale(1.5)",
                 }}
             />
 
@@ -90,12 +92,12 @@ export default function Background() {
                     x: { type: "spring", stiffness: 50, damping: 20 },
                     y: { type: "spring", stiffness: 50, damping: 20 },
                 }}
-                className="absolute top-[52%] sm:top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 will-change-transform"
+                className="absolute top-[52%] sm:top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
             >
                 <motion.div
                     initial={{ scale: 0.8, opacity: 0 }}
                     animate={
-                        isVisible
+                        shouldAnimate
                             ? {
                                   scale: [1, 1.03, 1],
                                   opacity: 1,
@@ -103,7 +105,7 @@ export default function Background() {
                             : { scale: 1, opacity: 1 }
                     }
                     transition={
-                        isVisible
+                        shouldAnimate
                             ? {
                                   opacity: { duration: 1.5 },
                                   scale: { duration: 6, repeat: Infinity, ease: "easeInOut" },
@@ -120,7 +122,7 @@ export default function Background() {
             {/* Leaf Shadow */}
             <motion.div
                 animate={
-                    isVisible
+                    shouldAnimate
                         ? {
                               rotate: [0, 2, -1, 0],
                               scale: [1, 1.02, 1],
@@ -128,7 +130,7 @@ export default function Background() {
                         : { rotate: 0, scale: 1 }
                 }
                 transition={
-                    isVisible
+                    shouldAnimate
                         ? {
                               duration: 12,
                               repeat: Infinity,
@@ -136,11 +138,10 @@ export default function Background() {
                           }
                         : { duration: 0.3 }
                 }
-                className="absolute -bottom-20 -left-20 w-[400px] h-[400px] opacity-10 will-change-transform"
+                className="absolute -bottom-20 -left-20 w-[400px] h-[400px] opacity-10 filter blur-[14px] md:blur-[50px]"
                 style={{
                     backgroundImage:
                         "radial-gradient(ellipse at center, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0) 70%)",
-                    filter: "blur(50px)",
                     borderRadius: "50% 50% 50% 0",
                 }}
             />

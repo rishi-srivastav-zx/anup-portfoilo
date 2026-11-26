@@ -216,6 +216,45 @@ body.lenis-scrolling iframe,
   box-shadow: 0 45px 120px rgba(0, 0, 0, 0.75), 0 15px 35px rgba(0, 0, 0, 0.55);
 }
 
+/* Standardized 786px Breakpoint for About Section (Origin) */
+@media (max-width: 785px) {
+  .book-container {
+    width: 880px !important;
+    min-width: 880px !important;
+    height: 580px !important;
+    min-height: 580px !important;
+  }
+  #mobile-diary-viewport {
+    width: 94vw !important;
+    max-width: 430px !important;
+    height: 66vh !important;
+    max-height: 560px !important;
+    min-height: 420px !important;
+    overflow: hidden !important;
+    border-radius: 1rem !important;
+  }
+}
+
+@media (min-width: 786px) {
+  .book-container {
+    width: 95vw !important;
+    max-width: 1440px !important;
+    height: 86vh !important;
+    max-height: 840px !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+  }
+  #mobile-diary-viewport {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: none !important;
+    max-height: none !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    border-radius: 0 !important;
+  }
+}
+
 /* --- Paper Textures & Creases --- */
 .paper-texture {
   background-image: url("data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMjAwIDIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZmlsdGVyIGlkPSJuIj48ZmVUdXJidWxlbmNlIHR5cGU9ImZyYWN0YWxOb2lzZSIgYmFzZUZyZXF1ZW5jeT0iMC45IiBudW1PY3RhdmVzPSIzIiBzdGl0Y2hUaWxlcz0ic3RpdGNoIi8+PC9maWx0ZXI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsdGVyPSJ1cmwoI24pIiBvcGFjaXR5PSIwLjA1Ii8+PC9zdmc+");
@@ -366,4 +405,22 @@ body.lenis-scrolling iframe,
 }
 .chat-scrollbar::-webkit-scrollbar-thumb:hover {
   background: rgba(214, 174, 103, 0.7);
+}
+
+/* iOS Safari GPU Memory & Compositing Optimizations */
+@media (max-width: 768px) {
+  .spotlight-blur-outer {
+    filter: none;
+  }
+  .spotlight-blur-inner {
+    filter: none;
+  }
+}
+@media (min-width: 769px) {
+  .spotlight-blur-outer {
+    filter: blur(35px);
+  }
+  .spotlight-blur-inner {
+    filter: blur(15px);
+  }
 }

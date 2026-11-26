@@ -161,6 +161,7 @@ export default function CustomCursor() {
   const isDashboard = pathname?.startsWith('/dashboard');
 
   const [mounted, setMounted] = useState(false);
+  const [isAboveBreakpoint, setIsAboveBreakpoint] = useState(false);
   const [hoverType, setHoverType] = useState(null); // 'pointer', 'grab', 'link', 'view', 'input'
   const [hoverLabel, setHoverLabel] = useState(null);
   const [isMouseDown, setIsMouseDown] = useState(false);
@@ -199,24 +200,66 @@ export default function CustomCursor() {
 
   const [isTouchDevice, setIsTouchDevice] = useState(false);
 
+  // Responsive Viewport Breakpoint Detection:
+  // If viewport width is LESS THAN 786px (max-width: 785px), completely disable custom cursor.
+  // At 786px and above, preserve existing custom cursor behavior.
   useEffect(() => {
-    // Check if device is purely a touch device with coarse pointer and no hover capability
+    setMounted(true);
+
+    const mql = window.matchMedia('(min-width: 786px)');
+
+    const updateBreakpoint = () => {
+      const matches = typeof window !== 'undefined' && window.innerWidth >= 786 && mql.matches;
+      setIsAboveBreakpoint(matches);
+      if (!matches && typeof document !== 'undefined') {
+        document.body.style.cursor = 'auto';
+      }
+    };
+
+    updateBreakpoint();
+
+    if (mql.addEventListener) {
+      mql.addEventListener('change', updateBreakpoint);
+    } else if (mql.addListener) {
+      mql.addListener(updateBreakpoint);
+    }
+
+    window.addEventListener('resize', updateBreakpoint);
+    window.addEventListener('orientationchange', updateBreakpoint);
+
+    return () => {
+      if (mql.removeEventListener) {
+        mql.removeEventListener('change', updateBreakpoint);
+      } else if (mql.removeListener) {
+        mql.removeListener(updateBreakpoint);
+      }
+      window.removeEventListener('resize', updateBreakpoint);
+      window.removeEventListener('orientationchange', updateBreakpoint);
+      if (typeof document !== 'undefined') {
+        document.body.style.cursor = 'auto';
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    // If not mounted, in dashboard, or viewport width < 786px, completely deactivate cursor
+    if (!mounted || isDashboard || !isAboveBreakpoint) {
+      if (typeof document !== 'undefined') {
+        document.body.style.cursor = 'auto';
+      }
+      return;
+    }
+
+    // At 786px and above, check for touch-only devices
     const touchOnly = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
     if (touchOnly) {
       setIsTouchDevice(true);
       document.body.style.cursor = 'auto';
       return;
     }
-
-    setMounted(true);
-
-    // Never hide cursor in dashboard
-    if (isDashboard) {
-      document.body.style.cursor = 'auto';
-      return;
-    }
+    setIsTouchDevice(false);
     
-    // Hide default OS cursor so custom cursor takes over
+    // Hide default OS cursor so custom cursor takes over on desktop
     document.body.style.cursor = 'none';
 
     const updateHoverState = (nextType, nextLabel) => {
@@ -365,10 +408,9 @@ export default function CustomCursor() {
       document.removeEventListener('mouseenter', handleMouseEnter);
       if (scrollRaf) cancelAnimationFrame(scrollRaf);
     };
-  }, [mouseX, mouseY, isDashboard]);
+  }, [mounted, isDashboard, isAboveBreakpoint, mouseX, mouseY]);
 
-  if (!mounted || isDashboard || isTouchDevice) return null;
-  if (typeof window !== 'undefined' && window.matchMedia('(hover: none) and (pointer: coarse)').matches) return null;
+  if (!mounted || isDashboard || !isAboveBreakpoint || isTouchDevice) return null;
 
   // Variants for the outer cursor element with seamless dark/light section color adaptation
   const ringVariants = {

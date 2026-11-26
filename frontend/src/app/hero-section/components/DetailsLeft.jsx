@@ -2,10 +2,10 @@
 
 import React from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { useHero } from "../provider/HeroProvider";
+import { useHeroConfig } from "../provider/HeroProvider";
 
 export default function DetailsLeft() {
-    const { config } = useHero();
+    const { config } = useHeroConfig();
     const {
         content: { topLeftBox, careerSteps },
         colors,
@@ -16,14 +16,14 @@ export default function DetailsLeft() {
         <div className="absolute left-3 sm:left-6 md:left-12 top-2 sm:top-6 bottom-24 sm:bottom-28 md:bottom-12 z-30 pointer-events-none flex flex-col justify-between">
             {/* Top Left Box */}
             <motion.div
-                initial={{ opacity: 0, x: -20 }}
+                initial={{ opacity: 0, x: shouldReduceMotion ? 0 : -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 1, delay: 1, ease: [0.16, 1, 0.3, 1] }}
                 className="relative px-2.5 py-1.5 sm:px-4 sm:py-3 pointer-events-auto group max-w-fit"
                 style={{ color: colors.text }}
             >
                 <motion.div
-                    className="absolute top-0 left-0 w-2.5 sm:w-3 h-2.5 sm:h-3 border-t border-l"
+                    className="absolute top-0 left-0 w-2.5 sm:w-3 h-2.5 sm:h-3 border-t border-l pointer-events-none"
                     style={{ borderColor: colors.lines }}
                     variants={{
                         hover: {
@@ -34,9 +34,10 @@ export default function DetailsLeft() {
                     }}
                     whileHover="hover"
                     inherit={false}
+                    aria-hidden="true"
                 />
                 <motion.div
-                    className="absolute bottom-0 right-0 w-2.5 sm:w-3 h-2.5 sm:h-3 border-b border-r"
+                    className="absolute bottom-0 right-0 w-2.5 sm:w-3 h-2.5 sm:h-3 border-b border-r pointer-events-none"
                     style={{ borderColor: colors.lines }}
                     variants={{
                         hover: {
@@ -47,6 +48,7 @@ export default function DetailsLeft() {
                     }}
                     whileHover="hover"
                     inherit={false}
+                    aria-hidden="true"
                 />
                 {/* Transparent overlay for hover detection */}
                 <div className="absolute inset-0 cursor-default" />
@@ -67,7 +69,7 @@ export default function DetailsLeft() {
                 {careerSteps.map((step, idx) => (
                     <motion.div
                         key={idx}
-                        initial={{ opacity: 0, y: 20 }}
+                        initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{
                             duration: 0.8,
@@ -98,6 +100,7 @@ export default function DetailsLeft() {
                                     },
                                 }}
                                 initial={{ width: 12, marginRight: 6 }}
+                                aria-hidden="true"
                             />
                             <motion.p
                                 className="text-[10.5px] sm:text-sm font-medium tracking-wide leading-tight"

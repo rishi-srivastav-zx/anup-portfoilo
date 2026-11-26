@@ -177,6 +177,12 @@ export const BlogServices = {
         return response.data;
     },
 
+    deleteQueueItem: async (id) => {
+        const url = ENDPOINTS.BLOGS.QUEUE_DELETE.replace(":id", encodeURIComponent(id));
+        const response = await axiosClient.delete(url);
+        return response.data;
+    },
+
     retryQueueItem: async (id, data = {}) => {
         const url = ENDPOINTS.BLOGS.QUEUE_RETRY.replace(":id", encodeURIComponent(id));
         const response = await axiosClient.post(url, data);
@@ -251,6 +257,7 @@ export const {
     getQueueStats,
     reorderQueue,
     cancelQueueItem,
+    deleteQueueItem,
     retryQueueItem,
     manualPublishQueueItem,
     getPublishLogs,

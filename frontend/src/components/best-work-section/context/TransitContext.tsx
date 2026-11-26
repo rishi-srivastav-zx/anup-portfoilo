@@ -40,6 +40,8 @@ interface TransitContextValue {
   transitStations: TransitStationConfig[];
   activeStationIdx: number;
   areDoorsHidden: boolean;
+  isLoadingProjects: boolean;
+  projectsError: boolean;
   // Refs for DOM elements animated by GSAP
   transitWorldRef: React.RefObject<HTMLDivElement | null>;
   transitTrainRef: React.RefObject<HTMLDivElement | null>;
@@ -68,6 +70,8 @@ export const TransitProvider: React.FC<{
   const [activeConfig, setActiveConfig] = useState<BestWorkConfig>(config);
   const [activeStationIdx, setActiveStationIdx] = useState<number>(0);
   const [areDoorsHidden, setAreDoorsHidden] = useState<boolean>(false);
+  const [isLoadingProjects, setIsLoadingProjects] = useState<boolean>(true);
+  const [projectsError, setProjectsError] = useState<boolean>(false);
 
   const activeStationIdxRef = useRef<number>(0);
   activeStationIdxRef.current = activeStationIdx;
@@ -75,49 +79,94 @@ export const TransitProvider: React.FC<{
   useEffect(() => {
     let isMounted = true;
     const loadDynamicProjects = async () => {
+      setIsLoadingProjects(true);
+      setProjectsError(false);
       try {
         const res = await workProjectService.getProjects();
-        if (isMounted && res?.success && Array.isArray(res.data) && res.data.length > 0) {
-          const mappedProjects: ProjectConfig[] = res.data.map((item: any, idx: number) => ({
-            id: item.id,
-            client: item.client || "ANUP WORKS",
-            name: item.title,
-            stationName: item.station_name || item.title.toUpperCase(),
-            tags: [item.floating_tag || "FEATURED"],
-            stat: item.title,
-            bg: "#14100E",
-            text: "#FFFFFF",
-            sysId: `WP-${idx + 1}`,
-            summary: item.summary || item.seo_description || "CINEMATOGRAPHY SHOWCASE",
-            points: [
-              `CAMERA: ${item.camera || "ARRI LF"}`,
-              `OPTICS: ${item.lens || "ANAMORPHIC"}`,
-              `FORMAT: ${item.format_ratio || "2.39:1"}`,
-            ],
-            metrics: [
-              item.camera || "ARRI LF",
-              item.lens || "ANAMORPHIC",
-              item.format_ratio || "2.39:1",
-            ] as [string, string, string],
-            metricLabels: ["CAMERA", "LENS", "RATIO"] as [string, string, string],
-            keyword: item.keyword || "Cinematography",
-            customHTML: "",
-            videoWebm: item.video_url,
-            videoMov: item.video_mov_url || item.video_url,
-            floatingTag: item.floating_tag || "FEATURED",
-          }));
+        if (isMounted) {
+          if (res?.success && Array.isArray(res.data) && res.data.length > 0) {
+            const mappedProjects: ProjectConfig[] = res.data.map((item: any, idx: number) => ({
+              id: item.id,
+              client: item.client || "ANUP WORKS",
+              name: item.title,
+              stationName: item.station_name || item.title.toUpperCase(),
+              tags: [item.floating_tag || "FEATURED"],
+              stat: item.title,
+              bg: "#14100E",
+              text: "#FFFFFF",
+              sysId: `WP-${idx + 1}`,
+              summary: item.summary || item.seo_description || "CINEMATOGRAPHY SHOWCASE",
+              points: [
+                `CAMERA: ${item.camera || "ARRI LF"}`,
+                `OPTICS: ${item.lens || "ANAMORPHIC"}`,
+                `FORMAT: ${item.format_ratio || "2.39:1"}`,
+              ],
+              metrics: [
+                item.camera || "ARRI LF",
+                item.lens || "ANAMORPHIC",
+                item.format_ratio || "2.39:1",
+              ] as [string, string, string],
+              metricLabels: ["CAMERA", "LENS", "RATIO"] as [string, string, string],
+              keyword: item.keyword || "Cinematography",
+              customHTML: "",
+              videoMp4: item.video_url || undefined,
+              videoWebm: item.video_url || undefined,
+              videoMov: item.video_mov_url || undefined,
+              imageUrl: item.thumbnail_url || undefined,
+              floatingTag: item.floating_tag || "FEATURED",
+            }));
 
-          setActiveConfig((prev) => ({
-            ...prev,
-            projects: mappedProjects,
-            routeBoard: {
-              ...prev.routeBoard,
-              dummyStationsList: mappedProjects.map((p: any) => p.floatingTag || "FEATURED"),
-            },
-          }));
+            setActiveConfig((prev) => ({
+              ...prev,
+              originStation: {
+                ...prev.originStation,
+                name: mappedProjects[0]?.name || prev.originStation.name,
+                videoMp4: mappedProjects[0]?.videoMp4,
+                videoWebm: mappedProjects[0]?.videoWebm,
+                videoMov: mappedProjects[0]?.videoMov,
+                imageUrl: mappedProjects[0]?.imageUrl,
+              },
+              projects: mappedProjects,
+              routeBoard: {
+                ...prev.routeBoard,
+                dummyStationsList: mappedProjects.map((p: any) => p.floatingTag || "FEATURED"),
+              },
+            }));
+            setIsLoadingProjects(false);
+          } else {
+            // Empty response from API
+            setIsLoadingProjects(false);
+            setProjectsError(true);
+            setActiveConfig((prev) => ({
+              ...prev,
+              originStation: {
+                ...prev.originStation,
+                videoMp4: undefined,
+                videoWebm: undefined,
+                videoMov: undefined,
+                imageUrl: undefined,
+              },
+              projects: [],
+            }));
+          }
         }
       } catch (err) {
-        console.warn("[TransitContext] Fallback to static projects:", err);
+        console.warn("[TransitContext] Dynamic projects load error:", err);
+        if (isMounted) {
+          setIsLoadingProjects(false);
+          setProjectsError(true);
+          setActiveConfig((prev) => ({
+            ...prev,
+            originStation: {
+              ...prev.originStation,
+              videoMp4: undefined,
+              videoWebm: undefined,
+              videoMov: undefined,
+              imageUrl: undefined,
+            },
+            projects: [],
+          }));
+        }
       }
     };
     loadDynamicProjects();
@@ -609,6 +658,8 @@ export const TransitProvider: React.FC<{
       transitStations,
       activeStationIdx,
       areDoorsHidden,
+      isLoadingProjects,
+      projectsError,
       transitWorldRef,
       transitTrainRef,
       metroDoorsOverlayRef,
@@ -630,6 +681,8 @@ export const TransitProvider: React.FC<{
       transitStations,
       activeStationIdx,
       areDoorsHidden,
+      isLoadingProjects,
+      projectsError,
       triggerMetroEntrance,
       navigateTransit,
       nextStation,

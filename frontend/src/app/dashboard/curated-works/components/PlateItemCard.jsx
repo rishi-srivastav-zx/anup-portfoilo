@@ -22,9 +22,9 @@ export default function PlateItemCard({
                 </div>
 
                 <div className="w-16 h-16 rounded-lg bg-[#EAE2D7] overflow-hidden shrink-0 border border-[#D6CDC2] relative flex items-center justify-center">
-                    {plate.url || plate.imageUrl ? (
+                    {plate.thumbnail_url || plate.image_url || plate.url || plate.imageUrl ? (
                         <img
-                            src={plate.url || plate.imageUrl}
+                            src={plate.thumbnail_url || plate.image_url || plate.url || plate.imageUrl}
                             alt={plate.title || "Plate"}
                             className="w-full h-full object-cover"
                         />

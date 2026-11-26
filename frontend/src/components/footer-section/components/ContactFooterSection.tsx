@@ -217,7 +217,7 @@ export const ContactFooterSection: React.FC = () => {
       {/* Main Studio Contact Section */}
       <section
         aria-label="Contact Anup Rawat"
-        className="relative flex-1 flex items-center py-16 sm:py-20 lg:py-24 px-6 sm:px-10 lg:px-16 xl:px-24 overflow-hidden"
+        className="relative flex-1 flex items-center py-12 sm:py-16 lg:py-24 px-4 sm:px-8 md:px-10 lg:px-16 xl:px-24 overflow-hidden"
       >
         {/* Cinematography Take Background Image Layer (Revealed when user clicks slate to mark take) */}
         <div
@@ -271,17 +271,17 @@ export const ContactFooterSection: React.FC = () => {
         />
 
         <div className="relative z-10 w-full max-w-[1440px] mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 xl:gap-12 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-10 lg:gap-8 xl:gap-12 items-center">
             {/* LEFT COLUMN: Oversized Expressive Brush Headline + Copy */}
-            <div className="lg:col-span-4 flex flex-col items-start justify-center">
+            <div className="lg:col-span-4 min-w-0 flex flex-col items-start justify-center">
               <div className="relative select-none py-2">
                 {/* Vivid Cobalt / Electric Blue "Contact" */}
                 <h2 className="flex flex-col leading-none">
-                  <span className="font-brush text-[4.5rem] sm:text-[5.5rem] xl:text-[6.5rem] text-[#012CEB] tracking-tight drop-shadow-[0_10px_24px_rgba(1,44,235,0.22)] transform -rotate-3 inline-block">
+                  <span className="font-brush text-[3.5rem] sm:text-[4.75rem] md:text-[5.5rem] xl:text-[6.5rem] text-[#012CEB] tracking-tight drop-shadow-[0_10px_24px_rgba(1,44,235,0.22)] transform -rotate-3 inline-block">
                     Contact
                   </span>
                   {/* Dark Ink "Me" with tasteful overlap */}
-                  <span className="font-brush text-[4.25rem] sm:text-[5.25rem] xl:text-[6.25rem] text-[#14100E] tracking-tight -mt-5 sm:-mt-7 xl:-mt-8 ml-14 sm:ml-20 xl:ml-24 drop-shadow-[0_4px_12px_rgba(20,16,14,0.15)] transform -rotate-1 inline-block">
+                  <span className="font-brush text-[3.25rem] sm:text-[4.5rem] md:text-[5.25rem] xl:text-[6.25rem] text-[#14100E] tracking-tight -mt-4 sm:-mt-6 xl:-mt-8 ml-10 sm:ml-16 md:ml-20 xl:ml-24 drop-shadow-[0_4px_12px_rgba(20,16,14,0.15)] transform -rotate-1 inline-block">
                     Me
                   </span>
                 </h2>

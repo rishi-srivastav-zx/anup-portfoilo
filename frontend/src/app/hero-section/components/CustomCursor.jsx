@@ -32,7 +32,42 @@ export default function CustomCursor() {
     }
   );
 
+  const [isAboveBreakpoint, setIsAboveBreakpoint] = React.useState(false);
+
   useEffect(() => {
+    const mql = window.matchMedia('(min-width: 786px)');
+
+    const updateBreakpoint = () => {
+      const matches = typeof window !== 'undefined' && window.innerWidth >= 786 && mql.matches;
+      setIsAboveBreakpoint(matches);
+    };
+
+    updateBreakpoint();
+
+    if (mql.addEventListener) {
+      mql.addEventListener('change', updateBreakpoint);
+    } else if (mql.addListener) {
+      mql.addListener(updateBreakpoint);
+    }
+
+    window.addEventListener('resize', updateBreakpoint);
+    window.addEventListener('orientationchange', updateBreakpoint);
+
+    return () => {
+      if (mql.removeEventListener) {
+        mql.removeEventListener('change', updateBreakpoint);
+      } else if (mql.removeListener) {
+        mql.removeListener(updateBreakpoint);
+      }
+      window.removeEventListener('resize', updateBreakpoint);
+      window.removeEventListener('orientationchange', updateBreakpoint);
+    };
+  }, []);
+
+  useEffect(() => {
+    // Completely disable cursor below 786px viewport width
+    if (!isAboveBreakpoint) return;
+
     // Only run on desktop, avoid tracking on touch devices
     if (window.matchMedia('(hover: none) and (pointer: coarse)').matches) return;
 
@@ -43,9 +78,9 @@ export default function CustomCursor() {
 
     window.addEventListener('mousemove', moveCursor);
     return () => window.removeEventListener('mousemove', moveCursor);
-  }, [cursorX, cursorY]);
+  }, [isAboveBreakpoint, cursorX, cursorY]);
 
-  if (shouldReduceMotion) return null;
+  if (shouldReduceMotion || !isAboveBreakpoint) return null;
 
   return (
     <div className="fixed inset-0 pointer-events-none z-[100] hidden sm:block overflow-hidden">

@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { useHero } from "../provider/HeroProvider";
+import { useHeroConfig } from "../provider/HeroProvider";
 
 const CINEMATOGRAPHY_QUOTES = [
     "Framing by light, more critical by moonlight.",
@@ -15,7 +16,7 @@ const CINEMATOGRAPHY_QUOTES = [
 ];
 
 export default function Navbar() {
-    const { config } = useHero();
+    const { config } = useHeroConfig();
     const {
         content: { navbar },
         colors,
@@ -26,6 +27,19 @@ export default function Navbar() {
     const [quoteIndex, setQuoteIndex] = useState(0);
     const [isQuoteVisible, setIsQuoteVisible] = useState(true);
     const [isQuoteHovered, setIsQuoteHovered] = useState(false);
+
+    const displayTimerRef = useRef(null);
+    const pauseTimerRef = useRef(null);
+    const clickTimerRef = useRef(null);
+
+    const clearAllTimers = () => {
+        if (displayTimerRef.current) clearTimeout(displayTimerRef.current);
+        if (pauseTimerRef.current) clearTimeout(pauseTimerRef.current);
+        if (clickTimerRef.current) clearTimeout(clickTimerRef.current);
+        displayTimerRef.current = null;
+        pauseTimerRef.current = null;
+        clickTimerRef.current = null;
+    };
 
     // Track live scroll percentage with rAF throttling and deduplication
     useEffect(() => {
@@ -68,35 +82,44 @@ export default function Navbar() {
 
     // Cycle cinematography quotes with a deliberate pause between each
     useEffect(() => {
+        clearAllTimers();
         if (isQuoteHovered) return;
 
         // Display current quote for 5.8s
-        const displayTimer = setTimeout(() => {
+        displayTimerRef.current = setTimeout(() => {
             // 1. Gently dissolve out
             setIsQuoteVisible(false);
 
             // 2. Graceful breathing pause of 850ms before the next quote fades in
-            const pauseTimer = setTimeout(() => {
+            pauseTimerRef.current = setTimeout(() => {
                 setQuoteIndex(
                     (prev) => (prev + 1) % CINEMATOGRAPHY_QUOTES.length,
                 );
                 setIsQuoteVisible(true);
             }, 850);
-
-            return () => clearTimeout(pauseTimer);
         }, 5800);
 
-        return () => clearTimeout(displayTimer);
+        return () => {
+            clearAllTimers();
+        };
     }, [quoteIndex, isQuoteHovered]);
 
     const handleBrandClick = (e) => {
         e.preventDefault();
-        window.scrollTo({ top: 0, behavior: "smooth" });
+        if (typeof window !== "undefined" && window.lenis) {
+            window.lenis.scrollTo(0, {
+                duration: 1.2,
+                easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+            });
+        } else if (typeof window !== "undefined") {
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        }
     };
 
     const handleNextQuote = () => {
+        clearAllTimers();
         setIsQuoteVisible(false);
-        setTimeout(() => {
+        clickTimerRef.current = setTimeout(() => {
             setQuoteIndex((prev) => (prev + 1) % CINEMATOGRAPHY_QUOTES.length);
             setIsQuoteVisible(true);
         }, 350);
@@ -128,9 +151,12 @@ export default function Navbar() {
                     style={{ letterSpacing: "0.08em" }}
                     aria-label="Back to top"
                 >
-                    <img
-                        src="/ar-monogram.webp"
-                        alt="AR"
+                    <Image
+                        src={config.images?.monogram || "/ar-monogram.webp"}
+                        alt="AR monogram"
+                        width={32}
+                        height={32}
+                        priority
                         className="w-7 h-7 sm:w-8 sm:h-8 object-contain mr-2.5 transition-transform duration-300 group-hover:scale-105"
                     />
                     <span className="font-light transition-opacity group-hover:opacity-75">
@@ -152,10 +178,19 @@ export default function Navbar() {
 
             {/* 2. MIDDLE: Curated Cinematography Quotes (Bigger text, no numbers, gentle pause between quotes) */}
             <div
-                className="hidden sm:flex flex-1 items-center justify-center px-4 sm:px-6 max-w-lg md:max-w-xl lg:max-w-2xl mx-auto overflow-hidden cursor-pointer"
+                role="button"
+                tabIndex={0}
+                aria-label="Advance to next cinematography quote"
+                className="hidden sm:flex flex-1 items-center justify-center px-4 sm:px-6 max-w-lg md:max-w-xl lg:max-w-2xl mx-auto overflow-hidden cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#14100E]/40 rounded py-1"
                 onMouseEnter={() => setIsQuoteHovered(true)}
                 onMouseLeave={() => setIsQuoteHovered(false)}
                 onClick={handleNextQuote}
+                onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        handleNextQuote();
+                    }
+                }}
                 title="Click to advance quote"
             >
                 <AnimatePresence mode="wait">

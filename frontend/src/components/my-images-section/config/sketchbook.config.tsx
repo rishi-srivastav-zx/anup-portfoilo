@@ -46,7 +46,7 @@ export interface FontOption {
 }
 
 /**
- * All default dynamic fields for Meng To — Singapore Sketchbook
+ * All default dynamic fields for Visual Chronicles — Anup Rawat
  */
 export const DEFAULT_SKETCHBOOK_TYPOGRAPHY: SketchbookTypography = {
     headingFont: "instrument-serif",

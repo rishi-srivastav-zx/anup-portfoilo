@@ -14,9 +14,11 @@ import {
     X,
 } from "lucide-react";
 import { SAMPLE_ADDITIONAL_PLATES } from "../config/sketchbook.config";
+import { useAuth } from "@/context/AuthContext";
 import { useSketchbook } from "../provider/SketchbookProvider";
 
 export function ImageManagerModal() {
+    const { isAuthenticated, isInitializing } = useAuth();
     const {
         pages,
         isImageManagerOpen,
@@ -44,12 +46,41 @@ export function ImageManagerModal() {
 
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    if (!isImageManagerOpen) return null;
+    // Handle Escape key and background scroll locking with Lenis
+    React.useEffect(() => {
+        if (!isImageManagerOpen || isInitializing || !isAuthenticated) return;
+
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Escape") {
+                setIsImageManagerOpen(false);
+            }
+        };
+        window.addEventListener("keydown", handleKeyDown);
+
+        const lenis = (window as any).lenis;
+        if (lenis && typeof lenis.stop === "function") lenis.stop();
+        const prevOverflow = document.body.style.overflow;
+        document.body.style.overflow = "hidden";
+
+        return () => {
+            window.removeEventListener("keydown", handleKeyDown);
+            if (lenis && typeof lenis.start === "function") lenis.start();
+            document.body.style.overflow = prevOverflow;
+        };
+    }, [isImageManagerOpen, isInitializing, isAuthenticated, setIsImageManagerOpen]);
+
+    if (!isImageManagerOpen || isInitializing || !isAuthenticated) return null;
 
     const handleFileChange = (file: File) => {
         if (!file.type.startsWith("image/")) {
             setFormError(
                 "Please select a valid image file (PNG, JPG, WebP, SVG).",
+            );
+            return;
+        }
+        if (file.size > 3 * 1024 * 1024) {
+            setFormError(
+                "Image file exceeds 3MB. Please select an optimized image under 3MB.",
             );
             return;
         }
@@ -123,8 +154,17 @@ export function ImageManagerModal() {
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-[#1a1714]/60 backdrop-blur-sm animate-fade-in">
-            <div className="relative w-full max-w-4xl max-h-[90vh] bg-[#ece7dc] rounded-2xl border border-[#2b2721]/15 shadow-2xl flex flex-col overflow-hidden text-[#2b2721]">
+        <div
+            className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-[#1a1714]/60 backdrop-blur-sm animate-fade-in"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Sketchbook Plates and Image Manager"
+            onClick={() => setIsImageManagerOpen(false)}
+        >
+            <div
+                className="relative w-full max-w-4xl max-h-[90vh] bg-[#ece7dc] rounded-2xl border border-[#2b2721]/15 shadow-2xl flex flex-col overflow-hidden text-[#2b2721]"
+                onClick={(e) => e.stopPropagation()}
+            >
                 {/* Modal Header */}
                 <div className="flex items-center justify-between px-6 py-4 border-b border-[#2b2721]/10 bg-[#ece7dc]/90 backdrop-blur-xs">
                     <div className="flex items-center gap-3">
@@ -137,13 +177,14 @@ export function ImageManagerModal() {
                             </h2>
                             <p className="text-xs text-[#2b2721]/60 font-sans">
                                 Add your own images, reorder spreads, or curate
-                                Singapore illustrated plates.
+                                visual storytelling plates.
                             </p>
                         </div>
                     </div>
                     <button
                         onClick={() => setIsImageManagerOpen(false)}
-                        className="p-1.5 rounded-full hover:bg-[#2b2721]/8 text-[#2b2721]/70 hover:text-[#2b2721] transition-colors"
+                        aria-label="Close image manager"
+                        className="p-1.5 rounded-full hover:bg-[#2b2721]/8 text-[#2b2721]/70 hover:text-[#2b2721] transition-colors cursor-pointer"
                     >
                         <X className="w-5 h-5" />
                     </button>

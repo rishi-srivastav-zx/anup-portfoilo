@@ -1,12 +1,16 @@
 import { useCallback, useEffect, useRef } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import { MengToSketchbookLandingPage } from "../shaders/landing-pages/LandingPages";
 import "../shaders/threeui.css";
 import { useSketchbook } from "../provider/SketchbookProvider";
 
 export function Scene() {
-    const { typography, registerFrame, currentPageIndex, pages, prevPage, nextPage } =
-        useSketchbook();
+    const {
+        typography,
+        registerFrame,
+        currentPageIndex,
+        pages,
+        toggleIndexDrawer,
+    } = useSketchbook();
     const containerRef = useRef<HTMLDivElement>(null);
     const pagesRef = useRef(pages);
     pagesRef.current = pages;
@@ -80,7 +84,7 @@ export function Scene() {
                         }
                     `;
 
-                    // 2. Active DOM purge for arrow buttons and SVG chevrons
+                    // 2. Immediate DOM purge for arrow buttons and SVG chevrons
                     const purgeArrows = () => {
                         try {
                             doc.querySelectorAll(".sb-arrow, #sbLeft, #sbRight").forEach((el) => {
@@ -97,12 +101,14 @@ export function Scene() {
                         } catch {}
                     };
                     purgeArrows();
-                    setTimeout(purgeArrows, 50);
-                    setTimeout(purgeArrows, 200);
-                    setTimeout(purgeArrows, 600);
 
-                    // 2. Attach mouse forwarding to keep the parent CustomCursor active and reactive
-                    if (win && !win.__cursorBridgeInstalled) {
+                    const isTouchDevice =
+                        typeof window !== "undefined" &&
+                        (window.matchMedia("(hover: none) and (pointer: coarse)").matches ||
+                            /iPad|iPhone|iPod/.test(navigator.userAgent));
+
+                    // 3. Attach mouse forwarding to keep the parent CustomCursor active and reactive (desktop only)
+                    if (!isTouchDevice && win && !win.__cursorBridgeInstalled) {
                         win.__cursorBridgeInstalled = true;
 
                         let isMouseDownState = false;
@@ -187,13 +193,15 @@ export function Scene() {
                         });
                     }
 
-                    // 3. Attach touch forwarding so mobile touch gestures scroll the parent window smoothly
+                    // 4. Attach touch forwarding coordinated with Lenis smooth scroll and touch momentum
                     if (win && !win.__touchBridgeInstalled) {
                         win.__touchBridgeInstalled = true;
 
                         let touchStartY = 0;
                         let touchStartX = 0;
                         let lastTouchY = 0;
+                        let lastTouchTime = 0;
+                        let touchVelocityY = 0;
                         let isVerticalScroll = false;
                         let isHorizontalTurn = false;
 
@@ -202,6 +210,8 @@ export function Scene() {
                                 touchStartY = e.touches[0].clientY;
                                 touchStartX = e.touches[0].clientX;
                                 lastTouchY = e.touches[0].clientY;
+                                lastTouchTime = performance.now();
+                                touchVelocityY = 0;
                                 isVerticalScroll = false;
                                 isHorizontalTurn = false;
                             }
@@ -212,25 +222,45 @@ export function Scene() {
                                 const curY = e.touches[0].clientY;
                                 const curX = e.touches[0].clientX;
                                 const dy = lastTouchY - curY;
+                                const now = performance.now();
+                                const dt = Math.max(1, now - lastTouchTime);
+                                touchVelocityY = dy / dt;
+                                lastTouchY = curY;
+                                lastTouchTime = now;
+
                                 const totalDy = Math.abs(curY - touchStartY);
                                 const totalDx = Math.abs(curX - touchStartX);
 
                                 if (!isVerticalScroll && !isHorizontalTurn) {
-                                    if (totalDy > 6 && totalDy >= totalDx) {
+                                    if (totalDy > 8 && totalDy >= totalDx) {
                                         isVerticalScroll = true;
-                                    } else if (totalDx > 10 && totalDx > totalDy) {
+                                    } else if (totalDx > 12 && totalDx > totalDy) {
                                         isHorizontalTurn = true;
                                     }
                                 }
 
                                 if (isVerticalScroll) {
-                                    lastTouchY = curY;
-                                    window.scrollBy({ top: dy, behavior: "instant" });
+                                    const lenis = (window as any).lenis;
+                                    if (lenis && typeof lenis.scrollTo === "function") {
+                                        lenis.scrollTo(lenis.scroll + dy, { immediate: true });
+                                    } else {
+                                        window.scrollBy({ top: dy, behavior: "instant" });
+                                    }
                                 }
                             }
                         };
 
                         const handleTouchEnd = () => {
+                            if (isVerticalScroll) {
+                                const lenis = (window as any).lenis;
+                                if (lenis && typeof lenis.scrollTo === "function" && Math.abs(touchVelocityY) > 0.1) {
+                                    const momentumDelta = touchVelocityY * 260;
+                                    lenis.scrollTo(lenis.scroll + momentumDelta, {
+                                        duration: Math.min(1.2, Math.max(0.4, Math.abs(touchVelocityY) * 0.7)),
+                                        easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+                                    });
+                                }
+                            }
                             isVerticalScroll = false;
                             isHorizontalTurn = false;
                         };
@@ -281,31 +311,17 @@ export function Scene() {
                 applyScene={handleApplyScene}
             />
 
-            {/* Floating Side Flip Arrows */}
+            {/* Table of Plates Index Trigger */}
             <button
                 type="button"
-                onClick={(e) => {
-                    e.stopPropagation();
-                    prevPage();
-                }}
-                aria-label="Previous plate"
-                className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 z-30 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-[#14100E]/75 hover:bg-[#14100E] text-[#F4EFE6] backdrop-blur-md border border-white/10 shadow-[0_4px_20px_rgba(0,0,0,0.2)] hover:scale-105 active:scale-95 transition-all flex items-center justify-center cursor-pointer group"
-                title="Previous plate"
+                onClick={toggleIndexDrawer}
+                aria-label="Open table of plates index"
+                className="absolute top-4 right-4 z-30 px-3.5 py-1.5 rounded-full bg-[#14100E]/75 hover:bg-[#14100E] text-[#F4EFE6] backdrop-blur-md border border-white/10 shadow-[0_4px_20px_rgba(0,0,0,0.2)] text-xs font-mono tracking-wider uppercase transition-all flex items-center gap-2 cursor-pointer group focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:outline-hidden hover:scale-105 active:scale-95"
+                title="Table of Plates"
             >
-                <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6 transition-transform group-hover:-translate-x-0.5" />
-            </button>
-
-            <button
-                type="button"
-                onClick={(e) => {
-                    e.stopPropagation();
-                    nextPage();
-                }}
-                aria-label="Next plate"
-                className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 z-30 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-[#14100E]/75 hover:bg-[#14100E] text-[#F4EFE6] backdrop-blur-md border border-white/10 shadow-[0_4px_20px_rgba(0,0,0,0.2)] hover:scale-105 active:scale-95 transition-all flex items-center justify-center cursor-pointer group"
-                title="Next plate"
-            >
-                <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6 transition-transform group-hover:translate-x-0.5" />
+                <span className="w-1.5 h-1.5 rounded-full bg-[#9a6a3e] group-hover:scale-125 transition-transform" />
+                <span className="hidden sm:inline">Plates</span>
+                <span>({pages.length})</span>
             </button>
         </div>
     );

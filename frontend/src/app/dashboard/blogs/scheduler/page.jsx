@@ -200,6 +200,18 @@ export default function BlogSchedulerDashboardPage() {
     }
   };
 
+  // Action: Delete Queue Item
+  const handleDeleteItem = async (queueId) => {
+    try {
+      const res = await BlogServices.deleteQueueItem(queueId);
+      showToast(res.message || "Queue item deleted.", "success");
+      await handleRefreshAll();
+    } catch (err) {
+      showToast(err.response?.data?.message || err.message || "Failed to delete queue item", "error");
+      throw err;
+    }
+  };
+
   // Action: Retry Queue Item
   const handleRetryItem = async (queueId) => {
     try {
@@ -214,7 +226,7 @@ export default function BlogSchedulerDashboardPage() {
 
   // Action: Reorder Queue
   const handleReorderItem = async (queueId, direction) => {
-    const currentIndex = queueItems.findIndex((q) => q.id === queueId);
+    const currentIndex = queueItems.findIndex((q) => (q.queueId || q.id) === queueId);
     if (currentIndex === -1) return;
 
     const targetIndex = direction === "up" ? currentIndex - 1 : currentIndex + 1;
@@ -227,7 +239,7 @@ export default function BlogSchedulerDashboardPage() {
     setQueueItems(newItems);
 
     try {
-      const pendingIds = newItems.filter((q) => q.status === "pending").map((q) => q.id);
+      const pendingIds = newItems.filter((q) => q.status === "pending").map((q) => q.queueId || q.id);
       await BlogServices.reorderQueue(pendingIds);
       showToast("Queue priority sequence reordered.", "success");
       await loadMetadata();
@@ -405,6 +417,7 @@ export default function BlogSchedulerDashboardPage() {
                 onPageChange={(newPage) => loadQueue(newPage, queueStatus, queueSearch)}
                 onManualPublish={handleManualPublish}
                 onCancelItem={handleCancelItem}
+                onDeleteItem={handleDeleteItem}
                 onRetryItem={handleRetryItem}
                 onReorderItem={handleReorderItem}
                 onRevalidateItem={handleRevalidateItem}

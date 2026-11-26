@@ -951,7 +951,7 @@ export function MengToSketchbookLandingPage(
         <LandingPageFrame
             {...frame}
             customization={customization}
-            title="Meng To — Singapore Sketchbook"
+            title="Anup Rawat — Visual Chronicles"
             sourceUrl="/landing-pages/meng-to-sketchbook.html"
         />
     );

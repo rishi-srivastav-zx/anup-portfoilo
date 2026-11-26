@@ -189,6 +189,14 @@ router.post(
     blogQueueController.cancelQueueItem
 );
 
+// DELETE /api/blogs/scheduler/queue/:id (Delete queue job)
+router.delete(
+    "/scheduler/queue/:id",
+    authenticate,
+    authorizeRoles("admin"),
+    blogQueueController.deleteQueueItem
+);
+
 // POST /api/blogs/scheduler/queue/:id/retry (Reset and retry failed queue job)
 router.post(
     "/scheduler/queue/:id/retry",

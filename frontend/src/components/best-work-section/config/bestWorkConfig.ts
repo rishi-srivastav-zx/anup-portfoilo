@@ -37,6 +37,7 @@ export interface ProjectConfig {
     videoMp4?: string;
     videoWebm?: string;
     videoMov?: string;
+    imageUrl?: string;
 }
 
 export interface TransitStationConfig {
@@ -59,6 +60,7 @@ export interface TransitStationConfig {
     videoMp4?: string;
     videoWebm?: string;
     videoMov?: string;
+    imageUrl?: string;
 }
 
 export interface BestWorkConfig {
@@ -1395,9 +1397,6 @@ if (inventoryData[0]) {
     inventoryData[0].metrics = ["ARRI LF", "ANAMORPHIC", "2.39:1"];
     inventoryData[0].metricLabels = ["CAMERA", "LENS", "FORMAT"];
     inventoryData[0].keyword = "Cinematography";
-    inventoryData[0].videoMp4 = "/videos/april 20.mp4";
-    inventoryData[0].videoWebm = "/videos/april 20.webm";
-    inventoryData[0].videoMov = "/videos/april 20.mov";
 }
 if (inventoryData[1]) {
     inventoryData[1].summary =
@@ -1411,9 +1410,6 @@ if (inventoryData[1]) {
     inventoryData[1].metrics = ["8K RAW", "120 FPS", "CHIAROSCURO"];
     inventoryData[1].metricLabels = ["SENSOR", "FPS", "LIGHTING"];
     inventoryData[1].keyword = "Aesthetics";
-    inventoryData[1].videoMp4 = "/videos/may 1.mp4";
-    inventoryData[1].videoWebm = "/videos/may 1.webm";
-    inventoryData[1].videoMov = "/videos/may 1.mov";
 }
 if (inventoryData[2]) {
     inventoryData[2].summary =
@@ -1427,9 +1423,6 @@ if (inventoryData[2]) {
     inventoryData[2].metrics = ["COOKE VINTAGE", "4:3 BOX", "180°"];
     inventoryData[2].metricLabels = ["OPTICS", "ASPECT", "SHUTTER"];
     inventoryData[2].keyword = "Atmosphere";
-    inventoryData[2].videoMp4 = "/videos/outrive .mp4";
-    inventoryData[2].videoWebm = "/videos/outrive .webm";
-    inventoryData[2].videoMov = "/videos/outrive .mov";
 }
 if (inventoryData[3]) {
     inventoryData[3].summary =
@@ -1443,9 +1436,6 @@ if (inventoryData[3]) {
     inventoryData[3].metrics = ["DUAL 4000", "15+ STOPS", "S-GAMUT3"];
     inventoryData[3].metricLabels = ["ISO BASE", "DYNAMIC RANGE", "COLOR SPACE"];
     inventoryData[3].keyword = "Dramatic";
-    inventoryData[3].videoMp4 = "/videos/qqq.mp4";
-    inventoryData[3].videoWebm = "/videos/qqq.webm";
-    inventoryData[3].videoMov = "/videos/qqq.mov";
 }
 if (inventoryData[4]) {
     inventoryData[4].summary =
@@ -1459,9 +1449,6 @@ if (inventoryData[4]) {
     inventoryData[4].metrics = ["ACES CCT", "4K DCI", "REC 709 / P3"];
     inventoryData[4].metricLabels = ["COLOR PIPELINE", "RESOLUTION", "GAMUT"];
     inventoryData[4].keyword = "Commercial";
-    inventoryData[4].videoMp4 = "/videos/Untitled dg.mp4";
-    inventoryData[4].videoWebm = "/videos/Untitled dg.webm";
-    inventoryData[4].videoMov = "/videos/Untitled dg.mov";
 }
 
 const dmrcStations = [
@@ -1517,9 +1504,10 @@ export const BEST_WORK_CONFIG: BestWorkConfig = {
         stationName: dmrcStations[0],
         stat: "Featured",
         summary: "CINEMATOGRAPHY SHOWREEL • ANUP RAWAT WORKS",
-        videoMp4: "/videos/qqq.mp4",
-        videoWebm: "/videos/qqq.webm",
-        videoMov: "/videos/qqq.mov",
+        videoMp4: undefined,
+        videoWebm: undefined,
+        videoMov: undefined,
+        imageUrl: undefined,
         points: [
             `<svg class="w-3 h-3 inline-block mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg> SWIPE L/R`,
             `<svg class="w-3 h-3 inline-block mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg> CINEMA VIEW`,
@@ -1575,5 +1563,5 @@ export const BEST_WORK_CONFIG: BestWorkConfig = {
         rightCautionHighlight:
             "framing stories through light & shadows",
     },
-    projects: enrichedProjects,
+    projects: [],
 };
