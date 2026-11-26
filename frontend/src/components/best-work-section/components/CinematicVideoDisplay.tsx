@@ -78,15 +78,21 @@ export const CinematicVideoDisplay: React.FC<CinematicVideoDisplayProps> = ({
     const canShowImage = Boolean(resolvedImage && !imageFailed);
     const hasMedia = canShowVideo || canShowImage;
 
-    const isIOS = typeof navigator !== "undefined" && (
-        /iPad|iPhone|iPod/.test(navigator.userAgent) ||
-        (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)
-    );
+    const isMobileOrTouch =
+        isMounted &&
+        typeof navigator !== "undefined" &&
+        (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+            (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1) ||
+            window.matchMedia("(hover: none) and (pointer: coarse)").matches ||
+            window.innerWidth < 768);
 
-    // On iOS Safari, mount active/in-view video to prevent hardware decoder starvation
-    const shouldMountVideo = canShowVideo && (isIOS
-        ? ((isActive || stationIndex === undefined) && isInView)
-        : (isActive || stationIndex === undefined || isInView));
+    // Mount video only when active AND in view on mobile (both iOS and Android) to prevent decoder OOM/starvation;
+    // on desktop, require (isActive || stationIndex === undefined) && isInView as well so offscreen videos stay unmounted.
+    const shouldMountVideo =
+        canShowVideo &&
+        (isMobileOrTouch
+            ? (isActive || stationIndex === undefined) && isInView
+            : (isActive || stationIndex === undefined) && isInView);
 
     const updateVideoMetadata = useCallback((videoElement: HTMLVideoElement) => {
         if (!videoElement.videoWidth || !videoElement.videoHeight) return;

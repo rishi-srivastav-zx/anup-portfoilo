@@ -34,8 +34,24 @@ export const Clapperboard3D: React.FC<Clapperboard3DProps> = ({
   const [isNearViewport, setIsNearViewport] = useState(false);
   const slateColorMapRef = useRef<THREE.CanvasTexture | null>(null);
 
-  // Lazy-mount WebGL only when footer approaches viewport to protect initial page load memory on iOS
+  // Skip heavy WebGL/Three.js initialization on mobile or low-memory devices; use the CSS clapperboard fallback
   useEffect(() => {
+    const isMobileOrLowMem =
+      typeof navigator !== 'undefined' &&
+      (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+        (typeof window !== 'undefined' && window.matchMedia('(hover: none) and (pointer: coarse)').matches) ||
+        (typeof window !== 'undefined' && window.innerWidth < 768) ||
+        (typeof (navigator as unknown as { deviceMemory?: number }).deviceMemory === 'number' &&
+          (navigator as unknown as { deviceMemory: number }).deviceMemory <= 4));
+
+    if (isMobileOrLowMem) {
+      setWebglSupported(false);
+    }
+  }, []);
+
+  // Lazy-mount WebGL only when footer approaches viewport to protect initial page load memory
+  useEffect(() => {
+    if (!webglSupported) return;
     const container = mountRef.current;
     if (!container) return;
 
@@ -46,12 +62,12 @@ export const Clapperboard3D: React.FC<Clapperboard3DProps> = ({
           observer.disconnect();
         }
       },
-      { rootMargin: '400px 0px' }
+      { rootMargin: '200px 0px' }
     );
 
     observer.observe(container);
     return () => observer.disconnect();
-  }, []);
+  }, [webglSupported]);
 
   // Mutable refs for animation loop without tearing down WebGL context
   const clapStateRef = useRef({
@@ -82,7 +98,7 @@ export const Clapperboard3D: React.FC<Clapperboard3DProps> = ({
   }, [clapCount, sceneCode, takeNumber]);
 
   useEffect(() => {
-    if (!isNearViewport) return;
+    if (!isNearViewport || !webglSupported) return;
     const container = mountRef.current;
     if (!container) return;
 
@@ -130,11 +146,10 @@ export const Clapperboard3D: React.FC<Clapperboard3DProps> = ({
 
     // Studio environment reflection via RoomEnvironment + PMREMGenerator
     const pmremGenerator = new THREE.PMREMGenerator(renderer);
-    const envTexture = pmremGenerator.fromScene(
-      new RoomEnvironment(),
-      0.04
-    ).texture;
+    const roomEnv = new RoomEnvironment();
+    const envTexture = pmremGenerator.fromScene(roomEnv, 0.04).texture;
     scene.environment = envTexture;
+    roomEnv.dispose();
     pmremGenerator.dispose();
 
     // Camera setup with convincing 3D perspective
@@ -681,7 +696,7 @@ export const Clapperboard3D: React.FC<Clapperboard3DProps> = ({
         renderer.domElement.parentNode.removeChild(renderer.domElement);
       }
     };
-  }, [isNearViewport]);
+  }, [isNearViewport, webglSupported]);
 
   if (!webglSupported) {
     // Graceful high-craft SVG/CSS 3D-rendered studio slate fallback if WebGL is disabled

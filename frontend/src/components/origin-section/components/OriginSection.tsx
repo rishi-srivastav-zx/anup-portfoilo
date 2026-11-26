@@ -624,7 +624,9 @@ export const OriginSection: React.FC = () => {
             }
 
             if (notebookRef.current) {
-                notebookRef.current.style.transform = `perspective(1800px) rotateX(${camRotX.toFixed(2)}deg) rotateY(${camRotY.toFixed(2)}deg) rotateZ(${camRotZ.toFixed(2)}deg) scale(${camScale.toFixed(3)}) translate3d(${camX.toFixed(2)}%, ${camY.toFixed(2)}%, 0)`;
+                notebookRef.current.style.transform = isDesktop
+                    ? `perspective(1800px) rotateX(${camRotX.toFixed(2)}deg) rotateY(${camRotY.toFixed(2)}deg) rotateZ(${camRotZ.toFixed(2)}deg) scale(${camScale.toFixed(3)}) translate3d(${camX.toFixed(2)}%, ${camY.toFixed(2)}%, 0)`
+                    : `rotate(${camRotZ.toFixed(2)}deg) scale(${camScale.toFixed(3)}) translate3d(${camX.toFixed(2)}%, ${camY.toFixed(2)}%, 0)`;
             }
 
             if (spotlightRef.current) {
@@ -1102,27 +1104,46 @@ export const OriginSection: React.FC = () => {
         };
     }, [updateVisuals]);
 
-    // Handle viewport resize and orientation changes with breakpoint crossing refresh
+    // Handle viewport resize and orientation changes with RAF throttling and breakpoint-only ScrollTrigger refresh
     const wasDesktopRef = useRef(
         typeof window !== "undefined" ? window.innerWidth >= 786 : true,
+    );
+    const lastWidthRef = useRef(
+        typeof window !== "undefined" ? window.innerWidth : 0,
     );
 
     useEffect(() => {
         let resizeTimer: NodeJS.Timeout | null = null;
+        let resizeRafId: number | null = null;
 
         const handleResize = () => {
-            const isDesktop = window.innerWidth >= 786;
+            const curWidth = window.innerWidth;
+            const isDesktop = curWidth >= 786;
+
+            // Ignore mobile URL-bar height-only resizes so ScrollTrigger doesn't thrash during scroll
+            if (curWidth === lastWidthRef.current && !isDesktop) {
+                return;
+            }
+            lastWidthRef.current = curWidth;
+
             if (isDesktop !== wasDesktopRef.current) {
                 wasDesktopRef.current = isDesktop;
                 ScrollTrigger.refresh();
             }
-            updateVisuals(progressRef.current);
+
+            if (resizeRafId !== null) return;
+            resizeRafId = window.requestAnimationFrame(() => {
+                resizeRafId = null;
+                updateVisuals(progressRef.current);
+            });
         };
 
         const handleOrientation = () => {
             if (resizeTimer) clearTimeout(resizeTimer);
             resizeTimer = setTimeout(() => {
-                const isDesktop = window.innerWidth >= 786;
+                const curWidth = window.innerWidth;
+                lastWidthRef.current = curWidth;
+                const isDesktop = curWidth >= 786;
                 wasDesktopRef.current = isDesktop;
                 ScrollTrigger.refresh();
                 updateVisuals(progressRef.current);
@@ -1136,6 +1157,7 @@ export const OriginSection: React.FC = () => {
 
         return () => {
             if (resizeTimer) clearTimeout(resizeTimer);
+            if (resizeRafId !== null) window.cancelAnimationFrame(resizeRafId);
             window.removeEventListener("resize", handleResize);
             window.removeEventListener("orientationchange", handleOrientation);
         };
@@ -1145,7 +1167,7 @@ export const OriginSection: React.FC = () => {
         <section
             id="origin"
             ref={containerRef}
-            className="relative w-full h-screen bg-[#E6DDD2] text-[#14100E] selection:bg-[#14100E] selection:text-[#F4EDE4] select-none overflow-hidden font-sans"
+            className="relative w-full h-[100svh] md:h-screen bg-[#E6DDD2] text-[#14100E] selection:bg-[#14100E] selection:text-[#F4EDE4] select-none overflow-hidden font-sans"
         >
             {/* Pinned Camera Viewport */}
             <div
