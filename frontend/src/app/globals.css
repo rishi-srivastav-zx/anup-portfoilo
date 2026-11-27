@@ -258,6 +258,12 @@ body.lenis-scrolling iframe,
   #notebook-container .paper-texture {
     mix-blend-mode: normal !important;
   }
+
+  /* TEST F (Temporary Diagnostic): OriginSection mobile drop-shadow isolation */
+  #personal-cutout > img,
+  #diary-cinematic-overlay > div > svg {
+    filter: none !important;
+  }
 }
 
 @media (min-width: 786px) {
