@@ -1370,6 +1370,32 @@
                 text-align: center;
                 padding-bottom: 44px;
             }
+
+            /* Temporary diagnostic (Test D): isolate 3D/blur compositing on mobile (<= 768px) */
+            @media (max-width: 768px) {
+                .sb-3d {
+                    perspective: none;
+                }
+                .sb-tilt,
+                .sb-book,
+                .curl,
+                .strip {
+                    transform-style: flat;
+                }
+                .top:before,
+                .chapter-pill,
+                .sb-tools,
+                .cue-pill {
+                    -webkit-backdrop-filter: none;
+                    backdrop-filter: none;
+                }
+                .sb-wrap.intro .sb-full img,
+                .sb-wrap.intro .sb-half-img,
+                .sb-wrap.intro.b2 .sb-full img,
+                .sb-wrap.intro.b2 .sb-half-img {
+                    filter: none;
+                }
+            }
         </style>
     </head>
     <body>
