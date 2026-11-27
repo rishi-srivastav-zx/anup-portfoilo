@@ -37,7 +37,7 @@ const ChatInput = ({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={cooldownRemaining > 0 ? `Please wait ${cooldownRemaining}s...` : placeholder}
-          className="min-w-0 flex-1 rounded-full border border-line bg-panel px-4 py-2.5 text-sm text-bone placeholder:text-mute focus:border-gold/60 focus:outline-none disabled:opacity-60"
+          className="min-w-0 flex-1 rounded-full border border-line bg-panel px-4 py-2.5 text-base sm:text-sm text-bone placeholder:text-mute focus:border-gold/60 focus:outline-none disabled:opacity-60"
         />
         <button
           type="submit"
