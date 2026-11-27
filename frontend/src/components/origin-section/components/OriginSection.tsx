@@ -1987,7 +1987,6 @@ export const OriginSection: React.FC = () => {
                                     strokeWidth="2.2px"
                                     strokeLinecap="round"
                                     opacity="0"
-                                    filter="url(#white-curve-glow)"
                                 />
                                 {/* Glowing tip of curved line */}
                                 <circle
@@ -1995,13 +1994,11 @@ export const OriginSection: React.FC = () => {
                                     r="3.5"
                                     fill="#FFFFFF"
                                     opacity="0"
-                                    filter="url(#white-curve-glow)"
                                 />
 
                                 {/* 2. Soft Ethereal Icy-Blue Ambient Glow Duplicate */}
                                 <g
                                     ref={sigGlowGroupRef}
-                                    filter="url(#signature-icy-glow)"
                                     opacity="0.55"
                                 >
                                     <path
@@ -2043,7 +2040,7 @@ export const OriginSection: React.FC = () => {
                                 </g>
 
                                 {/* 3. Crisp Pure White / Soft Luminous Signature Stroke */}
-                                <g filter="url(#white-curve-glow)">
+                                <g>
                                     <path
                                         ref={sigMainAnupRef}
                                         d={SIGNATURE_ANUP_PATH}
@@ -2093,14 +2090,12 @@ export const OriginSection: React.FC = () => {
                                         r="13"
                                         fill="#38BDF8"
                                         opacity="0.32"
-                                        filter="url(#sig-pen-flare)"
                                     />
                                     {/* Mid luminous cobalt glow */}
                                     <circle
                                         r="7.5"
                                         fill="#60A5FA"
                                         opacity="0.75"
-                                        filter="url(#white-curve-glow)"
                                     />
                                     {/* Diamond white pen nib point */}
                                     <circle
