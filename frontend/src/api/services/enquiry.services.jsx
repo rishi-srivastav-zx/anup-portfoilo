@@ -8,7 +8,7 @@ import { ENDPOINTS } from "../constants/apiEndpoints";
 export const enquiryService = {
     /**
      * Submit a new lead / contact form inquiry
-     * @param {{ name: string, phone: string, message?: string, source?: string }} payload
+     * @param {{ name: string, phone: string, email?: string, project_type?: string, message?: string, source?: string }} payload
      */
     async createEnquiry(payload) {
         // Try direct backend first via axiosClient, or relative Next.js route fallback
