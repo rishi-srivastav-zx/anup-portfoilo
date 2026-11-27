@@ -241,6 +241,23 @@ body.lenis-scrolling iframe,
     overflow: hidden !important;
     border-radius: 1rem !important;
   }
+
+  /* TEST E (Temporary Diagnostic): OriginSection iOS Safari compositor isolation */
+  #void-grain {
+    display: none !important;
+  }
+  #cinematic-spotlight {
+    display: none !important;
+  }
+  .spotlight-blur-outer,
+  .spotlight-blur-inner {
+    mix-blend-mode: normal !important;
+  }
+  #notebook-container .mix-blend-overlay,
+  #notebook-container .mix-blend-screen,
+  #notebook-container .paper-texture {
+    mix-blend-mode: normal !important;
+  }
 }
 
 @media (min-width: 786px) {
