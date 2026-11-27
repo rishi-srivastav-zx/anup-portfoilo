@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, useReducedMotion } from 'framer-motion';
 import CinematicFooter from '@/components/legal/CinematicFooter';
-import { workProjectService } from '@/api';
+import { enquiryService, workProjectService } from '@/api';
 
 /**
  * CONFIGURATION CONSTANT — PORTFOLIO OWNER EMAIL
@@ -182,23 +182,17 @@ export const ContactFooterSection: React.FC = () => {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch('/api/contact/enquiry', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: values.name.trim(),
-          phone: values.phone.trim(),
-          email: values.email.trim(),
-          projectType: values.projectType.trim(),
-          message: values.message.trim(),
-          source: 'Editorial Contact Section',
-        }),
+      const data = await enquiryService.createEnquiry({
+        name: values.name.trim(),
+        phone: values.phone.trim(),
+        email: values.email.trim(),
+        project_type: values.projectType.trim(),
+        message: values.message.trim(),
+        source: 'Editorial Contact Section',
       });
 
-      const data = await response.json().catch(() => null);
-
-      if (!response.ok || !data?.success) {
-        throw new Error(data?.error || 'Unable to submit your details. Please try again.');
+      if (!data?.success) {
+        throw new Error(data?.error || data?.message || 'Unable to submit your details. Please try again.');
       }
 
       setIsSubmitted(true);
@@ -248,9 +242,9 @@ export const ContactFooterSection: React.FC = () => {
         />
 
         {/* Top Editorial Navigation Bar */}
-        <div className="relative z-20 w-full max-w-[1480px] mx-auto flex items-center justify-between text-[10px] sm:text-[11px] font-['DM_Mono'] tracking-[0.18em] uppercase text-[#14100E]/80 pb-4 lg:pb-6">
-          <div className="flex items-center gap-2.5">
-            <span className="inline-flex flex-col gap-[3px] w-4" aria-hidden="true">
+        <div className="relative z-20 w-full max-w-[1480px] mx-auto flex items-center justify-between gap-2 text-[9px] sm:text-[11px] font-['DM_Mono'] tracking-[0.14em] sm:tracking-[0.18em] uppercase text-[#14100E]/80 pb-4 lg:pb-6">
+          <div className="flex items-center gap-2 shrink-0">
+            <span className="inline-flex flex-col gap-[3px] w-3.5 sm:w-4" aria-hidden="true">
               <span className="h-[1.5px] w-full bg-[#14100E]" />
               <span className="h-[1.5px] w-3/4 bg-[#14100E]" />
               <span className="h-[1.5px] w-full bg-[#14100E]" />
@@ -258,18 +252,18 @@ export const ContactFooterSection: React.FC = () => {
             <span className="font-bold text-[#14100E]">CONTACT ME</span>
           </div>
 
-          <div className="flex items-center gap-5 sm:gap-8">
+          <div className="flex items-center gap-3 sm:gap-8 shrink-0">
             <button
               type="button"
               onClick={() => scrollToTarget('top')}
-              className="hover:text-[#012CEB] transition-colors cursor-pointer uppercase tracking-[0.18em]"
+              className="hover:text-[#012CEB] transition-colors cursor-pointer uppercase tracking-[0.14em] sm:tracking-[0.18em]"
             >
               BACK TO TOP
             </button>
             <button
               type="button"
               onClick={() => scrollToTarget('work')}
-              className="hover:text-[#012CEB] transition-colors cursor-pointer uppercase tracking-[0.18em] font-semibold"
+              className="hover:text-[#012CEB] transition-colors cursor-pointer uppercase tracking-[0.14em] sm:tracking-[0.18em] font-semibold"
             >
               PORTFOLIO //
             </button>
@@ -311,29 +305,29 @@ export const ContactFooterSection: React.FC = () => {
                 transition={drawTransition}
                 className="font-sans font-black uppercase text-[#14100E] leading-[0.88] tracking-[-0.045em] select-none"
               >
-                <span className="block text-[3.1rem] sm:text-[4.5rem] md:text-[5.25rem] xl:text-[6.25rem]">
+                <span className="relative z-20 block text-[2.75rem] sm:text-[4.5rem] md:text-[5.25rem] xl:text-[6.25rem]">
                   LET&apos;S MAKE
                 </span>
 
                 {/* SOMETHING + Electric Blue Circle */}
-                <span className="relative block mt-1.5 sm:mt-2 mb-1.5 sm:mb-2">
+                <span className="relative block my-3 sm:my-4">
                   <motion.span
                     aria-hidden="true"
                     initial={shouldReduceMotion ? false : { scale: 0.85, opacity: 0 }}
                     whileInView={{ scale: 1, opacity: 1 }}
                     viewport={{ once: true, amount: 0.2 }}
                     transition={drawTransition}
-                    className="pointer-events-none absolute -left-2 sm:-left-3 top-1/2 -translate-y-1/2 w-[140px] h-[140px] sm:w-[210px] sm:h-[210px] xl:w-[245px] xl:h-[245px] rounded-full bg-[#012CEB] z-0"
+                    className="pointer-events-none absolute -left-1.5 sm:-left-3 top-1/2 -translate-y-1/2 w-[84px] h-[84px] sm:w-[150px] sm:h-[150px] md:w-[185px] md:h-[185px] xl:w-[235px] xl:h-[235px] rounded-full bg-[#012CEB] z-0"
                   />
-                  <span className="relative z-10 inline-block text-[3.1rem] sm:text-[4.5rem] md:text-[5.25rem] xl:text-[6.25rem] text-[#14100E]">
+                  <span className="relative z-10 inline-block text-[2.75rem] sm:text-[4.5rem] md:text-[5.25rem] xl:text-[6.25rem] text-[#14100E]">
                     SOMETHING
                   </span>
                 </span>
               </motion.h2>
 
               {/* "EST. HERE" annotations + curved arrow */}
-              <div className="relative flex items-center justify-between max-w-[520px] mt-1 mb-2 sm:mb-3 pr-4">
-                <div className="flex items-center gap-1.5 text-[#012CEB] ml-24 sm:ml-40">
+              <div className="relative z-20 flex items-center justify-between max-w-[520px] mt-2 sm:mt-3 mb-2 sm:mb-3 pr-4">
+                <div className="flex items-center gap-1.5 text-[#012CEB] ml-16 sm:ml-40">
                   <svg
                     aria-hidden="true"
                     viewBox="0 0 32 22"

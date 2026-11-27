@@ -39,7 +39,7 @@ function SketchbookSectionContent() {
                     observer.disconnect();
                 }
             },
-            { rootMargin: "600px 0px" },
+            { rootMargin: "0px" }, // Temporary diagnostic (Test A): mount only when section enters viewport
         );
 
         observer.observe(el);
@@ -50,7 +50,7 @@ function SketchbookSectionContent() {
         <section
             ref={sectionRef}
             id="my-images-section"
-            className="relative w-full h-screen min-h-[500px] h-[100dvh] overflow-hidden select-none z-10 font-sans transition-colors duration-500"
+            className="relative w-full h-[560px] sm:h-[660px] md:h-[100dvh] md:min-h-[500px] overflow-hidden select-none z-10 font-sans transition-colors duration-500"
             style={{ backgroundColor: activePalette?.paperColor || "#E6DDD2" }}
             aria-label="Visual Chronicles & Photographic Archive"
         >
