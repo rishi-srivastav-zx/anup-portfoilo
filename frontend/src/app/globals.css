@@ -264,6 +264,19 @@ body.lenis-scrolling iframe,
   #diary-cinematic-overlay > div > svg {
     filter: none !important;
   }
+
+  /* TEST H1 (Temporary Diagnostic): OriginSection remaining compositor isolation */
+  #notebook-container {
+    will-change: auto !important;
+  }
+  .paper-texture {
+    background-image: none !important;
+  }
+  .scotch-tape {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    mix-blend-mode: normal !important;
+  }
 }
 
 @media (min-width: 786px) {
