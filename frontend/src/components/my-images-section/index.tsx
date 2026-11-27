@@ -34,12 +34,10 @@ function SketchbookSectionContent() {
 
         const observer = new IntersectionObserver(
             ([entry]) => {
-                if (entry.isIntersecting) {
-                    setShouldMountScene(true);
-                    observer.disconnect();
-                }
+                const isVisible = entry.isIntersecting;
+                setShouldMountScene((prev) => (prev === isVisible ? prev : isVisible));
             },
-            { rootMargin: "0px" }, // Temporary diagnostic (Test A): mount only when section enters viewport
+            { rootMargin: "200px 0px" }, // Temporary diagnostic (Test B): mount/unmount Scene with viewport visibility
         );
 
         observer.observe(el);
