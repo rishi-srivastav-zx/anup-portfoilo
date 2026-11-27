@@ -47,7 +47,7 @@ const DEFAULT_FRAMES: [EditorialFrame, EditorialFrame, EditorialFrame] = [
     code: '35MM // ST-01',
   },
   {
-    src: '/meng-to-sketchbook/1956C3DE-266A-4B87-95D6-B5705F71403D_1_201_a.webp',
+    src: '/landing-pages/meng-to-sketchbook/1956C3DE-266A-4B87-95D6-B5705F71403D_1_201_a.webp',
     alt: 'On-location visual storytelling still',
     code: '24FPS // ST-02',
   },
