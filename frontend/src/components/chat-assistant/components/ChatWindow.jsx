@@ -38,17 +38,28 @@ const ChatWindow = ({ config, chat }) => {
       const heightDrop = baselineHeightRef.current - vv.height;
       if (heightDrop > KEYBOARD_THRESHOLD) {
         const availableHeight = Math.max(220, vv.height - 16);
-        setKeyboardLayout({
+        const nextLayout = {
           top: Math.round(vv.offsetTop + 8),
           height: Math.round(availableHeight),
           maxHeight: Math.round(availableHeight),
           maxWidth: Math.round(vv.width - 32),
+        };
+        setKeyboardLayout((prev) => {
+          if (
+            prev &&
+            prev.top === nextLayout.top &&
+            prev.height === nextLayout.height &&
+            prev.maxWidth === nextLayout.maxWidth
+          ) {
+            return prev;
+          }
+          if (!prev && chat.listRef?.current) {
+            chat.listRef.current.scrollTop = chat.listRef.current.scrollHeight;
+          }
+          return nextLayout;
         });
-        if (chat.listRef?.current) {
-          chat.listRef.current.scrollTop = chat.listRef.current.scrollHeight;
-        }
       } else {
-        setKeyboardLayout(null);
+        setKeyboardLayout((prev) => (prev === null ? prev : null));
       }
     };
 

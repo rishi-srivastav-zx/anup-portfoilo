@@ -12,6 +12,14 @@ const ChatInput = ({
   const isBlocked = typing || cooldownRemaining > 0;
   const isSendDisabled = isBlocked || !value.trim();
 
+  const handleFormSubmit = (e) => {
+    onSubmit(e);
+    // Keep focus on the input within the user-gesture handler so mobile keyboards stay open
+    if (inputRef?.current && document.activeElement !== inputRef.current) {
+      inputRef.current.focus({ preventScroll: true });
+    }
+  };
+
   return (
     <div className="flex shrink-0 flex-col border-t border-line bg-ink/60">
       {cooldownRemaining > 0 && (
@@ -25,7 +33,7 @@ const ChatInput = ({
           </span>
         </div>
       )}
-      <form onSubmit={onSubmit} className="flex items-center gap-2 px-3 py-3">
+      <form onSubmit={handleFormSubmit} className="flex items-center gap-2 px-3 py-3">
         <label htmlFor="chat-msg" className="sr-only">
           Message
         </label>
@@ -41,6 +49,7 @@ const ChatInput = ({
         />
         <button
           type="submit"
+          onMouseDown={(e) => e.preventDefault()}
           aria-label={typing ? 'Sending message' : cooldownRemaining > 0 ? `Wait ${cooldownRemaining}s` : 'Send'}
           disabled={isSendDisabled}
           className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition focus:outline-none focus-visible:ring-2 focus-visible:ring-goldsoft focus-visible:ring-offset-2 focus-visible:ring-offset-panel ${
